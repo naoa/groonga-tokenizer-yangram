@@ -130,17 +130,17 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
 {
   grn_yangram_tokenizer *tokenizer = user_data->ptr;
 
-  const unsigned char *token_top_pointer = tokenizer->next;
-  const unsigned char *token_next_pointer = tokenizer->next;
-  const unsigned char *token_cursor = token_top_pointer;
+  const unsigned char *token_top = tokenizer->next;
+  const unsigned char *token_next = tokenizer->next;
+  const unsigned char *token_cursor = token_top;
   const unsigned char *string_end = tokenizer->end;
 
   unsigned int char_length;
-  unsigned int rest_length = string_end - token_top_pointer;
+  unsigned int rest_length = string_end - token_top;
   int token_length = 0;
   int token_top_position = tokenizer->token_top_position + tokenizer->skip_size;
   grn_tokenizer_status status = 0;
-  grn_bool is_current_token_grouped = GRN_FALSE;
+  grn_bool is_token_grouped = GRN_FALSE;
   const unsigned char *ctype_cursor;
 
   if (tokenizer->ctypes) {
@@ -163,8 +163,8 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
         break;
       }
     }
-    token_next_pointer = token_cursor;
-    is_current_token_grouped = GRN_TRUE;
+    token_next = token_cursor;
+    is_token_grouped = GRN_TRUE;
   } else if (ctype_cursor &&
              tokenizer->split_digit == GRN_FALSE &&
              GRN_STR_CTYPE(*ctype_cursor) == GRN_CHAR_DIGIT) {
@@ -179,8 +179,8 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
         break;
       }
     }
-    token_next_pointer = token_cursor;
-    is_current_token_grouped = GRN_TRUE;
+    token_next = token_cursor;
+    is_token_grouped = GRN_TRUE;
   } else if (ctype_cursor &&
              tokenizer->split_symbol == GRN_FALSE &&
              GRN_STR_CTYPE(*ctype_cursor) == GRN_CHAR_SYMBOL) {
@@ -195,14 +195,14 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
         break;
       }
     }
-    token_next_pointer = token_cursor;
-    is_current_token_grouped = GRN_TRUE;
+    token_next = token_cursor;
+    is_token_grouped = GRN_TRUE;
   } else {
     if ((char_length = grn_plugin_charlen(ctx, (char *)token_cursor, rest_length,
                                           tokenizer->query->encoding))) {
       token_length++;
       token_cursor += char_length;
-      token_next_pointer = token_cursor;
+      token_next = token_cursor;
       while (token_length < tokenizer->ngram_unit &&
              (char_length = grn_plugin_charlen(ctx, (char *)token_cursor, rest_length,
                                                tokenizer->query->encoding))) {
@@ -223,11 +223,11 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
         token_length++;
         token_cursor += char_length;
       }
-      is_current_token_grouped = GRN_FALSE;
+      is_token_grouped = GRN_FALSE;
     }
   }
 
-  if (is_current_token_grouped == GRN_FALSE) {
+  if (is_token_grouped == GRN_FALSE) {
     if (tokenizer->is_token_grouped == GRN_FALSE && tokenizer->token_length > 1) {
       status |= GRN_TOKENIZER_TOKEN_OVERLAP;
     }
@@ -236,18 +236,18 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
     }
   }
 
-  tokenizer->is_token_grouped = is_current_token_grouped;
-  tokenizer->next = token_next_pointer;
+  tokenizer->is_token_grouped = is_token_grouped;
+  tokenizer->next = token_next;
 
   tokenizer->token_top_position = token_top_position;
   tokenizer->token_length = token_length;
   tokenizer->token_tail_position = token_top_position + token_length - 1;
 
-  if (token_top_pointer == token_cursor || tokenizer->next == string_end) {
+  if (token_top == token_cursor || tokenizer->next == string_end) {
     tokenizer->skip_size = 0;
     status |= GRN_TOKENIZER_TOKEN_LAST;
   } else {
-    if (is_current_token_grouped) {
+    if (is_token_grouped) {
       tokenizer->skip_size = token_length;
     } else {
       tokenizer->skip_size = 1;
@@ -258,8 +258,8 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
   }
   grn_tokenizer_token_push(ctx,
                            &(tokenizer->token),
-                           (const char *)token_top_pointer,
-                           token_cursor - token_top_pointer,
+                           (const char *)token_top,
+                           token_cursor - token_top,
                            status);
   return NULL;
 }
