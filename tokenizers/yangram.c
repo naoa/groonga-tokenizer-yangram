@@ -62,11 +62,11 @@ typedef struct {
   const unsigned char *next;
   const unsigned char *end;
   grn_bool is_overlapped;
-  int position;
+  int token_top_position;
   unsigned int next_skip_size;
   const unsigned char *ctypes;
   unsigned int token_length;
-  unsigned int token_tail;
+  unsigned int token_tail_position;
   unsigned short ngram_unit;
   grn_bool split_alpha;
   grn_bool split_digit;
@@ -112,7 +112,7 @@ yangram_init(grn_ctx *ctx, int nargs, grn_obj **args, grn_user_data *user_data)
     grn_string_get_types(ctx, tokenizer->query->normalized_query);
 
   tokenizer->is_overlapped = GRN_FALSE;
-  tokenizer->position = 0;
+  tokenizer->token_top_position = 0;
   tokenizer->next_skip_size = 0;
 
   tokenizer->ngram_unit = 2;
@@ -130,19 +130,19 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
 {
   grn_yangram_tokenizer *tokenizer = user_data->ptr;
 
-  const unsigned char *token_top = tokenizer->next;
-  const unsigned char *token_cursor = token_top;
+  const unsigned char *token_top_pointer = tokenizer->next;
+  const unsigned char *token_cursor = token_top_pointer;
   const unsigned char *string_end = tokenizer->end;
 
   unsigned int char_length;
-  unsigned int rest_length = string_end - token_top;
+  unsigned int rest_length = string_end - token_top_pointer;
   int token_length = 0;
-  int position = tokenizer->position + tokenizer->next_skip_size;
+  int token_top_position = tokenizer->token_top_position + tokenizer->next_skip_size;
   grn_tokenizer_status status = 0;
 
   const unsigned char *ctype_cursor;
   if (tokenizer->ctypes) {
-    ctype_cursor = tokenizer->ctypes + position;
+    ctype_cursor = tokenizer->ctypes + token_top_position;
   } else {
     ctype_cursor = NULL;
   }
@@ -235,11 +235,11 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
     }
   }
 
-  tokenizer->position = position;
+  tokenizer->token_top_position = token_top_position;
   tokenizer->token_length = token_length;
-  tokenizer->token_tail = position + token_length - 1;
+  tokenizer->token_tail_position = token_top_position + token_length - 1;
 
-  if (token_top == token_cursor || tokenizer->next == string_end) {
+  if (token_top_pointer == token_cursor || tokenizer->next == string_end) {
     tokenizer->next_skip_size = 0;
     status |= GRN_TOKENIZER_TOKEN_LAST;
   } else {
@@ -254,8 +254,8 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
   }
   grn_tokenizer_token_push(ctx,
                            &(tokenizer->token),
-                           (const char *)token_top,
-                           token_cursor - token_top,
+                           (const char *)token_top_pointer,
+                           token_cursor - token_top_pointer,
                            status);
   return NULL;
 }
