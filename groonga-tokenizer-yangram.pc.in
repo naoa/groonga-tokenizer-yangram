@@ -1,0 +1,5 @@
+plugin_name=tokenizers/yangram
+
+Name: groonga-tokenizer-yangram
+Description: Yet another ngram tokenizer plugin for Groonga
+Version: @VERSION@

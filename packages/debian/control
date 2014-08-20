@@ -1,0 +1,20 @@
+Source: groonga-tokenizer-yangram
+Section: libs
+Priority: optional
+Maintainer: Naoya Murakami <naoya@createfield.com>
+Build-Depends:
+  debhelper (>= 9),
+  autotools-dev
+Standards-Version: 1.0.0
+Homepage: https://github.com/naoa/groonga-tokenizer-yangram/
+
+Package: groonga-tokenizer-yangram
+Section: libs
+Architecture: any
+Depends:
+  ${misc:Depends},
+  ${shlibs:Depends},
+  libgroonga-dev (>= 4.0.5)
+Description: Yet another ngram tokenizer plugin for Groonga
+ This package provides yet another ngram tokenizer plugin.
+

@@ -1,0 +1,56 @@
+%global _initddir %{_sysconfdir}/init.d/
+
+Name:		groonga-tokenizer-yangram
+Version:	@VERSION@
+Release:	1%{?dist}
+Summary:	Yet another ngram tokenizer plugin for Groonga
+
+Group:		Applications/Text
+License:	LGPLv2.1
+URL:		http://github.com/naoa/groonga-tokenizer-yangram
+Source0:	http://packages.createfield.com/source/%{name}/%{name}-%{version}.tar.gz
+
+BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-%(%{__id_u} -n)
+BuildRequires:	groonga-devel >= 4.0.5
+Requires:	groonga-libs >= 4.0.5
+
+%description
+This package provides yet another ngram tokenizer plugin.
+
+%package devel
+Summary:        Development files for groonga-tokenizer/yangram
+Group:          Development/Libraries
+Requires:       %{name} = %{version}-%{release}
+
+%description devel
+This package provides development files for groonga-tokenizer-yangram.
+
+%prep
+%setup -q
+
+
+%build
+%configure \
+  --disable-static
+sed -i 's|^hardcode_libdir_flag_spec=.*|hardcode_libdir_flag_spec=""|g' libtool
+sed -i 's|^runpath_var=LD_RUN_PATH|runpath_var=DIE_RPATH_DIE|g' libtool
+make %{?_smp_mflags}
+
+%install
+make install DESTDIR=$RPM_BUILD_ROOT INSTALL="install -p"
+rm -f $RPM_BUILD_ROOT%{_libdir}/groonga/plugins/*/*.la
+rm -f $RPM_BUILD_ROOT%{_libdir}/groonga/plugins/*/*.a
+
+%files
+%doc COPYING
+%dir %{_libdir}/groonga
+%dir %{_libdir}/groonga/plugins
+%dir %{_libdir}/groonga/plugins/tokenizers
+%{_libdir}/groonga/plugins/tokenizers/yangram.so
+
+%files devel
+%{_libdir}/pkgconfig/groonga-tokenizer-yangram.pc
+
+%changelog
+* Sun Aug 17 2014 Naoya Murakami <naoya@createfield.com> - 1.0.0-1
+- initial packaging for CentOS
