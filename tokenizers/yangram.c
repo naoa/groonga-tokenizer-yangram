@@ -238,16 +238,15 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
     status |= GRN_TOKENIZER_TOKEN_OVERLAP;
   }
 
-  if (!is_token_grouped) {
-    if (token_length < tokenizer->ngram_unit) {
+  if (!is_token_grouped && token_length < tokenizer->ngram_unit) {
       status |= GRN_TOKENIZER_TOKEN_UNMATURED;
-    }
   }
 
   tokenizer->next = token_next;
   tokenizer->token_top_position = token_top_position;
   tokenizer->token_length = token_length;
   tokenizer->token_tail_position = token_top_position + token_length - 1;
+
   int token_bytes = token_cursor - token_top;
 
   if (!(status & GRN_TOKENIZER_TOKEN_SKIP)) {
@@ -271,7 +270,7 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
   grn_tokenizer_token_push(ctx,
                            &(tokenizer->token),
                            (const char *)token_top,
-                           token_cursor - token_top,
+                           token_bytes,
                            status);
   return NULL;
 }
