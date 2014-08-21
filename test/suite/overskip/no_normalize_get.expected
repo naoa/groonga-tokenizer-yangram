@@ -1,0 +1,28 @@
+register tokenizers/yangram
+[[0,0.0,0.0],true]
+tokenize TokenYaBigramOverskip "今日は、雨だな。" --mode GET
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  [
+    {
+      "value": "今日",
+      "position": 0
+    },
+    {
+      "value": "は、",
+      "position": 2
+    },
+    {
+      "value": "雨だ",
+      "position": 4
+    },
+    {
+      "value": "な。",
+      "position": 6
+    }
+  ]
+]

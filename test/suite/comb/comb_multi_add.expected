@@ -1,0 +1,44 @@
+register tokenizers/yangram
+[[0,0.0,0.0],true]
+tokenize TokenYaBigramCombhiraCombkata "今日はサ雨だ。どのカサ" NormalizerAuto --mode ADD
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  [
+    {
+      "value": "今日",
+      "position": 0
+    },
+    {
+      "value": "日は",
+      "position": 1
+    },
+    {
+      "value": "雨だ",
+      "position": 2
+    },
+    {
+      "value": "だ",
+      "position": 3
+    },
+    {
+      "value": "。",
+      "position": 4
+    },
+    {
+      "value": "どの",
+      "position": 5
+    },
+    {
+      "value": "カサ",
+      "position": 6
+    },
+    {
+      "value": "サ",
+      "position": 7
+    }
+  ]
+]

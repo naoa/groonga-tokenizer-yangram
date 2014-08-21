@@ -1,0 +1,28 @@
+register tokenizers/yangram
+[[0,0.0,0.0],true]
+tokenize TokenYaTrigramOverskip "今日は、雨だな。" NormalizerAuto --mode GET
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  [
+    {
+      "value": "今日は",
+      "position": 0
+    },
+    {
+      "value": "、",
+      "position": 3
+    },
+    {
+      "value": "雨だな",
+      "position": 4
+    },
+    {
+      "value": "。",
+      "position": 7
+    }
+  ]
+]

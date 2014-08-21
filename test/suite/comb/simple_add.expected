@@ -1,6 +1,6 @@
 register tokenizers/yangram
 [[0,0.0,0.0],true]
-tokenize TokenYaBigram "アイＡＢうえ" NormalizerAuto --mode ADD
+tokenize TokenYaBigramCombhiraCombkata "今日は雨だ" NormalizerAuto --mode ADD
 [
   [
     0,
@@ -9,24 +9,20 @@ tokenize TokenYaBigram "アイＡＢうえ" NormalizerAuto --mode ADD
   ],
   [
     {
-      "value": "アイ",
+      "value": "今日",
       "position": 0
     },
     {
-      "value": "イ",
+      "value": "日は",
       "position": 1
     },
     {
-      "value": "ab",
+      "value": "雨だ",
       "position": 2
     },
     {
-      "value": "うえ",
+      "value": "だ",
       "position": 3
-    },
-    {
-      "value": "え",
-      "position": 4
     }
   ]
 ]

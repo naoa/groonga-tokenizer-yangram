@@ -1,0 +1,36 @@
+register tokenizers/yangram
+[[0,0.0,0.0],true]
+tokenize TokenYaBigramOverskip "Tommorowは雨だな。" NormalizerAuto --mode ADD
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  [
+    {
+      "value": "tommorow",
+      "position": 0
+    },
+    {
+      "value": "は雨",
+      "position": 1
+    },
+    {
+      "value": "雨だ",
+      "position": 2
+    },
+    {
+      "value": "だな",
+      "position": 3
+    },
+    {
+      "value": "な",
+      "position": 4
+    },
+    {
+      "value": "。",
+      "position": 5
+    }
+  ]
+]

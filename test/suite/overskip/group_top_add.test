@@ -1,0 +1,3 @@
+register tokenizers/yangram
+
+tokenize TokenYaBigramOverskip "Tommorowは雨だな。" NormalizerAuto --mode ADD

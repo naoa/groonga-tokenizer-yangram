@@ -1,0 +1,3 @@
+register tokenizers/yangram
+
+tokenize TokenYaBigramContinua "今日は雨だなぁ" NormalizerAuto --mode GET

@@ -1,0 +1,3 @@
+register tokenizers/yangram
+
+tokenize TokenYaTrigramSplitSymbolAlphaOverskip "Tommorow is rainy" NormalizerAuto --mode ADD
