@@ -71,9 +71,8 @@ typedef struct {
   const unsigned char *ctypes;
   const unsigned char *pushed_token_tail;
   unsigned int skip_size;
-  int token_top_position;
-  unsigned int token_tail_position;
-  unsigned int token_length;
+  int ctypes_position;
+  unsigned int token_size;
   unsigned short ngram_unit;
   grn_bool split_alpha;
   grn_bool split_digit;
@@ -119,7 +118,7 @@ yangram_init(grn_ctx *ctx, int nargs, grn_obj **args, grn_user_data *user_data)
     grn_string_get_types(ctx, tokenizer->query->normalized_query);
 
   tokenizer->pushed_token_tail = NULL;
-  tokenizer->token_top_position = 0;
+  tokenizer->ctypes_position = 0;
   tokenizer->skip_size = 0;
 
   tokenizer->ngram_unit = 2;
@@ -144,14 +143,14 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
 
   unsigned int char_length;
   unsigned int rest_length = string_end - token_top;
-  int token_length = 0;
-  int token_top_position = tokenizer->token_top_position + tokenizer->skip_size;
+  int token_size = 0;
+  int ctypes_position = tokenizer->ctypes_position + tokenizer->skip_size;
   grn_tokenizer_status status = 0;
   grn_bool is_token_grouped = GRN_FALSE;
   const unsigned char *ctype_cursor;
 
   if (tokenizer->ctypes) {
-    ctype_cursor = tokenizer->ctypes + token_top_position;
+    ctype_cursor = tokenizer->ctypes + ctypes_position;
   } else {
     ctype_cursor = NULL;
   }
@@ -161,7 +160,7 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
       GRN_STR_CTYPE(*ctype_cursor) == GRN_CHAR_ALPHA) {
     while ((char_length = grn_plugin_charlen(ctx, (char *)token_cursor, rest_length,
                                              tokenizer->query->encoding))) {
-      token_length++;
+      token_size++;
       token_cursor += char_length;
       if (GRN_STR_ISBLANK(*ctype_cursor)) {
         break;
@@ -177,7 +176,7 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
              GRN_STR_CTYPE(*ctype_cursor) == GRN_CHAR_DIGIT) {
     while ((char_length = grn_plugin_charlen(ctx, (char *)token_cursor, rest_length,
                                              tokenizer->query->encoding))) {
-      token_length++;
+      token_size++;
       token_cursor += char_length;
       if (GRN_STR_ISBLANK(*ctype_cursor)) {
         break;
@@ -193,7 +192,7 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
              GRN_STR_CTYPE(*ctype_cursor) == GRN_CHAR_SYMBOL) {
     while ((char_length = grn_plugin_charlen(ctx, (char *)token_cursor, rest_length,
                                              tokenizer->query->encoding))) {
-      token_length++;
+      token_size++;
       token_cursor += char_length;
       if (!tokenizer->ignore_blank && GRN_STR_ISBLANK(*ctype_cursor)) {
         break;
@@ -207,10 +206,10 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
   } else {
     if ((char_length = grn_plugin_charlen(ctx, (char *)token_cursor, rest_length,
                                           tokenizer->query->encoding))) {
-      token_length++;
+      token_size++;
       token_cursor += char_length;
       token_next = token_cursor;
-      while (token_length < tokenizer->ngram_unit &&
+      while (token_size < tokenizer->ngram_unit &&
              (char_length = grn_plugin_charlen(ctx, (char *)token_cursor, rest_length,
                                                tokenizer->query->encoding))) {
         if (ctype_cursor) {
@@ -227,7 +226,7 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
             break;
           }
         }
-        token_length++;
+        token_size++;
         token_cursor += char_length;
       }
       is_token_grouped = GRN_FALSE;
@@ -238,27 +237,20 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
     status |= GRN_TOKENIZER_TOKEN_OVERLAP;
   }
 
-  if (!is_token_grouped && token_length < tokenizer->ngram_unit) {
+  if (!is_token_grouped && token_size < tokenizer->ngram_unit) {
       status |= GRN_TOKENIZER_TOKEN_UNMATURED;
   }
 
   tokenizer->next = token_next;
-  tokenizer->token_top_position = token_top_position;
-  tokenizer->token_length = token_length;
-  tokenizer->token_tail_position = token_top_position + token_length - 1;
-
-  int token_bytes = token_cursor - token_top;
-
-  if (!(status & GRN_TOKENIZER_TOKEN_SKIP)) {
-    tokenizer->pushed_token_tail = token_top + token_bytes - 1;
-  }
+  tokenizer->ctypes_position = ctypes_position;
+  tokenizer->token_size = token_size;
 
   if (token_top == token_cursor || tokenizer->next == string_end) {
     tokenizer->skip_size = 0;
     status |= GRN_TOKENIZER_TOKEN_LAST;
   } else {
     if (is_token_grouped) {
-      tokenizer->skip_size = token_length;
+      tokenizer->skip_size = token_size;
     } else {
       tokenizer->skip_size = 1;
     }
@@ -267,11 +259,18 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
     status |= GRN_TOKENIZER_TOKEN_REACH_END;
   }
 
-  grn_tokenizer_token_push(ctx,
-                           &(tokenizer->token),
-                           (const char *)token_top,
-                           token_bytes,
-                           status);
+  {
+    int token_length = token_cursor - token_top;
+    if (!(status & GRN_TOKENIZER_TOKEN_SKIP)) {
+      tokenizer->pushed_token_tail = token_top + token_length - 1;
+    }
+
+    grn_tokenizer_token_push(ctx,
+                             &(tokenizer->token),
+                             (const char *)token_top,
+                             token_length,
+                             status);
+  }
   return NULL;
 }
 
