@@ -322,7 +322,7 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
                                   &token_tail,
                                   &is_token_grouped);
 
-  if (token_size == tokenizer->ngram_unit) {
+  if (token_size >= 2) {
     if (tokenizer->continua_filter) {
       int char_length;
       char_length = grn_plugin_charlen(ctx, (char *)token_top,
