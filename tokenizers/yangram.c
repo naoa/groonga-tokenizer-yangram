@@ -81,6 +81,129 @@ typedef struct {
   grn_bool ignore_blank;
 } grn_yangram_tokenizer;
 
+/*
+  int
+  ngram_token_cursor(grn_ctx *ctx, grn_yangram_tokenizer *tokenizer,
+                     const unsigned char *ctypes,
+                     const unsigned char **token_next,
+                     const unsigned char **token_tail,
+                     grn_bool *is_token_grouped)
+
+  return value is token size.
+  It isn't byte length but character length.(ex. ABC = 3, あいう = 3)
+
+  ctypes specify grn_string->ctypes if the group of the alphabet/symbol/degit is required.
+  token_tail and token_next specify start pointer to search.
+  token_tail is setted token tail pointer.
+  token_next is setted next token pointer.
+  is_token_grouped is setted grouped flag.
+
+  ungrouped trigram case(ABCD -> ABC/BCD):
+
+  token_next is ABCD (overlap)
+                 ^
+  token_tail is ABCD
+                   ^
+
+  grouped trigram case(ABCDあい -> ABCD/あい):
+
+  token_next is ABCDあい (not overlap)
+                    ^
+  token_tail is ABCDあい
+                    ^
+*/
+
+
+static int
+ngram_token_cursor(grn_ctx *ctx, grn_yangram_tokenizer *tokenizer,
+                   const unsigned char *ctypes,
+                   const unsigned char **token_next,
+                   const unsigned char **token_tail,
+                   grn_bool *is_token_grouped)
+{
+  int token_size = 0;
+  unsigned int char_length;
+
+  if (ctypes &&
+      tokenizer->split_alpha == GRN_FALSE &&
+      GRN_STR_CTYPE(*ctypes) == GRN_CHAR_ALPHA) {
+    while ((char_length = grn_plugin_charlen(ctx, (char *)*token_tail, tokenizer->rest_length,
+                                             tokenizer->query->encoding))) {
+      token_size++;
+      *token_tail += char_length;
+      if (GRN_STR_ISBLANK(*ctypes)) {
+        break;
+      }
+      if (GRN_STR_CTYPE(*++ctypes) != GRN_CHAR_ALPHA) {
+        break;
+      }
+    }
+    *token_next = *token_tail;
+    *is_token_grouped = GRN_TRUE;
+  } else if (ctypes &&
+             tokenizer->split_digit == GRN_FALSE &&
+             GRN_STR_CTYPE(*ctypes) == GRN_CHAR_DIGIT) {
+    while ((char_length = grn_plugin_charlen(ctx, (char *)*token_tail, tokenizer->rest_length,
+                                             tokenizer->query->encoding))) {
+      token_size++;
+      *token_tail += char_length;
+      if (GRN_STR_ISBLANK(*ctypes)) {
+        break;
+      }
+      if (GRN_STR_CTYPE(*++ctypes) != GRN_CHAR_DIGIT) {
+        break;
+      }
+    }
+    *token_next = *token_tail;
+    *is_token_grouped = GRN_TRUE;
+  } else if (ctypes &&
+             tokenizer->split_symbol == GRN_FALSE &&
+             GRN_STR_CTYPE(*ctypes) == GRN_CHAR_SYMBOL) {
+    while ((char_length = grn_plugin_charlen(ctx, (char *)*token_tail, tokenizer->rest_length,
+                                             tokenizer->query->encoding))) {
+      token_size++;
+      *token_tail += char_length;
+      if (!tokenizer->ignore_blank && GRN_STR_ISBLANK(*ctypes)) {
+        break;
+      }
+      if (GRN_STR_CTYPE(*++ctypes) != GRN_CHAR_SYMBOL) {
+        break;
+      }
+    }
+    *token_next = *token_tail;
+    *is_token_grouped = GRN_TRUE;
+  } else {
+    if ((char_length = grn_plugin_charlen(ctx, (char *)*token_tail, tokenizer->rest_length,
+                                          tokenizer->query->encoding))) {
+      token_size++;
+      *token_tail += char_length;
+      *token_next = *token_tail;
+      while (token_size < tokenizer->ngram_unit &&
+             (char_length = grn_plugin_charlen(ctx, (char *)*token_tail, tokenizer->rest_length,
+                                               tokenizer->query->encoding))) {
+        if (ctypes) {
+          if (!tokenizer->ignore_blank && GRN_STR_ISBLANK(*ctypes)) {
+            break;
+          }
+          ctypes++;
+          if ((tokenizer->split_alpha == GRN_FALSE &&
+              GRN_STR_CTYPE(*ctypes) == GRN_CHAR_ALPHA) ||
+              (tokenizer->split_digit == GRN_FALSE &&
+              GRN_STR_CTYPE(*ctypes) == GRN_CHAR_DIGIT) ||
+              (tokenizer->split_symbol == GRN_FALSE &&
+              GRN_STR_CTYPE(*ctypes) == GRN_CHAR_SYMBOL)) {
+            break;
+          }
+        }
+        token_size++;
+        *token_tail += char_length;
+      }
+      *is_token_grouped = GRN_FALSE;
+    }
+  }
+  return token_size;
+}
+
 static grn_obj *
 yangram_init(grn_ctx *ctx, int nargs, grn_obj **args, grn_user_data *user_data)
 {
@@ -143,7 +266,6 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
   const unsigned char *token_tail = token_top;
   const unsigned char *string_end = tokenizer->end;
 
-  unsigned int char_length;
   int token_size = 0;
   int ctypes_position = tokenizer->ctypes_position + tokenizer->skip_size;
   grn_tokenizer_status status = 0;
@@ -156,83 +278,11 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
     ctypes = NULL;
   }
 
-  if (ctypes &&
-      tokenizer->split_alpha == GRN_FALSE &&
-      GRN_STR_CTYPE(*ctypes) == GRN_CHAR_ALPHA) {
-    while ((char_length = grn_plugin_charlen(ctx, (char *)token_tail, tokenizer->rest_length,
-                                             tokenizer->query->encoding))) {
-      token_size++;
-      token_tail += char_length;
-      if (GRN_STR_ISBLANK(*ctypes)) {
-        break;
-      }
-      if (GRN_STR_CTYPE(*++ctypes) != GRN_CHAR_ALPHA) {
-        break;
-      }
-    }
-    token_next = token_tail;
-    is_token_grouped = GRN_TRUE;
-  } else if (ctypes &&
-             tokenizer->split_digit == GRN_FALSE &&
-             GRN_STR_CTYPE(*ctypes) == GRN_CHAR_DIGIT) {
-    while ((char_length = grn_plugin_charlen(ctx, (char *)token_tail, tokenizer->rest_length,
-                                             tokenizer->query->encoding))) {
-      token_size++;
-      token_tail += char_length;
-      if (GRN_STR_ISBLANK(*ctypes)) {
-        break;
-      }
-      if (GRN_STR_CTYPE(*++ctypes) != GRN_CHAR_DIGIT) {
-        break;
-      }
-    }
-    token_next = token_tail;
-    is_token_grouped = GRN_TRUE;
-  } else if (ctypes &&
-             tokenizer->split_symbol == GRN_FALSE &&
-             GRN_STR_CTYPE(*ctypes) == GRN_CHAR_SYMBOL) {
-    while ((char_length = grn_plugin_charlen(ctx, (char *)token_tail, tokenizer->rest_length,
-                                             tokenizer->query->encoding))) {
-      token_size++;
-      token_tail += char_length;
-      if (!tokenizer->ignore_blank && GRN_STR_ISBLANK(*ctypes)) {
-        break;
-      }
-      if (GRN_STR_CTYPE(*++ctypes) != GRN_CHAR_SYMBOL) {
-        break;
-      }
-    }
-    token_next = token_tail;
-    is_token_grouped = GRN_TRUE;
-  } else {
-    if ((char_length = grn_plugin_charlen(ctx, (char *)token_tail, tokenizer->rest_length,
-                                          tokenizer->query->encoding))) {
-      token_size++;
-      token_tail += char_length;
-      token_next = token_tail;
-      while (token_size < tokenizer->ngram_unit &&
-             (char_length = grn_plugin_charlen(ctx, (char *)token_tail, tokenizer->rest_length,
-                                               tokenizer->query->encoding))) {
-        if (ctypes) {
-          if (!tokenizer->ignore_blank && GRN_STR_ISBLANK(*ctypes)) {
-            break;
-          }
-          ctypes++;
-          if ((tokenizer->split_alpha == GRN_FALSE &&
-              GRN_STR_CTYPE(*ctypes) == GRN_CHAR_ALPHA) ||
-              (tokenizer->split_digit == GRN_FALSE &&
-              GRN_STR_CTYPE(*ctypes) == GRN_CHAR_DIGIT) ||
-              (tokenizer->split_symbol == GRN_FALSE &&
-              GRN_STR_CTYPE(*ctypes) == GRN_CHAR_SYMBOL)) {
-            break;
-          }
-        }
-        token_size++;
-        token_tail += char_length;
-      }
-      is_token_grouped = GRN_FALSE;
-    }
-  }
+  token_size = ngram_token_cursor(ctx, tokenizer,
+                                  ctypes,
+                                  &token_next,
+                                  &token_tail,
+                                  &is_token_grouped);
 
   if (tokenizer->pushed_token_tail && token_top < tokenizer->pushed_token_tail) {
     status |= GRN_TOKENIZER_TOKEN_OVERLAP;
