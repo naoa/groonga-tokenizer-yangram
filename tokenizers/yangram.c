@@ -62,7 +62,6 @@ typedef enum {
   GRN_TOKEN_DEL
 } grn_token_mode;
 
-
 typedef struct {
   grn_tokenizer_token token;
   grn_tokenizer_query *query;
@@ -83,7 +82,7 @@ typedef struct {
 
 /*
   int
-  ngram_token_cursor(grn_ctx *ctx, grn_yangram_tokenizer *tokenizer,
+  ngram_token_search(grn_ctx *ctx, grn_yangram_tokenizer *tokenizer,
                      const unsigned char *ctypes,
                      const unsigned char **token_next,
                      const unsigned char **token_tail,
@@ -115,7 +114,7 @@ typedef struct {
 
 
 static int
-ngram_token_cursor(grn_ctx *ctx, grn_yangram_tokenizer *tokenizer,
+ngram_token_search(grn_ctx *ctx, grn_yangram_tokenizer *tokenizer,
                    const unsigned char *ctypes,
                    const unsigned char **token_next,
                    const unsigned char **token_tail,
@@ -278,7 +277,7 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
     ctypes = NULL;
   }
 
-  token_size = ngram_token_cursor(ctx, tokenizer,
+  token_size = ngram_token_search(ctx, tokenizer,
                                   ctypes,
                                   &token_next,
                                   &token_tail,
