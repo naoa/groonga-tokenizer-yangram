@@ -239,6 +239,9 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
 
   if (!is_token_grouped && token_size < tokenizer->ngram_unit) {
       status |= GRN_TOKENIZER_TOKEN_UNMATURED;
+      if (tokenizer->query->token_mode == GRN_TOKEN_GET) {
+        status |= GRN_TOKENIZER_TOKEN_SKIP;
+      }
   }
 
   tokenizer->next = token_next;
