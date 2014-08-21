@@ -145,9 +145,9 @@ Rroonga:
 
 LGPL 2.1. See COPYING for details.
 
-This program includes the Groonga ngrame tokenizer.  
+This program includes the Groonga ngram tokenizer.  
 https://github.com/groonga/groonga/blob/master/lib/token.c
 
 This program is the same license as Groonga.
 
-The Groonga ngrame tokenizer is povided by ``Copyright(C) 2009-2012 Brazil``
+The Groonga ngram tokenizer is povided by ``Copyright(C) 2009-2012 Brazil``
