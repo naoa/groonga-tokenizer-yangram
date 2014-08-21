@@ -56,13 +56,20 @@
 #define GRN_STR_ISBLANK(c) (c & 0x80)
 #define GRN_STR_CTYPE(c) (c & 0x7f)
 
+typedef enum {
+  GRN_TOKEN_GET = 0,
+  GRN_TOKEN_ADD,
+  GRN_TOKEN_DEL
+} grn_token_mode;
+
+
 typedef struct {
   grn_tokenizer_token token;
   grn_tokenizer_query *query;
   const unsigned char *next;
   const unsigned char *end;
   const unsigned char *ctypes;
-  grn_bool is_token_grouped;
+  const unsigned char *pushed_token_tail;
   unsigned int skip_size;
   int token_top_position;
   unsigned int token_tail_position;
@@ -111,7 +118,7 @@ yangram_init(grn_ctx *ctx, int nargs, grn_obj **args, grn_user_data *user_data)
   tokenizer->ctypes =
     grn_string_get_types(ctx, tokenizer->query->normalized_query);
 
-  tokenizer->is_token_grouped = GRN_FALSE;
+  tokenizer->pushed_token_tail = NULL;
   tokenizer->token_top_position = 0;
   tokenizer->skip_size = 0;
 
@@ -227,21 +234,25 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
     }
   }
 
-  if (is_token_grouped == GRN_FALSE) {
-    if (tokenizer->is_token_grouped == GRN_FALSE && tokenizer->token_length > 1) {
-      status |= GRN_TOKENIZER_TOKEN_OVERLAP;
-    }
+  if (token_top <= tokenizer->pushed_token_tail) {
+    status |= GRN_TOKENIZER_TOKEN_OVERLAP;
+  }
+
+  if (!is_token_grouped) {
     if (token_length < tokenizer->ngram_unit) {
       status |= GRN_TOKENIZER_TOKEN_UNMATURED;
     }
   }
 
-  tokenizer->is_token_grouped = is_token_grouped;
   tokenizer->next = token_next;
-
   tokenizer->token_top_position = token_top_position;
   tokenizer->token_length = token_length;
   tokenizer->token_tail_position = token_top_position + token_length - 1;
+  int token_bytes = token_cursor - token_top;
+
+  if (!(status & GRN_TOKENIZER_TOKEN_SKIP)) {
+    tokenizer->pushed_token_tail = token_top + token_bytes - 1;
+  }
 
   if (token_top == token_cursor || tokenizer->next == string_end) {
     tokenizer->skip_size = 0;
@@ -256,6 +267,7 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
   if (token_cursor == string_end) {
     status |= GRN_TOKENIZER_TOKEN_REACH_END;
   }
+
   grn_tokenizer_token_push(ctx,
                            &(tokenizer->token),
                            (const char *)token_top,
