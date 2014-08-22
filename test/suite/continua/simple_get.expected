@@ -1,6 +1,6 @@
 register tokenizers/yangram
 [[0,0.0,0.0],true]
-tokenize TokenYaBigramContinua "今日はぁ雨" NormalizerAuto --mode GET
+tokenize TokenYaBigramContinua "きょうは雨でしょう" NormalizerAuto --mode GET
 [
   [
     0,
@@ -9,20 +9,32 @@ tokenize TokenYaBigramContinua "今日はぁ雨" NormalizerAuto --mode GET
   ],
   [
     {
-      "value": "今日",
+      "value": "きょ",
       "position": 0
     },
     {
-      "value": "日は",
+      "value": "うは",
       "position": 1
     },
     {
-      "value": "はぁ",
+      "value": "は雨",
       "position": 2
     },
     {
-      "value": "ぁ雨",
+      "value": "雨で",
       "position": 3
+    },
+    {
+      "value": "でし",
+      "position": 4
+    },
+    {
+      "value": "しょ",
+      "position": 5
+    },
+    {
+      "value": "ょう",
+      "position": 6
     }
   ]
 ]

@@ -164,7 +164,7 @@ Overskipと併用することができますがトークンを落としすぎて
 * ADD mode / GET mode
 
 ```
-tokenize TokenYaBigramContinua "今日はぁ雨" NormalizerAuto --mode GET
+tokenize TokenYaBigramContinua "きょうは雨でしょう" NormalizerAuto --mode GET
 [
   [
     0,
@@ -173,20 +173,32 @@ tokenize TokenYaBigramContinua "今日はぁ雨" NormalizerAuto --mode GET
   ],
   [
     {
-      "value": "今日",
+      "value": "きょ",
       "position": 0
     },
     {
-      "value": "日は",
+      "value": "うは",
       "position": 1
     },
     {
-      "value": "はぁ",
+      "value": "は雨",
       "position": 2
     },
     {
-      "value": "雨",
+      "value": "雨で",
       "position": 3
+    },
+    {
+      "value": "でし",
+      "position": 4
+    },
+    {
+      "value": "しょ",
+      "position": 5
+    },
+    {
+      "value": "ょう",
+      "position": 6
     }
   ]
 ]
@@ -218,7 +230,7 @@ Overskipと併用することができますがトークンを落としすぎて
 * ADD mode / GET mode
 
 ```
-tokenize TokenYaBigramCombhiraCombkata "今日は雨だ" NormalizerAuto --mode ADD
+tokenize TokenYaBigramCombhiraCombkata "今日は雨だ" NormalizerAuto --mode GET
 [
   [
     0,
@@ -237,10 +249,6 @@ tokenize TokenYaBigramCombhiraCombkata "今日は雨だ" NormalizerAuto --mode A
     {
       "value": "雨だ",
       "position": 2
-    },
-    {
-      "value": "だ",
-      "position": 3
     }
   ]
 ]
