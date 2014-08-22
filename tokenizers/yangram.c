@@ -403,12 +403,6 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
       tokenizer->skip_size = 1;
     }
   }
-  if (token_tail == string_end) {
-    if (!(status & GRN_TOKENIZER_TOKEN_SKIP) &&
-        !(status & GRN_TOKENIZER_TOKEN_SKIP_WITH_POSITION)) {
-      status |= GRN_TOKENIZER_TOKEN_REACH_END;
-    }
-  }
 
   {
     int token_length = token_tail - token_top;
