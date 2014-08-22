@@ -21,7 +21,7 @@ tokenize TokenYaBigramContinua "今日はぁ雨" NormalizerAuto --mode GET
       "position": 2
     },
     {
-      "value": "雨",
+      "value": "ぁ雨",
       "position": 3
     }
   ]

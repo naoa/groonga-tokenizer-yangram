@@ -1,0 +1,3 @@
+register tokenizers/yangram
+
+tokenize TokenYaBigramOverskip "今日は雨だ" NormalizerAuto --mode GET

@@ -322,7 +322,12 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
                                   &token_tail,
                                   &is_token_grouped);
 
-  if (token_size >= 2) {
+  if (token_tail == string_end) {
+    status |= GRN_TOKENIZER_TOKEN_REACH_END;
+  }
+
+  if (token_size >= 2 &&
+      !(status & GRN_TOKENIZER_TOKEN_REACH_END)) {
     if (tokenizer->continua_filter) {
       int char_length;
       char_length = grn_plugin_charlen(ctx, (char *)token_top,
@@ -372,7 +377,9 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
       token_top < tokenizer->pushed_token_tail) {
     status |= GRN_TOKENIZER_TOKEN_OVERLAP;
     if (tokenizer->overlap_skip &&
+        !(status & GRN_TOKENIZER_TOKEN_REACH_END) &&
         !(status & GRN_TOKENIZER_TOKEN_SKIP_WITH_POSITION) &&
+        token_top < string_end - tokenizer->ngram_unit - 1 &&
         tokenizer->query->token_mode == GRN_TOKEN_GET) {
       status |= GRN_TOKENIZER_TOKEN_SKIP;
     }
@@ -523,7 +530,7 @@ GRN_PLUGIN_REGISTER(grn_ctx *ctx)
   GRN_BOOL_SET(ctx, &vars[10].value, GRN_FALSE);
   GRN_BOOL_SET(ctx, &vars[11].value, GRN_FALSE);
 
-  GRN_BOOL_SET(ctx, &vars[8].value, GRN_TRUE);
+  GRN_BOOL_SET(ctx, &vars[8].value, GRN_FALSE);
   grn_proc_create(ctx, "TokenYaBigramOverskip", -1,
                   GRN_PROC_TOKENIZER,
                   yangram_init, yangram_next, yangram_fin, 12, vars);
