@@ -379,7 +379,6 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
     if (tokenizer->overlap_skip &&
         !(status & GRN_TOKENIZER_TOKEN_REACH_END) &&
         !(status & GRN_TOKENIZER_TOKEN_SKIP_WITH_POSITION) &&
-        token_top < string_end - tokenizer->ngram_unit - 1 &&
         tokenizer->query->token_mode == GRN_TOKEN_GET) {
       status |= GRN_TOKENIZER_TOKEN_SKIP;
     }
