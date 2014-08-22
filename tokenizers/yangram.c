@@ -530,7 +530,7 @@ GRN_PLUGIN_REGISTER(grn_ctx *ctx)
   GRN_BOOL_SET(ctx, &vars[10].value, GRN_FALSE);
   GRN_BOOL_SET(ctx, &vars[11].value, GRN_FALSE);
 
-  GRN_BOOL_SET(ctx, &vars[8].value, GRN_FALSE);
+  GRN_BOOL_SET(ctx, &vars[8].value, GRN_TRUE);
   grn_proc_create(ctx, "TokenYaBigramOverskip", -1,
                   GRN_PROC_TOKENIZER,
                   yangram_init, yangram_next, yangram_fin, 12, vars);
