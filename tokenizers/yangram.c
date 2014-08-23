@@ -82,9 +82,9 @@ is_token_group(grn_yangram_tokenizer *tokenizer, const unsigned char *ctypes)
 }
 
 static int
-grouped_token_next(grn_ctx *ctx, grn_yangram_tokenizer *tokenizer,
-                   const unsigned char *ctypes,
-                   const unsigned char **token_tail)
+forward_grouped_token_tail(grn_ctx *ctx, grn_yangram_tokenizer *tokenizer,
+                           const unsigned char *ctypes,
+                           const unsigned char **token_tail)
 {
   int token_size = 0;
   unsigned int char_length;
@@ -137,9 +137,9 @@ grouped_token_next(grn_ctx *ctx, grn_yangram_tokenizer *tokenizer,
 }
 
 static int
-ngram_token_next(grn_ctx *ctx, grn_yangram_tokenizer *tokenizer,
-                 const unsigned char *ctypes,
-                 const unsigned char **token_tail)
+forward_ngram_token_tail(grn_ctx *ctx, grn_yangram_tokenizer *tokenizer,
+                         const unsigned char *ctypes,
+                         const unsigned char **token_tail)
 {
   int token_size = 0;
   unsigned int char_length;
@@ -279,10 +279,10 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
   is_token_grouped = is_token_group(tokenizer, ctypes);
 
   if (is_token_grouped) {
-    token_size = grouped_token_next(ctx, tokenizer, ctypes, &token_tail);
+    token_size = forward_grouped_token_tail(ctx, tokenizer, ctypes, &token_tail);
     token_next = token_tail;
   } else {
-    token_size = ngram_token_next(ctx, tokenizer, ctypes, &token_tail);
+    token_size = forward_ngram_token_tail(ctx, tokenizer, ctypes, &token_tail);
     char_length = grn_plugin_charlen(ctx, (char *)token_next,
                                      tokenizer->rest_length,
                                      tokenizer->query->encoding);
