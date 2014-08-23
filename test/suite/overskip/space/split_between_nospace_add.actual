@@ -1,6 +1,6 @@
 register tokenizers/yangram
 [[0,0.0,0.0],true]
-tokenize TokenYaTrigramOverskip "きつつ つつき" NormalizerAuto --mode ADD
+tokenize TokenYaBigramSplitSymbolAlphaOverskip "Thisis" NormalizerAuto --mode ADD
 [
   [
     0,
@@ -9,27 +9,27 @@ tokenize TokenYaTrigramOverskip "きつつ つつき" NormalizerAuto --mode ADD
   ],
   [
     {
-      "value": "きつつ",
+      "value": "th",
       "position": 0
     },
     {
-      "value": "つつつ",
+      "value": "hi",
       "position": 1
     },
     {
-      "value": "つつつ",
+      "value": "is",
       "position": 2
     },
     {
-      "value": "つつき",
+      "value": "si",
       "position": 3
     },
     {
-      "value": "つき",
+      "value": "is",
       "position": 4
     },
     {
-      "value": "き",
+      "value": "s",
       "position": 5
     }
   ]

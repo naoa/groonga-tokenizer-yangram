@@ -1,0 +1,32 @@
+register tokenizers/yangram
+[[0,0.0,0.0],true]
+tokenize TokenYaBigramOverskip "広告評論家" NormalizerAuto --mode ADD
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  [
+    {
+      "value": "広告",
+      "position": 0
+    },
+    {
+      "value": "告評",
+      "position": 1
+    },
+    {
+      "value": "評論",
+      "position": 2
+    },
+    {
+      "value": "論家",
+      "position": 3
+    },
+    {
+      "value": "家",
+      "position": 4
+    }
+  ]
+]

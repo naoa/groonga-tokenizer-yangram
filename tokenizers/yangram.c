@@ -227,7 +227,7 @@ forward_ngram_token_tail(grn_ctx *ctx, grn_yangram_tokenizer *tokenizer,
   unsigned int char_length;
 
   if ((char_length = grn_plugin_charlen(ctx, (char *)*token_tail, tokenizer->rest_length,
-                                          tokenizer->query->encoding))) {
+                                        tokenizer->query->encoding))) {
     token_size++;
     *token_tail += char_length;
     while (token_size < tokenizer->ngram_unit &&
@@ -262,8 +262,10 @@ is_next_token_group(grn_yangram_tokenizer *tokenizer,
   if (ctypes) {
     ctypes = ctypes + token_size;
   }
-  if (is_token_group(tokenizer, ctypes)) {
-    return GRN_TRUE;
+  if (ctypes) {
+    if (is_token_group(tokenizer, ctypes)) {
+      return GRN_TRUE;
+    }
   }
   return GRN_FALSE;
 }
@@ -382,6 +384,9 @@ yangram_init(grn_ctx *ctx, int nargs, grn_obj **args, grn_user_data *user_data)
   var = grn_plugin_proc_get_var(ctx, user_data, "overlap_skip", -1);
   if(GRN_TEXT_LEN(var) != 0) {
     tokenizer->overlap_skip = GRN_BOOL_VALUE(var);
+    if (tokenizer->overlap_skip == GRN_TRUE) {
+      tokenizer->ignore_blank = GRN_TRUE;
+    }
   }
   var = grn_plugin_proc_get_var(ctx, user_data, "continua_filter", -1);
   if(GRN_TEXT_LEN(var) != 0) {
@@ -453,7 +458,6 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
       ctypes_skip_size = 1;
     }
   }
-
   if (token_size >= 2 &&
       !(status & GRN_TOKENIZER_TOKEN_REACH_END)) {
     if (execute_token_filter(ctx, tokenizer, ctypes, token_top)) {

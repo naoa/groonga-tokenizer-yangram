@@ -1,0 +1,4 @@
+register tokenizers/yangram
+[[0,0.0,0.0],true]
+tokenize TokenYaBigramOverskip "This is" NormalizerAuto --mode GET
+[[0,0.0,0.0],[{"value":"this","position":0},{"value":"is","position":1}]]

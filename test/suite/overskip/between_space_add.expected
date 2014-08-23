@@ -13,7 +13,7 @@ tokenize TokenYaBigramOverskip "きつ つき" NormalizerAuto --mode ADD
       "position": 0
     },
     {
-      "value": "つ",
+      "value": "つつ",
       "position": 1
     },
     {

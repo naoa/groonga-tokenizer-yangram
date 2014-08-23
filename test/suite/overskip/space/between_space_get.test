@@ -1,0 +1,3 @@
+register tokenizers/yangram
+
+tokenize TokenYaBigramOverskip "This is" NormalizerAuto --mode GET
