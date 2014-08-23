@@ -126,6 +126,28 @@ combkata_filter(grn_ctx *ctx, grn_yangram_tokenizer *tokenizer,
 }
 
 static grn_bool
+execute_token_filter(grn_ctx *ctx, grn_yangram_tokenizer *tokenizer,
+                     const unsigned char *ctypes,
+                     const unsigned char *token_top)
+{
+  if (tokenizer->continua_filter &&
+      continua_filter(ctx, tokenizer, token_top)) {
+    return GRN_TRUE;
+  }
+
+  if (tokenizer->combhira_filter &&
+      combhira_filter(ctx, tokenizer, ctypes, token_top)) {
+    return GRN_TRUE;
+  }
+  if (tokenizer->combkata_filter &&
+      combkata_filter(ctx, tokenizer, ctypes, token_top)) {
+    return GRN_TRUE;
+  }
+
+  return GRN_FALSE;
+}
+
+static grn_bool
 is_token_group(grn_yangram_tokenizer *tokenizer, const unsigned char *ctypes)
 {
   if (ctypes &&
@@ -371,18 +393,7 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
 
   if (token_size >= 2 &&
       !(status & GRN_TOKENIZER_TOKEN_REACH_END)) {
-    if (tokenizer->continua_filter &&
-        continua_filter(ctx, tokenizer, token_top)) {
-      status |= GRN_TOKENIZER_TOKEN_SKIP_WITH_POSITION;
-    }
-    if (tokenizer->combhira_filter &&
-        !(status & GRN_TOKENIZER_TOKEN_SKIP_WITH_POSITION) &&
-        combhira_filter(ctx, tokenizer, ctypes, token_top)) {
-      status |= GRN_TOKENIZER_TOKEN_SKIP_WITH_POSITION;
-    }
-    if (tokenizer->combkata_filter &&
-        !(status & GRN_TOKENIZER_TOKEN_SKIP_WITH_POSITION) &&
-        combkata_filter(ctx, tokenizer, ctypes, token_top)) {
+    if (execute_token_filter(ctx, tokenizer, ctypes, token_top)) {
       status |= GRN_TOKENIZER_TOKEN_SKIP_WITH_POSITION;
     }
   }
