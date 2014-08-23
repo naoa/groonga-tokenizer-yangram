@@ -132,7 +132,6 @@ forward_grouped_token_tail(grn_ctx *ctx, grn_yangram_tokenizer *tokenizer,
       }
     }
   }
-
   return token_size;
 }
 
@@ -143,6 +142,7 @@ forward_ngram_token_tail(grn_ctx *ctx, grn_yangram_tokenizer *tokenizer,
 {
   int token_size = 0;
   unsigned int char_length;
+
   if ((char_length = grn_plugin_charlen(ctx, (char *)*token_tail, tokenizer->rest_length,
                                           tokenizer->query->encoding))) {
     token_size++;
