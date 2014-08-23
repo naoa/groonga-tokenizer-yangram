@@ -73,7 +73,7 @@ typedef struct {
   const unsigned char *ctypes;
   const unsigned char *pushed_token_tail;
   unsigned int ctypes_skip_size;
-  int ctypes_position;
+  int ctypes_next;
   int rest_length;
   unsigned int token_size;
   unsigned short ngram_unit;
@@ -249,7 +249,7 @@ yangram_init(grn_ctx *ctx, int nargs, grn_obj **args, grn_user_data *user_data)
     grn_string_get_types(ctx, tokenizer->query->normalized_query);
 
   tokenizer->pushed_token_tail = NULL;
-  tokenizer->ctypes_position = 0;
+  tokenizer->ctypes_next = 0;
   tokenizer->ctypes_skip_size = 0;
 
   grn_obj *var;
@@ -310,7 +310,7 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
   const unsigned char *ctypes;
 
   if (tokenizer->ctypes) {
-    ctypes = tokenizer->ctypes + tokenizer->ctypes_position;
+    ctypes = tokenizer->ctypes + tokenizer->ctypes_next;
   } else {
     ctypes = NULL;
   }
@@ -329,11 +329,7 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
       status |= GRN_TOKENIZER_TOKEN_UNMATURED;
   }
 
-  tokenizer->next = token_next;
-  tokenizer->rest_length = string_end - token_next;
-  tokenizer->token_size = token_size;
-
-  if (token_top == token_tail || tokenizer->next == string_end) {
+  if (token_top == token_tail || token_next == string_end) {
     tokenizer->ctypes_skip_size = 0;
     status |= GRN_TOKENIZER_TOKEN_LAST;
   } else {
@@ -343,8 +339,6 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
       tokenizer->ctypes_skip_size = 1;
     }
   }
-
-  tokenizer->ctypes_position = tokenizer->ctypes_position + tokenizer->ctypes_skip_size;
 
   if (token_size >= 2 &&
       !(status & GRN_TOKENIZER_TOKEN_REACH_END)) {
@@ -408,6 +402,11 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
       !(status & GRN_TOKENIZER_TOKEN_SKIP_WITH_POSITION)) {
     tokenizer->pushed_token_tail = token_tail;
   }
+
+  tokenizer->next = token_next;
+  tokenizer->rest_length = string_end - token_next;
+  tokenizer->token_size = token_size;
+  tokenizer->ctypes_next = tokenizer->ctypes_next + tokenizer->ctypes_skip_size;
 
   grn_tokenizer_token_push(ctx,
                            &(tokenizer->token),
