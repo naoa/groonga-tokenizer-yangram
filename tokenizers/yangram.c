@@ -70,12 +70,10 @@ typedef struct {
   grn_tokenizer_query *query;
   const unsigned char *next;
   const unsigned char *end;
-  const unsigned char *ctypes;
-  const unsigned char *pushed_token_tail;
-  unsigned int ctypes_skip_size;
-  int ctypes_next;
   int rest_length;
-  unsigned int token_size;
+  const unsigned char *pushed_token_tail;
+  const unsigned char *ctypes;
+  int ctypes_next;
   unsigned short ngram_unit;
   grn_bool split_alpha;
   grn_bool split_digit;
@@ -250,7 +248,6 @@ yangram_init(grn_ctx *ctx, int nargs, grn_obj **args, grn_user_data *user_data)
 
   tokenizer->pushed_token_tail = NULL;
   tokenizer->ctypes_next = 0;
-  tokenizer->ctypes_skip_size = 0;
 
   grn_obj *var;
   var = grn_plugin_proc_get_var(ctx, user_data, "ngram_unit", -1);
@@ -308,6 +305,7 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
   grn_tokenizer_status status = 0;
   grn_bool is_token_grouped = GRN_FALSE;
   const unsigned char *ctypes;
+  unsigned int ctypes_skip_size;
 
   if (tokenizer->ctypes) {
     ctypes = tokenizer->ctypes + tokenizer->ctypes_next;
@@ -330,13 +328,13 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
   }
 
   if (token_top == token_tail || token_next == string_end) {
-    tokenizer->ctypes_skip_size = 0;
+    ctypes_skip_size = 0;
     status |= GRN_TOKENIZER_TOKEN_LAST;
   } else {
     if (is_token_grouped) {
-      tokenizer->ctypes_skip_size = token_size;
+      ctypes_skip_size = token_size;
     } else {
-      tokenizer->ctypes_skip_size = 1;
+      ctypes_skip_size = 1;
     }
   }
 
@@ -405,8 +403,7 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
 
   tokenizer->next = token_next;
   tokenizer->rest_length = string_end - token_next;
-  tokenizer->token_size = token_size;
-  tokenizer->ctypes_next = tokenizer->ctypes_next + tokenizer->ctypes_skip_size;
+  tokenizer->ctypes_next = tokenizer->ctypes_next + ctypes_skip_size;
 
   grn_tokenizer_token_push(ctx,
                            &(tokenizer->token),
