@@ -1,0 +1,3 @@
+register tokenizers/yangram
+
+tokenize TokenYaBigramOverskip "きつ つき" NormalizerAuto --mode ADD

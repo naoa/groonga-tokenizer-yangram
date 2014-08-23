@@ -1,0 +1,28 @@
+register tokenizers/yangram
+[[0,0.0,0.0],true]
+tokenize TokenYaBigramOverskip "きつ つき" NormalizerAuto --mode ADD
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  [
+    {
+      "value": "きつ",
+      "position": 0
+    },
+    {
+      "value": "つ",
+      "position": 1
+    },
+    {
+      "value": "つき",
+      "position": 2
+    },
+    {
+      "value": "き",
+      "position": 3
+    }
+  ]
+]

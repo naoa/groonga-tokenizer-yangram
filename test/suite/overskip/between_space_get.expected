@@ -1,0 +1,4 @@
+register tokenizers/yangram
+[[0,0.0,0.0],true]
+tokenize TokenYaBigramOverskip "きつ つき" NormalizerAuto --mode GET
+[[0,0.0,0.0],[{"value":"きつ","position":0},{"value":"つき","position":2}]]

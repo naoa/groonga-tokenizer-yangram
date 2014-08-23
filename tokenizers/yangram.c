@@ -269,11 +269,49 @@ is_next_token_group(grn_yangram_tokenizer *tokenizer,
 }
 
 static grn_bool
-ignore_token_overlap_skip(grn_yangram_tokenizer *tokenizer,
+is_token_all_same(grn_ctx *ctx, grn_yangram_tokenizer *tokenizer,
+                  const unsigned char *token_top,
+                  int token_size)
+{
+  unsigned int char_length;
+  const unsigned char *token_before = token_top;
+
+  int i = 1;
+
+  if ((char_length = grn_plugin_charlen(ctx, (char *)token_top, tokenizer->rest_length,
+                                       tokenizer->query->encoding))) {
+    token_top += char_length;
+
+    while (i < token_size &&
+      (char_length = grn_plugin_charlen(ctx, (char *)token_top, tokenizer->rest_length,
+                                        tokenizer->query->encoding))) {
+      if (token_top + char_length &&
+          memcmp(token_before, token_top, char_length) != 0){
+        break;
+      }
+      token_before = token_top;
+      token_top += char_length;
+      i++;
+    }
+  }
+
+  if (i == token_size) {
+    return GRN_TRUE;
+  }
+
+  return GRN_FALSE;
+}
+
+static grn_bool
+ignore_token_overlap_skip(grn_ctx *ctx, grn_yangram_tokenizer *tokenizer,
                           const unsigned char *ctypes,
+                          const unsigned char *token_top,
                           int token_size)
 {
   if (is_next_token_group(tokenizer, ctypes, token_size)) {
+    return GRN_TRUE;
+  }
+  if (is_token_all_same(ctx, tokenizer, token_top, token_size)) {
     return GRN_TRUE;
   }
 
@@ -431,7 +469,7 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
         !(status & GRN_TOKENIZER_TOKEN_REACH_END) &&
         !(status & GRN_TOKENIZER_TOKEN_SKIP_WITH_POSITION) &&
         tokenizer->query->token_mode == GRN_TOKEN_GET) {
-      if (!ignore_token_overlap_skip(tokenizer, ctypes, token_size)) {
+      if (!ignore_token_overlap_skip(ctx, tokenizer, ctypes, token_top, token_size)) {
         status |= GRN_TOKENIZER_TOKEN_SKIP;
       }
     }
