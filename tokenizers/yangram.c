@@ -84,7 +84,6 @@ is_token_group(grn_yangram_tokenizer *tokenizer, const unsigned char *ctypes)
 static int
 grouped_token_next(grn_ctx *ctx, grn_yangram_tokenizer *tokenizer,
                    const unsigned char *ctypes,
-                   const unsigned char **token_next,
                    const unsigned char **token_tail)
 {
   int token_size = 0;
@@ -104,7 +103,6 @@ grouped_token_next(grn_ctx *ctx, grn_yangram_tokenizer *tokenizer,
         break;
       }
     }
-    *token_next = *token_tail;
   } else if (ctypes &&
              tokenizer->split_digit == GRN_FALSE &&
              GRN_STR_CTYPE(*ctypes) == GRN_CHAR_DIGIT) {
@@ -119,7 +117,6 @@ grouped_token_next(grn_ctx *ctx, grn_yangram_tokenizer *tokenizer,
         break;
       }
     }
-    *token_next = *token_tail;
   } else if (ctypes &&
              tokenizer->split_symbol == GRN_FALSE &&
              GRN_STR_CTYPE(*ctypes) == GRN_CHAR_SYMBOL) {
@@ -134,7 +131,6 @@ grouped_token_next(grn_ctx *ctx, grn_yangram_tokenizer *tokenizer,
         break;
       }
     }
-    *token_next = *token_tail;
   }
 
   return token_size;
@@ -143,7 +139,6 @@ grouped_token_next(grn_ctx *ctx, grn_yangram_tokenizer *tokenizer,
 static int
 ngram_token_next(grn_ctx *ctx, grn_yangram_tokenizer *tokenizer,
                  const unsigned char *ctypes,
-                 const unsigned char **token_next,
                  const unsigned char **token_tail)
 {
   int token_size = 0;
@@ -152,7 +147,6 @@ ngram_token_next(grn_ctx *ctx, grn_yangram_tokenizer *tokenizer,
                                           tokenizer->query->encoding))) {
     token_size++;
     *token_tail += char_length;
-    *token_next = *token_tail;
     while (token_size < tokenizer->ngram_unit &&
            (char_length = grn_plugin_charlen(ctx, (char *)*token_tail, tokenizer->rest_length,
                                              tokenizer->query->encoding))) {
@@ -275,6 +269,7 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
   grn_bool is_token_grouped = GRN_FALSE;
   const unsigned char *ctypes;
   unsigned int ctypes_skip_size;
+  int char_length = 0;
 
   if (tokenizer->ctypes) {
     ctypes = tokenizer->ctypes + tokenizer->ctypes_next;
@@ -284,11 +279,14 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
   is_token_grouped = is_token_group(tokenizer, ctypes);
 
   if (is_token_grouped) {
-    token_size = grouped_token_next(ctx, tokenizer, ctypes,
-                                    &token_next, &token_tail);
+    token_size = grouped_token_next(ctx, tokenizer, ctypes, &token_tail);
+    token_next = token_tail;
   } else {
-    token_size = ngram_token_next(ctx, tokenizer, ctypes,
-                                  &token_next, &token_tail);
+    token_size = ngram_token_next(ctx, tokenizer, ctypes, &token_tail);
+    char_length = grn_plugin_charlen(ctx, (char *)token_next,
+                                     tokenizer->rest_length,
+                                     tokenizer->query->encoding);
+    token_next += char_length;
   }
 
   if (token_tail == string_end) {
@@ -313,7 +311,6 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
   if (token_size >= 2 &&
       !(status & GRN_TOKENIZER_TOKEN_REACH_END)) {
     if (tokenizer->continua_filter) {
-      int char_length;
       char_length = grn_plugin_charlen(ctx, (char *)token_top,
                                        tokenizer->rest_length,
                                        tokenizer->query->encoding);
