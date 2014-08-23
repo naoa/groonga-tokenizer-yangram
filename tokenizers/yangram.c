@@ -305,13 +305,12 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
   const unsigned char *string_end = tokenizer->end;
 
   int token_size = 0;
-  int ctypes_position = tokenizer->ctypes_position + tokenizer->skip_size;
   grn_tokenizer_status status = 0;
   grn_bool is_token_grouped = GRN_FALSE;
   const unsigned char *ctypes;
 
   if (tokenizer->ctypes) {
-    ctypes = tokenizer->ctypes + ctypes_position;
+    ctypes = tokenizer->ctypes + tokenizer->ctypes_position;
   } else {
     ctypes = NULL;
   }
@@ -325,6 +324,27 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
   if (token_tail == string_end) {
     status |= GRN_TOKENIZER_TOKEN_REACH_END;
   }
+
+  if (!is_token_grouped && token_size < tokenizer->ngram_unit) {
+      status |= GRN_TOKENIZER_TOKEN_UNMATURED;
+  }
+
+  tokenizer->next = token_next;
+  tokenizer->rest_length = string_end - token_next;
+  tokenizer->token_size = token_size;
+
+  if (token_top == token_tail || tokenizer->next == string_end) {
+    tokenizer->skip_size = 0;
+    status |= GRN_TOKENIZER_TOKEN_LAST;
+  } else {
+    if (is_token_grouped) {
+      tokenizer->skip_size = token_size;
+    } else {
+      tokenizer->skip_size = 1;
+    }
+  }
+
+  tokenizer->ctypes_position = tokenizer->ctypes_position + tokenizer->skip_size;
 
   if (token_size >= 2 &&
       !(status & GRN_TOKENIZER_TOKEN_REACH_END)) {
@@ -384,39 +404,16 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
     }
   }
 
-  if (!is_token_grouped && token_size < tokenizer->ngram_unit) {
-      status |= GRN_TOKENIZER_TOKEN_UNMATURED;
+  if (!(status & GRN_TOKENIZER_TOKEN_SKIP) &&
+      !(status & GRN_TOKENIZER_TOKEN_SKIP_WITH_POSITION)) {
+    tokenizer->pushed_token_tail = token_tail;
   }
 
-  tokenizer->next = token_next;
-  tokenizer->rest_length = string_end - token_next;
-  tokenizer->ctypes_position = ctypes_position;
-  tokenizer->token_size = token_size;
-
-  if (token_top == token_tail || tokenizer->next == string_end) {
-    tokenizer->skip_size = 0;
-    status |= GRN_TOKENIZER_TOKEN_LAST;
-  } else {
-    if (is_token_grouped) {
-      tokenizer->skip_size = token_size;
-    } else {
-      tokenizer->skip_size = 1;
-    }
-  }
-
-  {
-    int token_length = token_tail - token_top;
-    if (!(status & GRN_TOKENIZER_TOKEN_SKIP) &&
-        !(status & GRN_TOKENIZER_TOKEN_SKIP_WITH_POSITION)) {
-      tokenizer->pushed_token_tail = token_tail;
-    }
-
-    grn_tokenizer_token_push(ctx,
-                             &(tokenizer->token),
-                             (const char *)token_top,
-                             token_length,
-                             status);
-  }
+  grn_tokenizer_token_push(ctx,
+                           &(tokenizer->token),
+                           (const char *)token_top,
+                           token_tail - token_top,
+                           status);
   return NULL;
 }
 
