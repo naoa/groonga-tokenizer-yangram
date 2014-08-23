@@ -72,7 +72,7 @@ typedef struct {
   const unsigned char *end;
   const unsigned char *ctypes;
   const unsigned char *pushed_token_tail;
-  unsigned int skip_size;
+  unsigned int ctypes_skip_size;
   int ctypes_position;
   int rest_length;
   unsigned int token_size;
@@ -250,7 +250,7 @@ yangram_init(grn_ctx *ctx, int nargs, grn_obj **args, grn_user_data *user_data)
 
   tokenizer->pushed_token_tail = NULL;
   tokenizer->ctypes_position = 0;
-  tokenizer->skip_size = 0;
+  tokenizer->ctypes_skip_size = 0;
 
   grn_obj *var;
   var = grn_plugin_proc_get_var(ctx, user_data, "ngram_unit", -1);
@@ -334,17 +334,17 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
   tokenizer->token_size = token_size;
 
   if (token_top == token_tail || tokenizer->next == string_end) {
-    tokenizer->skip_size = 0;
+    tokenizer->ctypes_skip_size = 0;
     status |= GRN_TOKENIZER_TOKEN_LAST;
   } else {
     if (is_token_grouped) {
-      tokenizer->skip_size = token_size;
+      tokenizer->ctypes_skip_size = token_size;
     } else {
-      tokenizer->skip_size = 1;
+      tokenizer->ctypes_skip_size = 1;
     }
   }
 
-  tokenizer->ctypes_position = tokenizer->ctypes_position + tokenizer->skip_size;
+  tokenizer->ctypes_position = tokenizer->ctypes_position + tokenizer->ctypes_skip_size;
 
   if (token_size >= 2 &&
       !(status & GRN_TOKENIZER_TOKEN_REACH_END)) {
