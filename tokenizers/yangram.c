@@ -82,6 +82,28 @@ continua_filter(grn_ctx *ctx, grn_yangram_tokenizer *tokenizer,
 }
 
 static grn_bool
+combhira_filter(grn_ctx *ctx, grn_yangram_tokenizer *tokenizer,
+                const unsigned char *ctypes,
+                const unsigned char *token_top)
+{
+  grn_id id;
+  unsigned int char_length;
+
+  if (ctypes && GRN_STR_CTYPE(*ctypes) == GRN_CHAR_HIRAGANA) {
+    if (GRN_STR_CTYPE(*++ctypes) != GRN_CHAR_HIRAGANA) {
+      char_length = grn_plugin_charlen(ctx, (char *)token_top,
+                                       tokenizer->rest_length,
+                                       tokenizer->query->encoding);
+      id = grn_hash_get(ctx, comb_exclude, token_top, char_length, NULL);
+      if (!id) {
+        return GRN_TRUE;
+      }
+    }
+  }
+  return GRN_FALSE;
+}
+
+static grn_bool
 is_token_group(grn_yangram_tokenizer *tokenizer, const unsigned char *ctypes)
 {
   if (ctypes &&
@@ -332,20 +354,9 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
       status |= GRN_TOKENIZER_TOKEN_SKIP_WITH_POSITION;
     }
     if (tokenizer->combhira_filter &&
-        !(status & GRN_TOKENIZER_TOKEN_SKIP_WITH_POSITION)) {
-      if (ctypes && GRN_STR_CTYPE(*ctypes) == GRN_CHAR_HIRAGANA) {
-        if (GRN_STR_CTYPE(*++ctypes) != GRN_CHAR_HIRAGANA) {
-          int char_length;
-          char_length = grn_plugin_charlen(ctx, (char *)token_top,
-                                          tokenizer->rest_length,
-                                          tokenizer->query->encoding);
-          grn_id id;
-          id = grn_hash_get(ctx, comb_exclude, token_top, char_length, NULL);
-          if (!id) {
-            status |= GRN_TOKENIZER_TOKEN_SKIP_WITH_POSITION;
-          }
-        }
-      }
+        !(status & GRN_TOKENIZER_TOKEN_SKIP_WITH_POSITION) &&
+        combhira_filter(ctx, tokenizer, ctypes, token_top)) {
+      status |= GRN_TOKENIZER_TOKEN_SKIP_WITH_POSITION;
     }
     if (tokenizer->combkata_filter &&
         !(status & GRN_TOKENIZER_TOKEN_SKIP_WITH_POSITION)) {
