@@ -268,6 +268,7 @@ is_next_token_group(grn_yangram_tokenizer *tokenizer,
   return GRN_FALSE;
 }
 
+/*
 static grn_bool
 is_token_all_same(grn_ctx *ctx, grn_yangram_tokenizer *tokenizer,
                   const unsigned char *token_top,
@@ -301,17 +302,15 @@ is_token_all_same(grn_ctx *ctx, grn_yangram_tokenizer *tokenizer,
 
   return GRN_FALSE;
 }
+*/
 
 static grn_bool
-ignore_token_overlap_skip(grn_ctx *ctx, grn_yangram_tokenizer *tokenizer,
+ignore_token_overlap_skip(GNUC_UNUSED grn_ctx *ctx, grn_yangram_tokenizer *tokenizer,
                           const unsigned char *ctypes,
-                          const unsigned char *token_top,
+                          GNUC_UNUSED const unsigned char *token_top,
                           int token_size)
 {
   if (is_next_token_group(tokenizer, ctypes, token_size)) {
-    return GRN_TRUE;
-  }
-  if (is_token_all_same(ctx, tokenizer, token_top, token_size)) {
     return GRN_TRUE;
   }
 

@@ -1,3 +1,0 @@
-register tokenizers/yangram
-
-tokenize TokenYaTrigramOverskip "きつつつき" NormalizerAuto --mode GET
