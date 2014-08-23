@@ -1,0 +1,32 @@
+register tokenizers/yangram
+[[0,0.0,0.0],true]
+tokenize TokenYaTrigramOverskip "つつきつAつきつつ" NormalizerAuto --mode GET
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  [
+    {
+      "value": "つつき",
+      "position": 0
+    },
+    {
+      "value": "つきつ",
+      "position": 1
+    },
+    {
+      "value": "a",
+      "position": 4
+    },
+    {
+      "value": "つきつ",
+      "position": 5
+    },
+    {
+      "value": "きつつ",
+      "position": 6
+    }
+  ]
+]

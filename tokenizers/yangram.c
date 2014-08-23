@@ -405,7 +405,12 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
         !(status & GRN_TOKENIZER_TOKEN_REACH_END) &&
         !(status & GRN_TOKENIZER_TOKEN_SKIP_WITH_POSITION) &&
         tokenizer->query->token_mode == GRN_TOKEN_GET) {
-      status |= GRN_TOKENIZER_TOKEN_SKIP;
+      if (ctypes) {
+        ctypes = ctypes + token_size;
+      }
+      if (!is_token_group(tokenizer, ctypes)) {
+        status |= GRN_TOKENIZER_TOKEN_SKIP;
+      }
     }
   }
 

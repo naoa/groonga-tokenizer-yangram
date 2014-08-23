@@ -13,8 +13,8 @@ tokenize TokenYaBigramOverskip "今日はABC雨だ" NormalizerAuto --mode GET
       "position": 0
     },
     {
-      "value": "は",
-      "position": 2
+      "value": "日は",
+      "position": 1
     },
     {
       "value": "abc",
