@@ -23,10 +23,6 @@ tokenize TokenYaBigramOverskipContinua "新データベース" NormalizerAuto --
     {
       "value": "ベー",
       "position": 3
-    },
-    {
-      "value": "ース",
-      "position": 4
     }
   ]
 ]

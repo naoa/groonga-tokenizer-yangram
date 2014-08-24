@@ -482,14 +482,6 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
     token_next += char_length;
   }
 
-  if (token_tail == string_end) {
-    status |= GRN_TOKENIZER_TOKEN_REACH_END;
-  }
-
-  if (!is_token_grouped && token_size < tokenizer->ngram_unit) {
-      status |= GRN_TOKENIZER_TOKEN_UNMATURED;
-  }
-
   if (token_top == token_tail || token_next == string_end) {
     ctypes_skip_size = 0;
     status |= GRN_TOKENIZER_TOKEN_LAST;
@@ -500,8 +492,12 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
       ctypes_skip_size = 1;
     }
   }
-  if (token_size >= 2 &&
-      !(status & GRN_TOKENIZER_TOKEN_REACH_END)) {
+
+  if (token_tail == string_end) {
+    status |= GRN_TOKENIZER_TOKEN_REACH_END;
+  }
+
+  if (token_size >= 2) {
     if (execute_token_filter(ctx, tokenizer, ctypes, token_top)) {
       status |= GRN_TOKENIZER_TOKEN_SKIP_WITH_POSITION;
     }
@@ -519,6 +515,10 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
         status |= GRN_TOKENIZER_TOKEN_SKIP;
       }
     }
+  }
+
+  if (!is_token_grouped && token_size < tokenizer->ngram_unit) {
+      status |= GRN_TOKENIZER_TOKEN_UNMATURED;
   }
 
   if (!(status & GRN_TOKENIZER_TOKEN_SKIP) &&

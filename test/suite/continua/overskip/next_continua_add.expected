@@ -25,12 +25,8 @@ tokenize TokenYaBigramOverskipContinua "新データベース" NormalizerAuto --
       "position": 3
     },
     {
-      "value": "ース",
-      "position": 4
-    },
-    {
       "value": "ス",
-      "position": 5
+      "position": 4
     }
   ]
 ]

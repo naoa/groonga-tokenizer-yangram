@@ -37,12 +37,8 @@ tokenize TokenYaBigramContinua "ぁぁあぃぅ今日っッは雨だなぉぉ" N
       "position": 6
     },
     {
-      "value": "ぉぉ",
-      "position": 7
-    },
-    {
       "value": "ぉ",
-      "position": 8
+      "position": 7
     }
   ]
 ]
