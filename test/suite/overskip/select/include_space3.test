@@ -8,7 +8,7 @@ column_create Terms document_index COLUMN_INDEX|WITH_POSITION Entries body
 
 load --table Entries
 [
-{"body": "広告評論家"}
+{"body": "広告　評論家"}
 ]
 
 select Entries --output_columns \

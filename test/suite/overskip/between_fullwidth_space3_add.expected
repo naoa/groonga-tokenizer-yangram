@@ -1,6 +1,6 @@
 register tokenizers/yangram
 [[0,0.0,0.0],true]
-tokenize TokenYaBigramSplitSymbolAlphaOverskip "This is" NormalizerAuto --mode ADD
+tokenize TokenYaBigramOverskip "広告評　論家" NormalizerAuto --mode ADD
 [
   [
     0,
@@ -9,28 +9,24 @@ tokenize TokenYaBigramSplitSymbolAlphaOverskip "This is" NormalizerAuto --mode A
   ],
   [
     {
-      "value": "th",
+      "value": "広告",
       "position": 0
     },
     {
-      "value": "hi",
+      "value": "告評",
       "position": 1
     },
     {
-      "value": "is",
+      "value": "評",
       "position": 2
     },
     {
-      "value": "si",
+      "value": "論家",
       "position": 3
     },
     {
-      "value": "is",
+      "value": "家",
       "position": 4
-    },
-    {
-      "value": "s",
-      "position": 5
     }
   ]
 ]

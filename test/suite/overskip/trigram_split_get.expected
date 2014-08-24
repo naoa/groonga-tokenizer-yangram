@@ -17,12 +17,16 @@ tokenize TokenYaTrigramSplitSymbolAlphaOverskip "Tommorow is rainy" NormalizerAu
       "position": 3
     },
     {
-      "value": "owi",
-      "position": 6
+      "value": "row",
+      "position": 5
     },
     {
-      "value": "sra",
-      "position": 9
+      "value": "is",
+      "position": 8
+    },
+    {
+      "value": "rai",
+      "position": 10
     },
     {
       "value": "iny",

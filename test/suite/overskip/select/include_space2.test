@@ -12,5 +12,5 @@ load --table Entries
 ]
 
 select Entries --output_columns \
-  --match_columns body --query '広告評論家' \
+  --match_columns body --query '広告　評論家' \
   --output_columns body

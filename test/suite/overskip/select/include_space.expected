@@ -10,8 +10,8 @@ column_create Terms document_index COLUMN_INDEX|WITH_POSITION Entries body
 [[0,0.0,0.0],true]
 load --table Entries
 [
-{"body": "しもつき きぬさ"}
+{"body": "広告評論家"}
 ]
 [[0,0.0,0.0],1]
-select Entries --output_columns   --match_columns body --query 'しもつききぬさ'   --output_columns body
-[[0,0.0,0.0],[[[1],[["body","ShortText"]],["しもつき きぬさ"]]]]
+select Entries --output_columns   --match_columns body --query '広告評論家'   --output_columns body
+[[0,0.0,0.0],[[[1],[["body","ShortText"]],["広告評論家"]]]]
