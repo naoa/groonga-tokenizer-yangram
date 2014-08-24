@@ -1,0 +1,3 @@
+register tokenizers/yangram
+
+tokenize TokenYaBigramOverskipCombhiraCombkata "でじた装置" NormalizerAuto --mode GET

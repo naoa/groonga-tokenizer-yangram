@@ -94,6 +94,10 @@ combhira_filter(grn_ctx *ctx, grn_yangram_tokenizer *tokenizer,
       char_length = grn_plugin_charlen(ctx, (char *)token_top,
                                        tokenizer->rest_length,
                                        tokenizer->query->encoding);
+      if (token_top + char_length*2 &&
+          memcmp(token_top + char_length, "ー", char_length) == 0){
+        return GRN_FALSE;
+      }
       id = grn_hash_get(ctx, comb_exclude, token_top, char_length, NULL);
       if (!id) {
         return GRN_TRUE;
@@ -338,6 +342,21 @@ ignore_token_overlap_skip(grn_ctx *ctx, grn_yangram_tokenizer *tokenizer,
   }
   if (tokenizer->continua_filter) {
     if (continua_filter(ctx, tokenizer, token_next)) {
+      return GRN_TRUE;
+    }
+  }
+  if (tokenizer->combhira_filter || tokenizer->combkata_filter) {
+    if (ctypes) {
+      ctypes = ctypes + ctypes_skip_size;
+    }
+  }
+  if (tokenizer->combhira_filter) {
+    if (combhira_filter(ctx, tokenizer, ctypes, token_next)) {
+      return GRN_TRUE;
+    }
+  }
+  if (tokenizer->combkata_filter) {
+    if (combkata_filter(ctx, tokenizer, ctypes, token_next)) {
       return GRN_TRUE;
     }
   }

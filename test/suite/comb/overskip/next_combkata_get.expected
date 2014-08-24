@@ -1,0 +1,24 @@
+register tokenizers/yangram
+[[0,0.0,0.0],true]
+tokenize TokenYaBigramOverskipCombhiraCombkata "データ装置" NormalizerAuto --mode GET
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  [
+    {
+      "value": "デー",
+      "position": 0
+    },
+    {
+      "value": "ータ",
+      "position": 1
+    },
+    {
+      "value": "装置",
+      "position": 2
+    }
+  ]
+]

@@ -1,0 +1,28 @@
+register tokenizers/yangram
+[[0,0.0,0.0],true]
+tokenize TokenYaBigramCombhiraCombkata "でーた装置" NormalizerAuto --mode ADD
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  [
+    {
+      "value": "でー",
+      "position": 0
+    },
+    {
+      "value": "ーた",
+      "position": 1
+    },
+    {
+      "value": "装置",
+      "position": 2
+    },
+    {
+      "value": "置",
+      "position": 3
+    }
+  ]
+]

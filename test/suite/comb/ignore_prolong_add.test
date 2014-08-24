@@ -1,0 +1,3 @@
+register tokenizers/yangram
+
+tokenize TokenYaBigramCombhiraCombkata "でーた装置" NormalizerAuto --mode ADD
