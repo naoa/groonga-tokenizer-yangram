@@ -255,7 +255,7 @@ forward_ngram_token_tail(grn_ctx *ctx, grn_yangram_tokenizer *tokenizer,
 }
 
 static grn_bool
-is_next_token_group(grn_yangram_tokenizer *tokenizer,
+is_next_token_group(GNUC_UNUSED grn_ctx *ctx, grn_yangram_tokenizer *tokenizer,
                     const unsigned char *ctypes,
                     int token_size)
 {
@@ -264,6 +264,22 @@ is_next_token_group(grn_yangram_tokenizer *tokenizer,
   }
   if (ctypes) {
     if (is_token_group(tokenizer, ctypes)) {
+      return GRN_TRUE;
+    }
+  }
+  return GRN_FALSE;
+}
+
+static grn_bool
+is_next_token_blank(GNUC_UNUSED grn_ctx *ctx, GNUC_UNUSED grn_yangram_tokenizer *tokenizer,
+                    const unsigned char *ctypes,
+                    int token_size)
+{
+  if (ctypes) {
+    ctypes = ctypes + token_size;
+  }
+  if (ctypes) {
+    if (GRN_STR_ISBLANK(*--ctypes)) {
       return GRN_TRUE;
     }
   }
@@ -307,12 +323,15 @@ is_token_all_same(grn_ctx *ctx, grn_yangram_tokenizer *tokenizer,
 */
 
 static grn_bool
-ignore_token_overlap_skip(GNUC_UNUSED grn_ctx *ctx, grn_yangram_tokenizer *tokenizer,
+ignore_token_overlap_skip(grn_ctx *ctx, grn_yangram_tokenizer *tokenizer,
                           const unsigned char *ctypes,
                           GNUC_UNUSED const unsigned char *token_top,
                           int token_size)
 {
-  if (is_next_token_group(tokenizer, ctypes, token_size)) {
+  if (is_next_token_group(ctx, tokenizer, ctypes, token_size)) {
+    return GRN_TRUE;
+  }
+  if (is_next_token_blank(ctx, tokenizer, ctypes, token_size)) {
     return GRN_TRUE;
   }
 
@@ -384,9 +403,6 @@ yangram_init(grn_ctx *ctx, int nargs, grn_obj **args, grn_user_data *user_data)
   var = grn_plugin_proc_get_var(ctx, user_data, "overlap_skip", -1);
   if(GRN_TEXT_LEN(var) != 0) {
     tokenizer->overlap_skip = GRN_BOOL_VALUE(var);
-    if (tokenizer->overlap_skip == GRN_TRUE) {
-      tokenizer->ignore_blank = GRN_TRUE;
-    }
   }
   var = grn_plugin_proc_get_var(ctx, user_data, "continua_filter", -1);
   if(GRN_TEXT_LEN(var) != 0) {
