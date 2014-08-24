@@ -497,6 +497,10 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
     status |= GRN_TOKENIZER_TOKEN_REACH_END;
   }
 
+  if (!is_token_grouped && token_size < tokenizer->ngram_unit) {
+      status |= GRN_TOKENIZER_TOKEN_UNMATURED;
+  }
+
   if (token_size >= 2) {
     if (execute_token_filter(ctx, tokenizer, ctypes, token_top)) {
       status |= GRN_TOKENIZER_TOKEN_SKIP_WITH_POSITION;
@@ -515,10 +519,6 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
         status |= GRN_TOKENIZER_TOKEN_SKIP;
       }
     }
-  }
-
-  if (!is_token_grouped && token_size < tokenizer->ngram_unit) {
-      status |= GRN_TOKENIZER_TOKEN_UNMATURED;
   }
 
   if (!(status & GRN_TOKENIZER_TOKEN_SKIP) &&
