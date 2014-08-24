@@ -3,14 +3,10 @@
 ## Tokenizer
 
 * TokenYaBigramOverskip
-* TokenYaBigramContinua
 * TokenYaBigramCombhiraCombkata
-* TokenYaBigramOverskipContinua
 * TokenYaBigramOverskipCombhiraCombkata
 * TokenYaTrigramOverskip
-* TokenYaTrigramContinua
 * TokenYaTrigramCombhiraCombkata
-* TokenYaTrigramOverskipContinua
 * TokenYaTrigramOverskipCombhiraCombkata
 * TokenYaBigramSplitSymbolAlphaOverskip
 * TokenYaTrigramSplitSymbolAlphaOverskip
@@ -19,7 +15,7 @@ TokenYaBigram～等は、原則、通常のTokenBigram等と同じルールで�
 
 それに加え、以下の機能が実行されるようにカスタマイズしています。
 
-また十分なテスト検証は行えていません。
+まだ十分なテスト検証は行えていません。
 
 このほかに英文用にストップワードやstemmingの機能も追加する予定です。
 トークナイザの種類が増えすぎるため、何か方法を考えないといけません。
@@ -27,35 +23,39 @@ TokenYaBigram～等は、原則、通常のTokenBigram等と同じルールで�
 ### Overskip
 
 検索時のみNgramのオーバラップをスキップしてトークナイズします。  
-Bigramの場合、検索時のトークンの数が半分+αになります。  
-Trigramの場合、検索時のトークンの数が1/3+αになります。  
+検索時のトークン数を減らせることができます。
 トークンの比較回数が減るため、検索処理の速度向上が見込めるかもしれません。  
 
-トークンの末尾が最終まで到達した場合(``GRN_TOKENIZER_TOKEN_REACH_END``)および
-アルファベットや記号などトークンがグループ化される字種境界ではスキップされません。
+トークンの末尾が最終まで到達した場合(``GRN_TOKENIZER_TOKEN_REACH_END``)、
+アルファベットや記号などトークンがグループ化される字種境界および次のトークンが
+フィルターされる場合ではスキップされません。
 すなわち、検索クエリ末尾や字種境界では、オーバラップしているトークンが含まれます。
-これはNgramのNに満たない1文字のトークンを含めてしまうと検索性能が劣化するため、
+これはNgramのNに満たないトークンを含めてしまうと検索性能が劣化するため、
 あえてスキップしないようにしています。
 
-Overskipを有効にする場合強制的にIgnoreBlankモードになります。
-これは、空白があるケースを区別することができないためです。
+Overskipではトークン間の空白の有無を区別することができません。以下は全てヒットします。
+
+検索クエリ:「広告　評論家」本文：「広告評論家」  
+検索クエリ:「広告評論家」本文：「広告評論家」  
+検索クエリ:「広告　評論家」本文：「広告　評論家」  
+検索クエリ:「広告評論家」本文：「広告　評論家」  
 
 Wikipedia(ja)で1000回検索した場合の検索速度差とヒット件数差
 
-* オーバラップスキップ有  
-All Hits = 112397  
-Average = 0.032549199104309 sec  
+|                       | TokenYaBigramOverskip | TokenBigram |
+|:----------------------|----------------------:|------------:|
+| Hits                  | 112397                | 112378      |
+| Searching time (Avg)  | 0.0322 sec            | 0.0508 sec  |
+| Offline Indexing time | 1312 sec              | 1200 sec    |
+| Index size            | 7.580GiB              | 7.580GiB    |
 
-* オーバラップスキップ無  
-All Hits = 112378  
-Average = 0.058408310890198 sec
 
-どういったケースで誤差がでているかを調査予定。
-
-間を抜くとたまたまヒットするような繰り返し表現か末尾のとこか字種境界の
-ところでたまたまずらすと一致しすぎるようなケースがあるのかもしれません。
-または強制前方一致検索のケースで多少誤差があるのかもしれません。
-
+|                       | TokenYaTrigramOverskip | TokenTrigram |
+|:----------------------|-----------------------:|-------------:|
+| Hits                  | 112385                 | 112378       |
+| Searching time (Avg)  | 0.0064 sec             | 0.0146 sec   |
+| Offline Indeximg time | 2044 sec               | 2333 sec     |
+| Index size            | 9.009GiB               | 9.009GiB     |
 
 * ADD mode
 
@@ -124,83 +124,6 @@ tokenize TokenYaBigramOverskip "今日は雨だな" NormalizerAuto --mode GET
 ]
 ```
 
-### Continua
-
-検索時、追加時の両方で以下の連結文字から始まるトークンを除去します。
-以下のような連結文字は検索クエリの先頭に入力されることは少ないため
-転置索引に含めなくても影響が低いという観点によるものです。
-転置索引の容量を削減させることができます。
-
-Ngramではオーバラップされているため、検索クエリの途中にでてくるもの
-には影響しません(連続しなければ)。
-
-Overskipと併用することができますがトークンを落としすぎて検索のヒット率に悪影響を
-与える可能性があります。
-
-転置索引の容量削減率と一致数の変化を検証予定。
-
-* 連結文字
-
-```
-    "゛", " ゜",
-    "ヽ", "ヾ", "ゝ", "ゞ", "〃", "仝", "々",
-    "ー",
-    "ぁ", "ぃ", "ぅ", "ぇ", "ぉ",
-    "っ",
-    "ゃ", "ゅ", "ょ",
-    "ゎ",
-    "を", "ん",
-    "ァ", "ィ", "ゥ", "ェ", "ォ",
-    "ッ",
-    "ャ", "ュ", "ョ",
-    "ヮ",
-    "ン",
-    "ヵ", "ヶ"
-```
-
-* ADD mode / GET mode
-
-```
-tokenize TokenYaBigramContinua "きょうは雨でしょう" NormalizerAuto --mode GET
-[
-  [
-    0,
-    0.0,
-    0.0
-  ],
-  [
-    {
-      "value": "きょ",
-      "position": 0
-    },
-    {
-      "value": "うは",
-      "position": 1
-    },
-    {
-      "value": "は雨",
-      "position": 2
-    },
-    {
-      "value": "雨で",
-      "position": 3
-    },
-    {
-      "value": "でし",
-      "position": 4
-    },
-    {
-      "value": "しょ",
-      "position": 5
-    },
-    {
-      "value": "ょう",
-      "position": 6
-    }
-  ]
-]
-```
-
 ### Combhira/Combkata
 
 検索時、追加時の両方で``ひらがな1文字+他の字種``または``カタカナ1文字+漢字``の組み合わせで
@@ -212,17 +135,22 @@ tokenize TokenYaBigramContinua "きょうは雨でしょう" NormalizerAuto --mo
 ただし、以下の除外文字が2文字目にでてくる場合は除去されません。ひらがなorカタカナ+漢字1字で検索
 したいことがありそうなためです。
 
-Overskipと併用することができますがトークンを落としすぎて検索のヒット率に悪影響を
-与える可能性があります。
-
-転置索引の容量削減率と一致数の変化を検証予定。
-
 * 除外文字
 
 ```
     "段", "行", "列", "組", "号", "回", "連", "式", "系",
     "型", "形", "変", "長", "短", "音", "階", "字"
 ```
+
+Wikipedia(ja)で1000回検索した場合の検索速度差とヒット件数差
+
+|                       | TokenYaBigram<BR>CombhiraCombkata | TokenYaBigram<BR>OverskipCombhiraCombkata |
+|:----------------------|------------------------------:|------------------------------------:|
+| Hits                  | 110549                        | 110766                              |
+| Searching time (Avg)  | 0.0471 sec                    | 0.0375 sec                          |
+| Offline Indexing time | 1312 sec                      | 1200 sec                            |
+| Index size            | 6.780GiB                      | 6.780GiB                            |
+
 
 * ADD mode / GET mode
 
