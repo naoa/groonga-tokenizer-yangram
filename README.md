@@ -33,21 +33,23 @@ TokenYaBigram～等は、原則、通常のTokenBigram等と同じルールで�
 これはNgramのNに満たないトークンを含めてしまうと検索性能が劣化するため、
 あえてスキップしないようにしています。
 
-Overskipではトークン間の空白の有無を区別することができません。以下は全てヒットします。
+OverskipではN番目後のトークン間の空白の有無を区別することができません。以下は全てヒットします。
 
 検索クエリ:「広告　評論家」本文：「広告評論家」  
 検索クエリ:「広告評論家」本文：「広告評論家」  
 検索クエリ:「広告　評論家」本文：「広告　評論家」  
 検索クエリ:「広告評論家」本文：「広告　評論家」  
 
+空白を除去せずにトークナイズすることによりこれを区別することができます。ただし、インデックスサイズが少し増えます。デフォルトで空白を除去しないか、オプションとするか検討中。
+
 Wikipedia(ja)で1000回検索した場合の検索速度差とヒット件数差
 
-|                       | TokenYaBigramOverskip | TokenBigram |
-|:----------------------|----------------------:|------------:|
-| Hits                  | 112397                | 112378      |
-| Searching time (Avg)  | 0.0322 sec            | 0.0508 sec  |
-| Offline Indexing time | 1312 sec              | 1200 sec    |
-| Index size            | 7.580GiB              | 7.580GiB    |
+|                       | TokenYaBigram<BR>Overskip(空白除去無) | TokenYaBigram<BR>Overskip | TokenBigram |
+|:----------------------|----------------------:|----------------------:|------------:|
+| Hits                  | 112378                | 112397                | 112378      |
+| Searching time (Avg)  | 0.0325 sec            | 0.0322 sec            | 0.0508 sec  |
+| Offline Indexing time | 1224 sec              | 1312 sec              | 1200 sec    |
+| Index size            | 7.898GiB              | 7.580GiB              | 7.580GiB    |
 
 
 |                       | TokenYaTrigramOverskip | TokenTrigram |
