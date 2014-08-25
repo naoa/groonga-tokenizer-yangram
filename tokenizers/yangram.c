@@ -346,8 +346,6 @@ static grn_obj *
 yangram_init(grn_ctx *ctx, int nargs, grn_obj **args, grn_user_data *user_data)
 {
   grn_tokenizer_query *query;
-  // Don't use GRN_STRING_REMOVE_BLANK 
-  // Because overlap_skip can't recognize blank existence.
   unsigned int normalize_flags =
     GRN_STRING_WITH_TYPES |
     GRN_STRING_REMOVE_TOKENIZED_DELIMITER;
@@ -416,6 +414,10 @@ yangram_init(grn_ctx *ctx, int nargs, grn_obj **args, grn_user_data *user_data)
   var = grn_plugin_proc_get_var(ctx, user_data, "combkata_filter", -1);
   if(GRN_TEXT_LEN(var) != 0) {
     tokenizer->combkata_filter = GRN_BOOL_VALUE(var);
+  }
+
+  if (!tokenizer->overlap_skip) {
+    normalize_flags |= GRN_STRING_REMOVE_BLANK;
   }
 
   return NULL;
