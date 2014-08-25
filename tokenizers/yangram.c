@@ -75,8 +75,12 @@ combhira_filter(grn_ctx *ctx, grn_yangram_tokenizer *tokenizer,
       char_length = grn_plugin_charlen(ctx, (char *)token_top,
                                        tokenizer->rest_length,
                                        tokenizer->query->encoding);
-      if (token_top + char_length*2 &&
-          memcmp(token_top + char_length, "ー", char_length) == 0){
+      token_top += char_length;
+      char_length = grn_plugin_charlen(ctx, (char *)token_top,
+                                       tokenizer->rest_length,
+                                       tokenizer->query->encoding);
+      if (token_top + char_length &&
+          memcmp(token_top, "ー", char_length) == 0){
         return GRN_FALSE;
       }
       id = grn_hash_get(ctx, comb_exclude, token_top, char_length, NULL);
@@ -98,6 +102,10 @@ combkata_filter(grn_ctx *ctx, grn_yangram_tokenizer *tokenizer,
 
   if (ctypes && GRN_STR_CTYPE(*ctypes) == GRN_CHAR_KATAKANA) {
     if (GRN_STR_CTYPE(*++ctypes) == GRN_CHAR_KANJI) {
+      char_length = grn_plugin_charlen(ctx, (char *)token_top,
+                                       tokenizer->rest_length,
+                                       tokenizer->query->encoding);
+      token_top += char_length;
       char_length = grn_plugin_charlen(ctx, (char *)token_top,
                                        tokenizer->rest_length,
                                        tokenizer->query->encoding);

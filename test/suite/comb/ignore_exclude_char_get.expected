@@ -1,0 +1,4 @@
+register tokenizers/yangram
+[[0,0.0,0.0],true]
+tokenize TokenYaBigramCombhiraCombkata "ト長調" NormalizerAuto --mode GET
+[[0,0.0,0.0],[{"value":"ト長","position":0},{"value":"長調","position":1}]]

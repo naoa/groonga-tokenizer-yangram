@@ -1,0 +1,3 @@
+register tokenizers/yangram
+
+tokenize TokenYaBigramCombhiraCombkata "ト長調" NormalizerAuto --mode GET
