@@ -80,7 +80,7 @@ combhira_filter(grn_ctx *ctx, grn_yangram_tokenizer *tokenizer,
                                        tokenizer->rest_length,
                                        tokenizer->query->encoding);
       if (token_top + char_length &&
-          memcmp(token_top, "ー", char_length) == 0){
+          !memcmp(token_top, "ー", char_length)){
         return GRN_FALSE;
       }
       id = grn_hash_get(ctx, comb_exclude, token_top, char_length, NULL);
@@ -295,7 +295,7 @@ is_token_all_same(grn_ctx *ctx, grn_yangram_tokenizer *tokenizer,
       (char_length = grn_plugin_charlen(ctx, (char *)token_top, tokenizer->rest_length,
                                         tokenizer->query->encoding))) {
       if (token_top + char_length &&
-          memcmp(token_before, token_top, char_length) != 0){
+          !memcmp(token_before, token_top, char_length)){
         break;
       }
       token_before = token_top;
@@ -487,8 +487,8 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
                                      tokenizer->rest_length,
                                      tokenizer->query->encoding);
     if (token_top + char_length &&
-        (memcmp(token_top, "　", char_length) == 0 ||
-         memcmp(token_top, " ", char_length) == 0)) {
+        (!memcmp(token_top, "　", char_length) ||
+         !memcmp(token_top, " ", char_length))) {
       status |= GRN_TOKENIZER_TOKEN_SKIP_WITH_POSITION;
     }
   }
