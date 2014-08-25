@@ -13,16 +13,16 @@ tokenize TokenYaBigramOverskip "つつき きつつ" NormalizerAuto --mode GET
       "position": 0
     },
     {
-      "value": "つき",
-      "position": 1
+      "value": "き ",
+      "position": 2
     },
     {
       "value": "きつ",
-      "position": 3
+      "position": 4
     },
     {
       "value": "つつ",
-      "position": 4
+      "position": 5
     }
   ]
 ]

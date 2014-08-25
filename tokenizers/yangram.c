@@ -250,6 +250,7 @@ is_next_token_group(GNUC_UNUSED grn_ctx *ctx, grn_yangram_tokenizer *tokenizer,
   return GRN_FALSE;
 }
 
+/*
 static grn_bool
 is_next_token_blank(GNUC_UNUSED grn_ctx *ctx, GNUC_UNUSED grn_yangram_tokenizer *tokenizer,
                     const unsigned char *ctypes,
@@ -265,6 +266,7 @@ is_next_token_blank(GNUC_UNUSED grn_ctx *ctx, GNUC_UNUSED grn_yangram_tokenizer 
   }
   return GRN_FALSE;
 }
+*/
 
 /*
 static grn_bool
@@ -313,9 +315,6 @@ ignore_token_overlap_skip(grn_ctx *ctx, grn_yangram_tokenizer *tokenizer,
   if (is_next_token_group(ctx, tokenizer, ctypes, token_size)) {
     return GRN_TRUE;
   }
-  if (is_next_token_blank(ctx, tokenizer, ctypes, token_size)) {
-    return GRN_TRUE;
-  }
   if (tokenizer->combhira_filter || tokenizer->combkata_filter) {
     if (ctypes) {
       ctypes = ctypes + ctypes_skip_size;
@@ -339,8 +338,9 @@ static grn_obj *
 yangram_init(grn_ctx *ctx, int nargs, grn_obj **args, grn_user_data *user_data)
 {
   grn_tokenizer_query *query;
+  // Don't use GRN_STRING_REMOVE_BLANK 
+  // Because overlap_skip can't recognize blank existence.
   unsigned int normalize_flags =
-    GRN_STRING_REMOVE_BLANK |
     GRN_STRING_WITH_TYPES |
     GRN_STRING_REMOVE_TOKENIZED_DELIMITER;
 
@@ -470,6 +470,16 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
 
   if (token_size >= 2) {
     if (execute_token_filter(ctx, tokenizer, ctypes, token_top)) {
+      status |= GRN_TOKENIZER_TOKEN_SKIP_WITH_POSITION;
+    }
+  } else if (token_size == 1) {
+    int char_length;
+    char_length = grn_plugin_charlen(ctx, (char *)token_top,
+                                     tokenizer->rest_length,
+                                     tokenizer->query->encoding);
+    if (token_top + char_length &&
+        (memcmp(token_top, "　", char_length) == 0 ||
+         memcmp(token_top, " ", char_length) == 0)){
       status |= GRN_TOKENIZER_TOKEN_SKIP_WITH_POSITION;
     }
   }

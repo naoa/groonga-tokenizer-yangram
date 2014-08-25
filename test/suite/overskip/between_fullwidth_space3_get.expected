@@ -13,12 +13,12 @@ tokenize TokenYaBigramOverskip "広告評　論家" NormalizerAuto --mode GET
       "position": 0
     },
     {
-      "value": "告評",
-      "position": 1
+      "value": "評 ",
+      "position": 2
     },
     {
       "value": "論家",
-      "position": 3
+      "position": 4
     }
   ]
 ]

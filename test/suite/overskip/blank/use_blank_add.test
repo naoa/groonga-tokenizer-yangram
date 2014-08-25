@@ -1,0 +1,3 @@
+register tokenizers/yangram
+
+tokenize TokenYaBigramOverskip "広告　評論家" NormalizerAuto --mode ADD

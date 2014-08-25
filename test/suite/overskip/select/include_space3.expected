@@ -14,4 +14,4 @@ load --table Entries
 ]
 [[0,0.0,0.0],1]
 select Entries --output_columns   --match_columns body --query '広告評論家'   --output_columns body
-[[0,0.0,0.0],[[[1],[["body","ShortText"]],["広告　評論家"]]]]
+[[0,0.0,0.0],[[[0],[["body","ShortText"]]]]]

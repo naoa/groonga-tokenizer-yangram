@@ -21,16 +21,20 @@ tokenize TokenYaBigramSplitSymbolAlphaOverskip "This is" NormalizerAuto --mode A
       "position": 2
     },
     {
-      "value": "s",
+      "value": "s ",
       "position": 3
     },
     {
-      "value": "is",
+      "value": " i",
       "position": 4
     },
     {
-      "value": "s",
+      "value": "is",
       "position": 5
+    },
+    {
+      "value": "s",
+      "position": 6
     }
   ]
 ]

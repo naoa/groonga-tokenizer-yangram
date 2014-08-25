@@ -17,16 +17,20 @@ tokenize TokenYaBigramOverskip "広告評　論家" NormalizerAuto --mode ADD
       "position": 1
     },
     {
-      "value": "評",
+      "value": "評 ",
       "position": 2
     },
     {
-      "value": "論家",
+      "value": " 論",
       "position": 3
     },
     {
-      "value": "家",
+      "value": "論家",
       "position": 4
+    },
+    {
+      "value": "家",
+      "position": 5
     }
   ]
 ]

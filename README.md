@@ -13,18 +13,15 @@
 
 TokenYaBigram～等は、原則、通常のTokenBigram等と同じルールでトークナイズされます。
 
+ただし、通常のTokenBigram等と異なり空白が含まれた状態でトークナイズされます。これは空白を除去するとオーバラップした場合に空白の有無をうまく区別することができないためです。このため、通常のTokenBigram等よりも若干インデックスサイズが増えます。なお、空白1文字のみのトークンは除去されます。
+
 それに加え、以下の機能が実行されるようにカスタマイズしています。
-
-まだ十分なテスト検証は行えていません。
-
-このほかに英文用にストップワードやstemmingの機能も追加する予定です。
-トークナイザの種類が増えすぎるため、何か方法を考えないといけません。
 
 ### Overskip
 
 検索時のみNgramのオーバラップをスキップしてトークナイズします。  
-検索時のトークン数を減らせることができます。
-トークンの比較回数が減るため、検索処理の速度向上が見込めるかもしれません。  
+検索時のトークン数を減らすことができます。
+トークンの比較回数が減るため、検索処理の速度向上が見込めます。  
 
 トークンの末尾が最終まで到達した場合(``GRN_TOKENIZER_TOKEN_REACH_END``)、
 アルファベットや記号などトークンがグループ化される字種境界および次のトークンが
@@ -33,31 +30,22 @@ TokenYaBigram～等は、原則、通常のTokenBigram等と同じルールで�
 これはNgramのNに満たないトークンを含めてしまうと検索性能が劣化するため、
 あえてスキップしないようにしています。
 
-OverskipではN番目後のトークン間の空白の有無を区別することができません。以下は全てヒットします。
-
-検索クエリ:「広告　評論家」本文：「広告評論家」  
-検索クエリ:「広告評論家」本文：「広告評論家」  
-検索クエリ:「広告　評論家」本文：「広告　評論家」  
-検索クエリ:「広告評論家」本文：「広告　評論家」  
-
-空白を除去せずにトークナイズすることによりこれを区別することができます。ただし、インデックスサイズが少し増えます。デフォルトで空白を除去しないか、オプションとするか検討中。
-
 Wikipedia(ja)で1000回検索した場合の検索速度差とヒット件数差
 
-|                       | TokenYaBigram<BR>Overskip(空白除去無) | TokenYaBigram<BR>Overskip | TokenBigram |
-|:----------------------|----------------------:|----------------------:|------------:|
-| Hits                  | 112378                | 112397                | 112378      |
-| Searching time (Avg)  | 0.0325 sec            | 0.0322 sec            | 0.0508 sec  |
-| Offline Indexing time | 1224 sec              | 1312 sec              | 1200 sec    |
-| Index size            | 7.898GiB              | 7.580GiB              | 7.580GiB    |
+|                       | TokenYaBigramOverskip | TokenBigram |
+|:----------------------|----------------------:|------------:|
+| Hits                  | 112378                | 112378      |
+| Searching time (Avg)  | 0.0325 sec            | 0.0508 sec  |
+| Offline Indexing time | 1224 sec              | 1200 sec    |
+| Index size            | 7.898GiB              | 7.580GiB    |
 
 
 |                       | TokenYaTrigramOverskip | TokenTrigram |
 |:----------------------|-----------------------:|-------------:|
-| Hits                  | 112385                 | 112378       |
-| Searching time (Avg)  | 0.0064 sec             | 0.0146 sec   |
-| Offline Indeximg time | 2044 sec               | 2333 sec     |
-| Index size            | 9.009GiB               | 9.009GiB     |
+| Hits                  | 112378                 | 112378       |
+| Searching time (Avg)  | 0.0063 sec             | 0.0146 sec   |
+| Offline Indeximg time | 2293 sec               | 2333 sec     |
+| Index size            | 9.275GiB               | 9.009GiB     |
 
 * ADD mode
 
@@ -148,10 +136,10 @@ Wikipedia(ja)で1000回検索した場合の検索速度差とヒット件数差
 
 |                       | TokenYaBigram<BR>CombhiraCombkata | TokenYaBigram<BR>OverskipCombhiraCombkata |
 |:----------------------|------------------------------:|------------------------------------:|
-| Hits                  | 110549                        | 110766                              |
-| Searching time (Avg)  | 0.0471 sec                    | 0.0375 sec                          |
+| Hits                  | 110549                        | 110748                              |
+| Searching time (Avg)  | 0.0471 sec                    | 0.0376 sec                          |
 | Offline Indexing time | 1312 sec                      | 1200 sec                            |
-| Index size            | 6.780GiB                      | 6.780GiB                            |
+| Index size            | 6.940GiB                      | 6.940GiB                            |
 
 
 * ADD mode / GET mode
