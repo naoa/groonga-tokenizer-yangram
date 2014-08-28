@@ -171,11 +171,9 @@ tokenize TokenYaBigramCombhiraCombkata "今日は雨だ" NormalizerAuto --mode G
 
 ### ストップワード
 
-語彙表に以下のカラムを作るとストップワードの機能が自動的に有効になります。
+語彙表に以下の名前のカラムを作るとストップワードの機能が自動的に有効になります。
 
 ```
-table_create Terms TABLE_PAT_KEY ShortText --default_tokenizer TokenYaBigramOverskip --normalizer NormalizerAuto
-column_create Terms document_index COLUMN_INDEX|WITH_POSITION Entries body
 column_create Terms @stopword COLUMN_SCALAR Bool
 ```
 
