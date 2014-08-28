@@ -46,7 +46,6 @@ void *source;
 } grn_db_obj;
 
 grn_hash *comb_exclude = NULL;
-grn_obj lexicon_name;
 
 #define STOPWORD_FLAG_COLUMN_NAME "@stopword"
 
@@ -431,9 +430,7 @@ yangram_init(grn_ctx *ctx, int nargs, grn_obj **args, grn_user_data *user_data)
     normalize_flags |= GRN_STRING_REMOVE_BLANK;
   }
 
-
   grn_obj *lexicon = args[0];
-
   grn_obj *stopword_column;
 
   stopword_column = grn_obj_column(ctx, lexicon,
@@ -613,24 +610,9 @@ load_comb_exclude(grn_ctx *ctx)
 
 }
 
-static grn_obj*
-command_use_lexicon(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
-                    grn_user_data *user_data)
-{
-  grn_obj *var;
-  var = grn_plugin_proc_get_var(ctx, user_data, "lexicon_name", -1);
-
-  GRN_TEXT_SET(ctx, &lexicon_name, GRN_TEXT_VALUE(var), GRN_TEXT_LEN(var));
-
-  grn_ctx_output_bool(ctx, GRN_TRUE);
-  return NULL;
-}
-
 grn_rc
 GRN_PLUGIN_INIT(grn_ctx *ctx)
 {
-  GRN_TEXT_INIT(&lexicon_name, 0);
-  
   load_comb_exclude(ctx);
 
   return ctx->rc;
@@ -641,9 +623,6 @@ grn_rc
 GRN_PLUGIN_REGISTER(grn_ctx *ctx)
 {
   grn_expr_var vars[11];
-
-  grn_plugin_expr_var_init(ctx, &vars[0], "lexicon_name", -1);
-  grn_plugin_command_create(ctx, "use_lexicon", -1, command_use_lexicon, 1, vars);
 
   grn_plugin_expr_var_init(ctx, &vars[0], NULL, -1);
   grn_plugin_expr_var_init(ctx, &vars[1], NULL, -1);
@@ -726,9 +705,6 @@ GRN_PLUGIN_FIN(GNUC_UNUSED grn_ctx *ctx)
   if (comb_exclude) {
     grn_hash_close(ctx, comb_exclude);
     comb_exclude = NULL;
-  }
-  if (GRN_TEXT_LEN(&lexicon_name)) {
-    grn_obj_unlink(ctx, &lexicon_name);
   }
 
   return GRN_SUCCESS;
