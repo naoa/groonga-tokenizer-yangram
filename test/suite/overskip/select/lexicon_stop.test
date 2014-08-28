@@ -6,8 +6,6 @@ column_create Entries body COLUMN_SCALAR ShortText
 table_create Terms TABLE_PAT_KEY ShortText --default_tokenizer TokenYaBigramOverskip --normalizer NormalizerAuto
 column_create Terms document_index COLUMN_INDEX|WITH_POSITION Entries body
 column_create Terms @stopword_flag COLUMN_SCALAR Bool
-column_create Terms @@@term_freq COLUMN_SCALAR UInt32
-column_create Terms @@document_freq COLUMN_SCALAR UInt32
 
 load --table Entries
 [
