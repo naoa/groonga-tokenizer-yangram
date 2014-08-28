@@ -1,6 +1,8 @@
 register tokenizers/yangram
 [[0,0.0,0.0],true]
-tokenize TokenYaBigramSplitSymbolAlphaOverskip "Thisis" NormalizerAuto --mode GET
+yangram_register 2 --split_symbol 1 --split_alpha 1 --overlap_skip 1
+[[0,0.0,0.0],"TokenYaBigramSplitSymbolAlphaSkipOverlap"]
+tokenize TokenYaBigramSplitSymbolAlphaSkipOverlap "Thisis" NormalizerAuto --mode GET
 [
   [
     0,

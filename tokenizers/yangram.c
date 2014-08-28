@@ -18,6 +18,7 @@
 
 #include <groonga/tokenizer.h>
 
+#include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
 
@@ -51,10 +52,10 @@ typedef struct {
   const unsigned char *ctypes;
   int ctypes_next;
   unsigned short ngram_unit;
+  grn_bool ignore_blank;
+  grn_bool split_symbol;
   grn_bool split_alpha;
   grn_bool split_digit;
-  grn_bool split_symbol;
-  grn_bool ignore_blank;
   grn_bool overlap_skip;
   grn_bool combhira_filter;
   grn_bool combkata_filter;
@@ -385,12 +386,21 @@ yangram_init(grn_ctx *ctx, int nargs, grn_obj **args, grn_user_data *user_data)
   const char *normalized;
   unsigned int normalized_length_in_bytes;
   grn_yangram_tokenizer *tokenizer;
+  grn_obj *var;
+  grn_bool overlap_skip = GRN_FALSE;
+
+  var = grn_plugin_proc_get_var(ctx, user_data, "overlap_skip", -1);
+  if (GRN_TEXT_LEN(var) != 0) {
+    overlap_skip = GRN_INT32_VALUE(var);
+  }
+  if (!overlap_skip) {
+    normalize_flags |= GRN_STRING_REMOVE_BLANK;
+  }
 
   query = grn_tokenizer_query_open(ctx, nargs, args, normalize_flags);
   if (!query) {
     return NULL;
   }
-
   if (!(tokenizer = GRN_PLUGIN_MALLOC(ctx,sizeof(grn_yangram_tokenizer)))) {
     GRN_PLUGIN_ERROR(ctx,GRN_NO_MEMORY_AVAILABLE,
                      "[tokenizer][yangram] "
@@ -401,7 +411,36 @@ yangram_init(grn_ctx *ctx, int nargs, grn_obj **args, grn_user_data *user_data)
   user_data->ptr = tokenizer;
   grn_tokenizer_token_init(ctx, &(tokenizer->token));
   tokenizer->query = query;
+  tokenizer->overlap_skip = overlap_skip;
 
+  var = grn_plugin_proc_get_var(ctx, user_data, "ngram_unit", -1);
+  if (GRN_TEXT_LEN(var) != 0) {
+    tokenizer->ngram_unit = GRN_INT32_VALUE(var);
+  }
+  var = grn_plugin_proc_get_var(ctx, user_data, "ignore_blank", -1);
+  if (GRN_TEXT_LEN(var) != 0) {
+    tokenizer->ignore_blank = GRN_INT32_VALUE(var);
+  }
+  var = grn_plugin_proc_get_var(ctx, user_data, "split_symbol", -1);
+  if (GRN_TEXT_LEN(var) != 0) {
+    tokenizer->split_symbol = GRN_INT32_VALUE(var);
+  }
+  var = grn_plugin_proc_get_var(ctx, user_data, "split_alpha", -1);
+  if (GRN_TEXT_LEN(var) != 0) {
+    tokenizer->split_alpha = GRN_INT32_VALUE(var);
+  }
+  var = grn_plugin_proc_get_var(ctx, user_data, "split_digit", -1);
+  if (GRN_TEXT_LEN(var) != 0) {
+    tokenizer->split_digit = GRN_INT32_VALUE(var);
+  }
+  var = grn_plugin_proc_get_var(ctx, user_data, "combhira_filter", -1);
+  if (GRN_TEXT_LEN(var) != 0) {
+    tokenizer->combhira_filter = GRN_INT32_VALUE(var);
+  }
+  var = grn_plugin_proc_get_var(ctx, user_data, "combkata_filter", -1);
+  if (GRN_TEXT_LEN(var) != 0) {
+    tokenizer->combkata_filter = GRN_INT32_VALUE(var);
+  }
 
   grn_string_get_normalized(ctx, tokenizer->query->normalized_query,
                             &normalized, &normalized_length_in_bytes,
@@ -414,44 +453,6 @@ yangram_init(grn_ctx *ctx, int nargs, grn_obj **args, grn_user_data *user_data)
 
   tokenizer->pushed_token_tail = NULL;
   tokenizer->ctypes_next = 0;
-
-  grn_obj *var;
-  var = grn_plugin_proc_get_var(ctx, user_data, "ngram_unit", -1);
-  if(GRN_TEXT_LEN(var) != 0) {
-    tokenizer->ngram_unit = GRN_INT32_VALUE(var);
-  }
-  var = grn_plugin_proc_get_var(ctx, user_data, "split_alpha", -1);
-  if(GRN_TEXT_LEN(var) != 0) {
-    tokenizer->split_alpha = GRN_BOOL_VALUE(var);
-  }
-  var = grn_plugin_proc_get_var(ctx, user_data, "split_digit", -1);
-  if(GRN_TEXT_LEN(var) != 0) {
-    tokenizer->split_digit = GRN_BOOL_VALUE(var);
-  }
-  var = grn_plugin_proc_get_var(ctx, user_data, "split_symbol", -1);
-  if(GRN_TEXT_LEN(var) != 0) {
-    tokenizer->split_symbol = GRN_BOOL_VALUE(var);
-  }
-  var = grn_plugin_proc_get_var(ctx, user_data, "ignore_blank", -1);
-  if(GRN_TEXT_LEN(var) != 0) {
-    tokenizer->ignore_blank = GRN_BOOL_VALUE(var);
-  }
-  var = grn_plugin_proc_get_var(ctx, user_data, "overlap_skip", -1);
-  if(GRN_TEXT_LEN(var) != 0) {
-    tokenizer->overlap_skip = GRN_BOOL_VALUE(var);
-  }
-  var = grn_plugin_proc_get_var(ctx, user_data, "combhira_filter", -1);
-  if(GRN_TEXT_LEN(var) != 0) {
-    tokenizer->combhira_filter = GRN_BOOL_VALUE(var);
-  }
-  var = grn_plugin_proc_get_var(ctx, user_data, "combkata_filter", -1);
-  if(GRN_TEXT_LEN(var) != 0) {
-    tokenizer->combkata_filter = GRN_BOOL_VALUE(var);
-  }
-
-  if (!tokenizer->overlap_skip) {
-    normalize_flags |= GRN_STRING_REMOVE_BLANK;
-  }
 
   grn_obj *lexicon = args[0];
   grn_obj *stopword_column;
@@ -622,6 +623,177 @@ load_comb_exclude(grn_ctx *ctx)
 
 }
 
+static grn_obj *
+command_yangram_register(grn_ctx *ctx, GNUC_UNUSED int nargs,
+                         GNUC_UNUSED grn_obj **args, grn_user_data *user_data)
+{
+  int ngram_unit = 2;
+  int ignore_blank = 0;
+  int split_symbol = 0;
+  int split_alpha = 0;
+  int split_digit = 0;
+  int overlap_skip = 0;
+  int combhira_filter = 0;
+  int combkata_filter = 0;
+
+  grn_obj tokenizer_name;
+  grn_obj *var;
+  grn_expr_var vars[11];
+
+  grn_plugin_expr_var_init(ctx, &vars[0], NULL, -1);
+  grn_plugin_expr_var_init(ctx, &vars[1], NULL, -1);
+  grn_plugin_expr_var_init(ctx, &vars[2], NULL, -1);
+  grn_plugin_expr_var_init(ctx, &vars[3], "ngram_unit", -1);
+  grn_plugin_expr_var_init(ctx, &vars[4], "ignore_blank", -1);
+  grn_plugin_expr_var_init(ctx, &vars[5], "split_symbol", -1);
+  grn_plugin_expr_var_init(ctx, &vars[6], "split_alpha", -1);
+  grn_plugin_expr_var_init(ctx, &vars[7], "split_digit", -1);
+  grn_plugin_expr_var_init(ctx, &vars[8], "overlap_skip", -1);
+  grn_plugin_expr_var_init(ctx, &vars[9], "combhira_filter", -1);
+  grn_plugin_expr_var_init(ctx, &vars[10], "combkata_filter", -1);
+
+  GRN_INT32_SET(ctx, &vars[3].value, ngram_unit);
+  GRN_INT32_SET(ctx, &vars[4].value, ignore_blank);
+  GRN_INT32_SET(ctx, &vars[5].value, split_symbol);
+  GRN_INT32_SET(ctx, &vars[6].value, split_alpha);
+  GRN_INT32_SET(ctx, &vars[7].value, split_digit);
+  GRN_INT32_SET(ctx, &vars[8].value, overlap_skip);
+  GRN_INT32_SET(ctx, &vars[9].value, combhira_filter);
+  GRN_INT32_SET(ctx, &vars[10].value, combkata_filter);
+
+  GRN_TEXT_INIT(&tokenizer_name, 0);
+  GRN_BULK_REWIND(&tokenizer_name);
+  GRN_TEXT_PUTS(ctx, &tokenizer_name, "TokenYa");
+
+  var = grn_plugin_proc_get_var(ctx, user_data, "ngram_unit", -1);
+  if (GRN_TEXT_LEN(var) != 0) {
+    ngram_unit = atoi(GRN_TEXT_VALUE(var));
+    GRN_INT32_SET(ctx, &vars[3].value, ngram_unit);
+    switch (ngram_unit) {
+    case 1 :
+      GRN_TEXT_PUTS(ctx, &tokenizer_name, "Unigram");
+      break;
+    case 2 :
+      GRN_TEXT_PUTS(ctx, &tokenizer_name, "Bigram");
+      break;
+    case 3 :
+      GRN_TEXT_PUTS(ctx, &tokenizer_name, "Trigram");
+      break;
+    case 4 :
+      GRN_TEXT_PUTS(ctx, &tokenizer_name, "Quadgram");
+      break;
+    case 5 :
+      GRN_TEXT_PUTS(ctx, &tokenizer_name, "Pentgram");
+      break;
+    case 6 :
+      GRN_TEXT_PUTS(ctx, &tokenizer_name, "Hexgram");
+      break;
+    case 7 :
+      GRN_TEXT_PUTS(ctx, &tokenizer_name, "Heptgram");
+      break;
+    case 8 :
+      GRN_TEXT_PUTS(ctx, &tokenizer_name, "Octgram");
+      break;
+    case 9 :
+      GRN_TEXT_PUTS(ctx, &tokenizer_name, "Nongram");
+      break;
+    case 10 :
+      GRN_TEXT_PUTS(ctx, &tokenizer_name, "Decgram");
+      break;
+    default :
+      GRN_PLUGIN_LOG(ctx, GRN_LOG_WARNING,
+                     "[yangram_register] invalid ngram_unit %d", ngram_unit);
+      grn_obj_unlink(ctx, &tokenizer_name);
+      grn_ctx_output_cstr(ctx, "invalid ngram_unit");
+      return NULL;
+    }
+  } else {
+    ngram_unit = 2;
+    GRN_INT32_SET(ctx, &vars[3].value, ngram_unit);
+    GRN_TEXT_PUTS(ctx, &tokenizer_name, "Bigram");
+  }
+
+  var = grn_plugin_proc_get_var(ctx, user_data, "ignore_blank", -1);
+  if (GRN_TEXT_LEN(var) != 0) {
+    ignore_blank = atoi(GRN_TEXT_VALUE(var));
+    GRN_INT32_SET(ctx, &vars[4].value, ignore_blank);
+    GRN_TEXT_PUTS(ctx, &tokenizer_name, "IgnoreBlank");
+  }
+
+  var = grn_plugin_proc_get_var(ctx, user_data, "split_symbol", -1);
+  if (GRN_TEXT_LEN(var) != 0) {
+    split_symbol = atoi(GRN_TEXT_VALUE(var));
+    GRN_INT32_SET(ctx, &vars[5].value, split_symbol);
+  }
+  var = grn_plugin_proc_get_var(ctx, user_data, "split_alpha", -1);
+  if (GRN_TEXT_LEN(var) != 0) {
+    split_alpha = atoi(GRN_TEXT_VALUE(var));
+    GRN_INT32_SET(ctx, &vars[6].value, split_alpha);
+  }
+  var = grn_plugin_proc_get_var(ctx, user_data, "split_digit", -1);
+  if (GRN_TEXT_LEN(var) != 0) {
+    split_digit = atoi(GRN_TEXT_VALUE(var));
+    GRN_INT32_SET(ctx, &vars[7].value, split_digit);
+  }
+  if (split_symbol || split_alpha || split_digit) {
+    GRN_TEXT_PUTS(ctx, &tokenizer_name, "Split");
+  }
+  if (split_symbol) {
+    GRN_TEXT_PUTS(ctx, &tokenizer_name, "Symbol");
+  }
+  if (split_alpha) {
+    GRN_TEXT_PUTS(ctx, &tokenizer_name, "Alpha");
+  }
+  if (split_digit) {
+    GRN_TEXT_PUTS(ctx, &tokenizer_name, "Digit");
+  }
+
+  var = grn_plugin_proc_get_var(ctx, user_data, "overlap_skip", -1);
+  if (GRN_TEXT_LEN(var) != 0) {
+    overlap_skip = atoi(GRN_TEXT_VALUE(var));
+    GRN_INT32_SET(ctx, &vars[8].value, overlap_skip);
+  }
+  if (overlap_skip) {
+    GRN_TEXT_PUTS(ctx, &tokenizer_name, "Skip");
+  }
+  if (overlap_skip) {
+    GRN_TEXT_PUTS(ctx, &tokenizer_name, "Overlap");
+  }
+
+  var = grn_plugin_proc_get_var(ctx, user_data, "combhira_filter", -1);
+  if (GRN_TEXT_LEN(var) != 0) {
+    combhira_filter = atoi(GRN_TEXT_VALUE(var));
+    GRN_INT32_SET(ctx, &vars[9].value, combhira_filter);
+  }
+  var = grn_plugin_proc_get_var(ctx, user_data, "combkata_filter", -1);
+  if (GRN_TEXT_LEN(var) != 0) {
+    combkata_filter = atoi(GRN_TEXT_VALUE(var));
+    GRN_INT32_SET(ctx, &vars[10].value, combkata_filter);
+  }
+
+  if (combhira_filter || combkata_filter) {
+    GRN_TEXT_PUTS(ctx, &tokenizer_name, "Filter");
+  }
+
+  if (combhira_filter) {
+    GRN_TEXT_PUTS(ctx, &tokenizer_name, "Combhira");
+  }
+
+  if (combkata_filter) {
+    GRN_TEXT_PUTS(ctx, &tokenizer_name, "Combkata");
+  }
+
+  GRN_TEXT_PUTC(ctx, &tokenizer_name, '\0');
+  grn_proc_create(ctx, GRN_TEXT_VALUE(&tokenizer_name), -1,
+                  GRN_PROC_TOKENIZER,
+                  yangram_init, yangram_next, yangram_fin, 11, vars);
+
+  grn_ctx_output_cstr(ctx, GRN_TEXT_VALUE(&tokenizer_name));
+  grn_obj_unlink(ctx, &tokenizer_name);
+
+  return NULL;
+}
+
 grn_rc
 GRN_PLUGIN_INIT(grn_ctx *ctx)
 {
@@ -634,80 +806,19 @@ GRN_PLUGIN_INIT(grn_ctx *ctx)
 grn_rc
 GRN_PLUGIN_REGISTER(grn_ctx *ctx)
 {
-  grn_expr_var vars[11];
+  grn_expr_var vars[8];
 
-  grn_plugin_expr_var_init(ctx, &vars[0], NULL, -1);
-  grn_plugin_expr_var_init(ctx, &vars[1], NULL, -1);
-  grn_plugin_expr_var_init(ctx, &vars[2], NULL, -1);
-  grn_plugin_expr_var_init(ctx, &vars[3], "ngram_unit", -1);
-  grn_plugin_expr_var_init(ctx, &vars[4], "split_alpha", -1);
-  grn_plugin_expr_var_init(ctx, &vars[5], "split_digit", -1);
-  grn_plugin_expr_var_init(ctx, &vars[6], "split_symbol", -1);
-  grn_plugin_expr_var_init(ctx, &vars[7], "ignore_blank", -1);
-  grn_plugin_expr_var_init(ctx, &vars[8], "overlap_skip", -1);
-  grn_plugin_expr_var_init(ctx, &vars[9], "combhira_filter", -1);
-  grn_plugin_expr_var_init(ctx, &vars[10], "combkata_filter", -1);
+  grn_plugin_expr_var_init(ctx, &vars[0], "ngram_unit", -1);
+  grn_plugin_expr_var_init(ctx, &vars[1], "ignore_blank", -1);
+  grn_plugin_expr_var_init(ctx, &vars[2], "split_symbol", -1);
+  grn_plugin_expr_var_init(ctx, &vars[3], "split_alpha", -1);
+  grn_plugin_expr_var_init(ctx, &vars[4], "split_digit", -1);
+  grn_plugin_expr_var_init(ctx, &vars[5], "overlap_skip", -1);
+  grn_plugin_expr_var_init(ctx, &vars[6], "combhira_filter", -1);
+  grn_plugin_expr_var_init(ctx, &vars[7], "combkata_filter", -1);
 
-  GRN_INT32_SET(ctx, &vars[3].value, 2);
-  GRN_BOOL_SET(ctx, &vars[4].value, GRN_FALSE);
-  GRN_BOOL_SET(ctx, &vars[5].value, GRN_FALSE);
-  GRN_BOOL_SET(ctx, &vars[6].value, GRN_FALSE);
-  GRN_BOOL_SET(ctx, &vars[7].value, GRN_FALSE);
-  GRN_BOOL_SET(ctx, &vars[8].value, GRN_FALSE);
-  GRN_BOOL_SET(ctx, &vars[9].value, GRN_FALSE);
-  GRN_BOOL_SET(ctx, &vars[10].value, GRN_FALSE);
-
-  GRN_BOOL_SET(ctx, &vars[8].value, GRN_TRUE);
-  grn_proc_create(ctx, "TokenYaBigramOverskip", -1,
-                  GRN_PROC_TOKENIZER,
-                  yangram_init, yangram_next, yangram_fin, 11, vars);
-
-  GRN_INT32_SET(ctx, &vars[3].value, 3);
-  grn_proc_create(ctx, "TokenYaTrigramOverskip", -1,
-                  GRN_PROC_TOKENIZER,
-                  yangram_init, yangram_next, yangram_fin, 11, vars);
-
-  GRN_INT32_SET(ctx, &vars[3].value, 2);
-  GRN_BOOL_SET(ctx, &vars[8].value, GRN_FALSE);
-  GRN_BOOL_SET(ctx, &vars[9].value, GRN_TRUE);
-  GRN_BOOL_SET(ctx, &vars[10].value, GRN_TRUE);
-  grn_proc_create(ctx, "TokenYaBigramCombhiraCombkata", -1,
-                  GRN_PROC_TOKENIZER,
-                  yangram_init, yangram_next, yangram_fin, 11, vars);
-
-  GRN_INT32_SET(ctx, &vars[3].value, 3);
-  grn_proc_create(ctx, "TokenYaTrigramCombhiraCombkata", -1,
-                  GRN_PROC_TOKENIZER,
-                  yangram_init, yangram_next, yangram_fin, 11, vars);
-
-  GRN_INT32_SET(ctx, &vars[3].value, 2);
-  GRN_BOOL_SET(ctx, &vars[8].value, GRN_TRUE);
-  GRN_BOOL_SET(ctx, &vars[9].value, GRN_TRUE);
-  GRN_BOOL_SET(ctx, &vars[10].value, GRN_TRUE);
-  grn_proc_create(ctx, "TokenYaBigramOverskipCombhiraCombkata", -1,
-                  GRN_PROC_TOKENIZER,
-                  yangram_init, yangram_next, yangram_fin, 11, vars);
-
-  GRN_INT32_SET(ctx, &vars[3].value, 3);
-  grn_proc_create(ctx, "TokenYaTrigramOverskipCombhiraCombkata", -1,
-                  GRN_PROC_TOKENIZER,
-                  yangram_init, yangram_next, yangram_fin, 11, vars);
-
-  GRN_INT32_SET(ctx, &vars[3].value, 2);
-  GRN_BOOL_SET(ctx, &vars[4].value, GRN_TRUE);
-  GRN_BOOL_SET(ctx, &vars[6].value, GRN_TRUE);
-  GRN_BOOL_SET(ctx, &vars[8].value, GRN_TRUE);
-  GRN_BOOL_SET(ctx, &vars[9].value, GRN_FALSE);
-  GRN_BOOL_SET(ctx, &vars[10].value, GRN_FALSE);
-  grn_proc_create(ctx, "TokenYaBigramSplitSymbolAlphaOverskip", -1,
-                  GRN_PROC_TOKENIZER,
-                  yangram_init, yangram_next, yangram_fin, 11, vars);
-
-  GRN_INT32_SET(ctx, &vars[3].value, 3);
-  grn_proc_create(ctx, "TokenYaTrigramSplitSymbolAlphaOverskip", -1,
-                  GRN_PROC_TOKENIZER,
-                  yangram_init, yangram_next, yangram_fin, 11, vars);
-
+  grn_plugin_command_create(ctx, "yangram_register", -1,
+                            command_yangram_register, 8, vars);
   return ctx->rc;
 }
 

@@ -1,0 +1,23 @@
+register tokenizers/yangram
+yangram_register --ngram_unit 1
+yangram_register --ngram_unit 2
+yangram_register --ngram_unit 3
+yangram_register --ngram_unit 4
+yangram_register --ngram_unit 5
+yangram_register --ngram_unit 6
+yangram_register --ngram_unit 7
+yangram_register --ngram_unit 8
+yangram_register --ngram_unit 9
+yangram_register --ngram_unit 10
+yangram_register --ngram_unit 11
+tokenizer_list
+tokenize TokenYaUnigram "1234567890"
+tokenize TokenYaBigram "1234567890"
+tokenize TokenYaTrigram "1234567890"
+tokenize TokenYaQuadgram "1234567890"
+tokenize TokenYaPentgram "1234567890"
+tokenize TokenYaHexgram "1234567890"
+tokenize TokenYaHeptgram "1234567890"
+tokenize TokenYaOctgram "1234567890"
+tokenize TokenYaNongram "1234567890"
+tokenize TokenYaDecgram "1234567890"

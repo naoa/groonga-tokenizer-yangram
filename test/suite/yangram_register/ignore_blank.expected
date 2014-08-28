@@ -1,0 +1,118 @@
+register tokenizers/yangram
+[[0,0.0,0.0],true]
+yangram_register --ngram_unit 3 --split_alpha 1
+[[0,0.0,0.0],"TokenYaTrigramSplitAlpha"]
+yangram_register --ngram_unit 3 --split_alpha 1 --ignore_blank 1
+[[0,0.0,0.0],"TokenYaTrigramIgnoreBlankSplitAlpha"]
+tokenizer_list
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  [
+    {
+      "name": "TokenDelimit"
+    },
+    {
+      "name": "TokenUnigram"
+    },
+    {
+      "name": "TokenBigram"
+    },
+    {
+      "name": "TokenTrigram"
+    },
+    {
+      "name": "TokenBigramSplitSymbol"
+    },
+    {
+      "name": "TokenBigramSplitSymbolAlpha"
+    },
+    {
+      "name": "TokenBigramSplitSymbolAlphaDigit"
+    },
+    {
+      "name": "TokenBigramIgnoreBlank"
+    },
+    {
+      "name": "TokenBigramIgnoreBlankSplitSymbol"
+    },
+    {
+      "name": "TokenBigramIgnoreBlankSplitSymbolAlpha"
+    },
+    {
+      "name": "TokenBigramIgnoreBlankSplitSymbolAlphaDigit"
+    },
+    {
+      "name": "TokenDelimitNull"
+    },
+    {
+      "name": "TokenYaTrigramSplitAlpha"
+    },
+    {
+      "name": "TokenYaTrigramIgnoreBlankSplitAlpha"
+    }
+  ]
+]
+tokenize TokenYaTrigramSplitAlpha "ab cde" NormalizerAuto
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  [
+    {
+      "value": "ab",
+      "position": 0
+    },
+    {
+      "value": "b",
+      "position": 1
+    },
+    {
+      "value": "cde",
+      "position": 2
+    },
+    {
+      "value": "de",
+      "position": 3
+    },
+    {
+      "value": "e",
+      "position": 4
+    }
+  ]
+]
+tokenize TokenYaTrigramIgnoreBlankSplitAlpha "ab cde" NormalizerAuto
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  [
+    {
+      "value": "abc",
+      "position": 0
+    },
+    {
+      "value": "bcd",
+      "position": 1
+    },
+    {
+      "value": "cde",
+      "position": 2
+    },
+    {
+      "value": "de",
+      "position": 3
+    },
+    {
+      "value": "e",
+      "position": 4
+    }
+  ]
+]

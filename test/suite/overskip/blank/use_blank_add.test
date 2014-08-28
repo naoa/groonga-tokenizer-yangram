@@ -1,3 +1,4 @@
 register tokenizers/yangram
 
-tokenize TokenYaBigramOverskip "広告　評論家" NormalizerAuto --mode ADD
+yangram_register 2 --overlap_skip 1
+tokenize TokenYaBigramSkipOverlap "広告　評論家" NormalizerAuto --mode ADD

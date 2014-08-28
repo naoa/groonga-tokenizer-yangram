@@ -1,0 +1,79 @@
+register tokenizers/yangram
+[[0,0.0,0.0],true]
+yangram_register --combkata_filter 1
+[[0,0.0,0.0],"TokenYaBigramFilterCombkata"]
+tokenizer_list
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  [
+    {
+      "name": "TokenDelimit"
+    },
+    {
+      "name": "TokenUnigram"
+    },
+    {
+      "name": "TokenBigram"
+    },
+    {
+      "name": "TokenTrigram"
+    },
+    {
+      "name": "TokenBigramSplitSymbol"
+    },
+    {
+      "name": "TokenBigramSplitSymbolAlpha"
+    },
+    {
+      "name": "TokenBigramSplitSymbolAlphaDigit"
+    },
+    {
+      "name": "TokenBigramIgnoreBlank"
+    },
+    {
+      "name": "TokenBigramIgnoreBlankSplitSymbol"
+    },
+    {
+      "name": "TokenBigramIgnoreBlankSplitSymbolAlpha"
+    },
+    {
+      "name": "TokenBigramIgnoreBlankSplitSymbolAlphaDigit"
+    },
+    {
+      "name": "TokenDelimitNull"
+    },
+    {
+      "name": "TokenYaBigramFilterCombkata"
+    }
+  ]
+]
+tokenize TokenYaBigramFilterCombkata "今日ハ雨ダ" NormalizerAuto
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  [
+    {
+      "value": "今日",
+      "position": 0
+    },
+    {
+      "value": "日ハ",
+      "position": 1
+    },
+    {
+      "value": "雨ダ",
+      "position": 2
+    },
+    {
+      "value": "ダ",
+      "position": 3
+    }
+  ]
+]

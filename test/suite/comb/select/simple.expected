@@ -1,10 +1,12 @@
 register tokenizers/yangram
 [[0,0.0,0.0],true]
+yangram_register 2 --combhira_filter 1 --combkata_filter 1
+[[0,0.0,0.0],"TokenYaBigramFilterCombhiraCombkata"]
 table_create Entries TABLE_NO_KEY
 [[0,0.0,0.0],true]
 column_create Entries body COLUMN_SCALAR ShortText
 [[0,0.0,0.0],true]
-table_create Terms TABLE_PAT_KEY ShortText --default_tokenizer TokenYaBigramCombhiraCombkata --normalizer NormalizerAuto
+table_create Terms TABLE_PAT_KEY ShortText --default_tokenizer TokenYaBigramFilterCombhiraCombkata --normalizer NormalizerAuto
 [[0,0.0,0.0],true]
 column_create Terms document_index COLUMN_INDEX|WITH_POSITION Entries body
 [[0,0.0,0.0],true]

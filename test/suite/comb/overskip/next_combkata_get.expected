@@ -1,6 +1,8 @@
 register tokenizers/yangram
 [[0,0.0,0.0],true]
-tokenize TokenYaBigramOverskipCombhiraCombkata "データ装置" NormalizerAuto --mode GET
+yangram_register 2 --overlap_skip 1 --combhira_filter 1 --combkata_filter 1
+[[0,0.0,0.0],"TokenYaBigramSkipOverlapFilterCombhiraCombkata"]
+tokenize TokenYaBigramSkipOverlapFilterCombhiraCombkata "データ装置" NormalizerAuto --mode GET
 [
   [
     0,

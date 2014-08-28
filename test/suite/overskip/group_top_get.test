@@ -1,3 +1,4 @@
 register tokenizers/yangram
 
-tokenize TokenYaBigramOverskip "Tommorowは雨だな。" NormalizerAuto --mode GET
+yangram_register 2 --overlap_skip 1
+tokenize TokenYaBigramSkipOverlap "Tommorowは雨だな。" NormalizerAuto --mode GET

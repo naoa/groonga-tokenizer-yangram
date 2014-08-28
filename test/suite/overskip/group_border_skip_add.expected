@@ -1,6 +1,8 @@
 register tokenizers/yangram
 [[0,0.0,0.0],true]
-tokenize TokenYaBigramOverskip "今日はABC雨だ" NormalizerAuto --mode GET
+yangram_register 2 --overlap_skip 1
+[[0,0.0,0.0],"TokenYaBigramSkipOverlap"]
+tokenize TokenYaBigramSkipOverlap "今日はABC雨だ" NormalizerAuto --mode GET
 [
   [
     0,

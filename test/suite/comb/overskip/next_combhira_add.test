@@ -1,3 +1,4 @@
 register tokenizers/yangram
 
-tokenize TokenYaBigramOverskipCombhiraCombkata "でじた装置" NormalizerAuto --mode ADD
+yangram_register 2 --overlap_skip 1 --combhira_filter 1 --combkata_filter 1
+tokenize TokenYaBigramSkipOverlapFilterCombhiraCombkata "でじた装置" NormalizerAuto --mode ADD

@@ -1,6 +1,8 @@
 register tokenizers/yangram
 [[0,0.0,0.0],true]
-tokenize TokenYaTrigramSplitSymbolAlphaOverskip "Tommorow is rainy" NormalizerAuto --mode ADD
+yangram_register 3 --split_symbol 1 --split_alpha 1 --overlap_skip 1
+[[0,0.0,0.0],"TokenYaTrigramSplitSymbolAlphaSkipOverlap"]
+tokenize TokenYaTrigramSplitSymbolAlphaSkipOverlap "Tommorow is rainy" NormalizerAuto --mode ADD
 [
   [
     0,

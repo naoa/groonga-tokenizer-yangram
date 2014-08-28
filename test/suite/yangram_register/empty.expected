@@ -1,0 +1,53 @@
+register tokenizers/yangram
+[[0,0.0,0.0],true]
+yangram_register
+[[0,0.0,0.0],"TokenYaBigram"]
+tokenizer_list
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  [
+    {
+      "name": "TokenDelimit"
+    },
+    {
+      "name": "TokenUnigram"
+    },
+    {
+      "name": "TokenBigram"
+    },
+    {
+      "name": "TokenTrigram"
+    },
+    {
+      "name": "TokenBigramSplitSymbol"
+    },
+    {
+      "name": "TokenBigramSplitSymbolAlpha"
+    },
+    {
+      "name": "TokenBigramSplitSymbolAlphaDigit"
+    },
+    {
+      "name": "TokenBigramIgnoreBlank"
+    },
+    {
+      "name": "TokenBigramIgnoreBlankSplitSymbol"
+    },
+    {
+      "name": "TokenBigramIgnoreBlankSplitSymbolAlpha"
+    },
+    {
+      "name": "TokenBigramIgnoreBlankSplitSymbolAlphaDigit"
+    },
+    {
+      "name": "TokenDelimitNull"
+    },
+    {
+      "name": "TokenYaBigram"
+    }
+  ]
+]

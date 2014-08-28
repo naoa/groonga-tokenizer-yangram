@@ -1,6 +1,8 @@
 register tokenizers/yangram
 [[0,0.0,0.0],true]
-tokenize TokenYaBigramCombhiraCombkata "でーた装置" NormalizerAuto --mode ADD
+yangram_register 2 --combhira_filter 1 --combkata_filter 1
+[[0,0.0,0.0],"TokenYaBigramFilterCombhiraCombkata"]
+tokenize TokenYaBigramFilterCombhiraCombkata "でーた装置" NormalizerAuto --mode ADD
 [
   [
     0,

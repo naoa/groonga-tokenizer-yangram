@@ -1,0 +1,601 @@
+register tokenizers/yangram
+[[0,0.0,0.0],true]
+yangram_register --ngram_unit 1
+[[0,0.0,0.0],"TokenYaUnigram"]
+yangram_register --ngram_unit 2
+[[0,0.0,0.0],"TokenYaBigram"]
+yangram_register --ngram_unit 3
+[[0,0.0,0.0],"TokenYaTrigram"]
+yangram_register --ngram_unit 4
+[[0,0.0,0.0],"TokenYaQuadgram"]
+yangram_register --ngram_unit 5
+[[0,0.0,0.0],"TokenYaPentgram"]
+yangram_register --ngram_unit 6
+[[0,0.0,0.0],"TokenYaHexgram"]
+yangram_register --ngram_unit 7
+[[0,0.0,0.0],"TokenYaHeptgram"]
+yangram_register --ngram_unit 8
+[[0,0.0,0.0],"TokenYaOctgram"]
+yangram_register --ngram_unit 9
+[[0,0.0,0.0],"TokenYaNongram"]
+yangram_register --ngram_unit 10
+[[0,0.0,0.0],"TokenYaDecgram"]
+yangram_register --ngram_unit 11
+[[0,0.0,0.0],"invalid ngram_unit"]
+#|w| [yangram_register] invalid ngram_unit 11
+tokenizer_list
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  [
+    {
+      "name": "TokenDelimit"
+    },
+    {
+      "name": "TokenUnigram"
+    },
+    {
+      "name": "TokenBigram"
+    },
+    {
+      "name": "TokenTrigram"
+    },
+    {
+      "name": "TokenBigramSplitSymbol"
+    },
+    {
+      "name": "TokenBigramSplitSymbolAlpha"
+    },
+    {
+      "name": "TokenBigramSplitSymbolAlphaDigit"
+    },
+    {
+      "name": "TokenBigramIgnoreBlank"
+    },
+    {
+      "name": "TokenBigramIgnoreBlankSplitSymbol"
+    },
+    {
+      "name": "TokenBigramIgnoreBlankSplitSymbolAlpha"
+    },
+    {
+      "name": "TokenBigramIgnoreBlankSplitSymbolAlphaDigit"
+    },
+    {
+      "name": "TokenDelimitNull"
+    },
+    {
+      "name": "TokenYaUnigram"
+    },
+    {
+      "name": "TokenYaBigram"
+    },
+    {
+      "name": "TokenYaTrigram"
+    },
+    {
+      "name": "TokenYaQuadgram"
+    },
+    {
+      "name": "TokenYaPentgram"
+    },
+    {
+      "name": "TokenYaHexgram"
+    },
+    {
+      "name": "TokenYaHeptgram"
+    },
+    {
+      "name": "TokenYaOctgram"
+    },
+    {
+      "name": "TokenYaNongram"
+    },
+    {
+      "name": "TokenYaDecgram"
+    }
+  ]
+]
+tokenize TokenYaUnigram "1234567890"
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  [
+    {
+      "value": "1",
+      "position": 0
+    },
+    {
+      "value": "2",
+      "position": 1
+    },
+    {
+      "value": "3",
+      "position": 2
+    },
+    {
+      "value": "4",
+      "position": 3
+    },
+    {
+      "value": "5",
+      "position": 4
+    },
+    {
+      "value": "6",
+      "position": 5
+    },
+    {
+      "value": "7",
+      "position": 6
+    },
+    {
+      "value": "8",
+      "position": 7
+    },
+    {
+      "value": "9",
+      "position": 8
+    },
+    {
+      "value": "0",
+      "position": 9
+    }
+  ]
+]
+tokenize TokenYaBigram "1234567890"
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  [
+    {
+      "value": "12",
+      "position": 0
+    },
+    {
+      "value": "23",
+      "position": 1
+    },
+    {
+      "value": "34",
+      "position": 2
+    },
+    {
+      "value": "45",
+      "position": 3
+    },
+    {
+      "value": "56",
+      "position": 4
+    },
+    {
+      "value": "67",
+      "position": 5
+    },
+    {
+      "value": "78",
+      "position": 6
+    },
+    {
+      "value": "89",
+      "position": 7
+    },
+    {
+      "value": "90",
+      "position": 8
+    },
+    {
+      "value": "0",
+      "position": 9
+    }
+  ]
+]
+tokenize TokenYaTrigram "1234567890"
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  [
+    {
+      "value": "123",
+      "position": 0
+    },
+    {
+      "value": "234",
+      "position": 1
+    },
+    {
+      "value": "345",
+      "position": 2
+    },
+    {
+      "value": "456",
+      "position": 3
+    },
+    {
+      "value": "567",
+      "position": 4
+    },
+    {
+      "value": "678",
+      "position": 5
+    },
+    {
+      "value": "789",
+      "position": 6
+    },
+    {
+      "value": "890",
+      "position": 7
+    },
+    {
+      "value": "90",
+      "position": 8
+    },
+    {
+      "value": "0",
+      "position": 9
+    }
+  ]
+]
+tokenize TokenYaQuadgram "1234567890"
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  [
+    {
+      "value": "1234",
+      "position": 0
+    },
+    {
+      "value": "2345",
+      "position": 1
+    },
+    {
+      "value": "3456",
+      "position": 2
+    },
+    {
+      "value": "4567",
+      "position": 3
+    },
+    {
+      "value": "5678",
+      "position": 4
+    },
+    {
+      "value": "6789",
+      "position": 5
+    },
+    {
+      "value": "7890",
+      "position": 6
+    },
+    {
+      "value": "890",
+      "position": 7
+    },
+    {
+      "value": "90",
+      "position": 8
+    },
+    {
+      "value": "0",
+      "position": 9
+    }
+  ]
+]
+tokenize TokenYaPentgram "1234567890"
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  [
+    {
+      "value": "12345",
+      "position": 0
+    },
+    {
+      "value": "23456",
+      "position": 1
+    },
+    {
+      "value": "34567",
+      "position": 2
+    },
+    {
+      "value": "45678",
+      "position": 3
+    },
+    {
+      "value": "56789",
+      "position": 4
+    },
+    {
+      "value": "67890",
+      "position": 5
+    },
+    {
+      "value": "7890",
+      "position": 6
+    },
+    {
+      "value": "890",
+      "position": 7
+    },
+    {
+      "value": "90",
+      "position": 8
+    },
+    {
+      "value": "0",
+      "position": 9
+    }
+  ]
+]
+tokenize TokenYaHexgram "1234567890"
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  [
+    {
+      "value": "123456",
+      "position": 0
+    },
+    {
+      "value": "234567",
+      "position": 1
+    },
+    {
+      "value": "345678",
+      "position": 2
+    },
+    {
+      "value": "456789",
+      "position": 3
+    },
+    {
+      "value": "567890",
+      "position": 4
+    },
+    {
+      "value": "67890",
+      "position": 5
+    },
+    {
+      "value": "7890",
+      "position": 6
+    },
+    {
+      "value": "890",
+      "position": 7
+    },
+    {
+      "value": "90",
+      "position": 8
+    },
+    {
+      "value": "0",
+      "position": 9
+    }
+  ]
+]
+tokenize TokenYaHeptgram "1234567890"
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  [
+    {
+      "value": "1234567",
+      "position": 0
+    },
+    {
+      "value": "2345678",
+      "position": 1
+    },
+    {
+      "value": "3456789",
+      "position": 2
+    },
+    {
+      "value": "4567890",
+      "position": 3
+    },
+    {
+      "value": "567890",
+      "position": 4
+    },
+    {
+      "value": "67890",
+      "position": 5
+    },
+    {
+      "value": "7890",
+      "position": 6
+    },
+    {
+      "value": "890",
+      "position": 7
+    },
+    {
+      "value": "90",
+      "position": 8
+    },
+    {
+      "value": "0",
+      "position": 9
+    }
+  ]
+]
+tokenize TokenYaOctgram "1234567890"
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  [
+    {
+      "value": "12345678",
+      "position": 0
+    },
+    {
+      "value": "23456789",
+      "position": 1
+    },
+    {
+      "value": "34567890",
+      "position": 2
+    },
+    {
+      "value": "4567890",
+      "position": 3
+    },
+    {
+      "value": "567890",
+      "position": 4
+    },
+    {
+      "value": "67890",
+      "position": 5
+    },
+    {
+      "value": "7890",
+      "position": 6
+    },
+    {
+      "value": "890",
+      "position": 7
+    },
+    {
+      "value": "90",
+      "position": 8
+    },
+    {
+      "value": "0",
+      "position": 9
+    }
+  ]
+]
+tokenize TokenYaNongram "1234567890"
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  [
+    {
+      "value": "123456789",
+      "position": 0
+    },
+    {
+      "value": "234567890",
+      "position": 1
+    },
+    {
+      "value": "34567890",
+      "position": 2
+    },
+    {
+      "value": "4567890",
+      "position": 3
+    },
+    {
+      "value": "567890",
+      "position": 4
+    },
+    {
+      "value": "67890",
+      "position": 5
+    },
+    {
+      "value": "7890",
+      "position": 6
+    },
+    {
+      "value": "890",
+      "position": 7
+    },
+    {
+      "value": "90",
+      "position": 8
+    },
+    {
+      "value": "0",
+      "position": 9
+    }
+  ]
+]
+tokenize TokenYaDecgram "1234567890"
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  [
+    {
+      "value": "1234567890",
+      "position": 0
+    },
+    {
+      "value": "234567890",
+      "position": 1
+    },
+    {
+      "value": "34567890",
+      "position": 2
+    },
+    {
+      "value": "4567890",
+      "position": 3
+    },
+    {
+      "value": "567890",
+      "position": 4
+    },
+    {
+      "value": "67890",
+      "position": 5
+    },
+    {
+      "value": "7890",
+      "position": 6
+    },
+    {
+      "value": "890",
+      "position": 7
+    },
+    {
+      "value": "90",
+      "position": 8
+    },
+    {
+      "value": "0",
+      "position": 9
+    }
+  ]
+]

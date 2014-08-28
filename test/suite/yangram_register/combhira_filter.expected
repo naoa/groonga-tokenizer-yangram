@@ -1,0 +1,79 @@
+register tokenizers/yangram
+[[0,0.0,0.0],true]
+yangram_register --combhira_filter 1
+[[0,0.0,0.0],"TokenYaBigramFilterCombhira"]
+tokenizer_list
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  [
+    {
+      "name": "TokenDelimit"
+    },
+    {
+      "name": "TokenUnigram"
+    },
+    {
+      "name": "TokenBigram"
+    },
+    {
+      "name": "TokenTrigram"
+    },
+    {
+      "name": "TokenBigramSplitSymbol"
+    },
+    {
+      "name": "TokenBigramSplitSymbolAlpha"
+    },
+    {
+      "name": "TokenBigramSplitSymbolAlphaDigit"
+    },
+    {
+      "name": "TokenBigramIgnoreBlank"
+    },
+    {
+      "name": "TokenBigramIgnoreBlankSplitSymbol"
+    },
+    {
+      "name": "TokenBigramIgnoreBlankSplitSymbolAlpha"
+    },
+    {
+      "name": "TokenBigramIgnoreBlankSplitSymbolAlphaDigit"
+    },
+    {
+      "name": "TokenDelimitNull"
+    },
+    {
+      "name": "TokenYaBigramFilterCombhira"
+    }
+  ]
+]
+tokenize TokenYaBigramFilterCombhira "今日は雨だ" NormalizerAuto
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  [
+    {
+      "value": "今日",
+      "position": 0
+    },
+    {
+      "value": "日は",
+      "position": 1
+    },
+    {
+      "value": "雨だ",
+      "position": 2
+    },
+    {
+      "value": "だ",
+      "position": 3
+    }
+  ]
+]
