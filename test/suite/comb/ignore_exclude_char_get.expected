@@ -1,0 +1,6 @@
+register tokenizers/yangram
+[[0,0.0,0.0],true]
+yangram_register 2 --filter_combhira 1 --filter_combkata 1
+[[0,0.0,0.0],"TokenYaBigramFilterCombhiraCombkata"]
+tokenize TokenYaBigramFilterCombhiraCombkata "ト長調" NormalizerAuto --mode GET
+[[0,0.0,0.0],[{"value":"ト長","position":0},{"value":"長調","position":1}]]
