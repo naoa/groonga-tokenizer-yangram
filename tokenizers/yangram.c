@@ -48,7 +48,7 @@ void *source;
 grn_hash *comb_exclude = NULL;
 grn_obj lexicon_name;
 
-#define STOPWORD_FLAG_COLUMN_NAME "@stopword_flag"
+#define STOPWORD_FLAG_COLUMN_NAME "@stopword"
 
 typedef struct {
   grn_tokenizer_token token;
@@ -67,9 +67,9 @@ typedef struct {
   grn_bool overlap_skip;
   grn_bool combhira_filter;
   grn_bool combkata_filter;
-  grn_bool use_stopword_flag;
+  grn_bool use_stopword;
   grn_obj *lexicon;
-  grn_obj *stopword_flag_column;
+  grn_obj *stopword_column;
 } grn_yangram_tokenizer;
 
 static grn_bool
@@ -434,19 +434,19 @@ yangram_init(grn_ctx *ctx, int nargs, grn_obj **args, grn_user_data *user_data)
 
   grn_obj *lexicon = args[0];
 
-  grn_obj *stopword_flag_column;
+  grn_obj *stopword_column;
 
-  stopword_flag_column = grn_obj_column(ctx, lexicon,
+  stopword_column = grn_obj_column(ctx, lexicon,
                                         STOPWORD_FLAG_COLUMN_NAME,
                                         strlen(STOPWORD_FLAG_COLUMN_NAME));
-  if (lexicon && stopword_flag_column) {
-    tokenizer->use_stopword_flag = GRN_TRUE;
+  if (lexicon && stopword_column) {
+    tokenizer->use_stopword = GRN_TRUE;
     tokenizer->lexicon = lexicon;
-    tokenizer->stopword_flag_column = stopword_flag_column;
+    tokenizer->stopword_column = stopword_column;
   } else {
-    tokenizer->use_stopword_flag = GRN_FALSE;
+    tokenizer->use_stopword = GRN_FALSE;
     tokenizer->lexicon = NULL;
-    grn_obj_unlink(ctx, stopword_flag_column);
+    grn_obj_unlink(ctx, stopword_column);
   }
 
   return NULL;
@@ -539,7 +539,7 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
   if (!(status & GRN_TOKENIZER_TOKEN_SKIP) &&
       !(status & GRN_TOKENIZER_TOKEN_SKIP_WITH_POSITION)) {
 
-    if (tokenizer->use_stopword_flag &&
+    if (tokenizer->use_stopword &&
         tokenizer->query->token_mode == GRN_TOKEN_GET) {
       grn_id id;
       id = grn_table_get(ctx, tokenizer->lexicon, token_top, token_tail - token_top);
@@ -547,7 +547,7 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
         grn_obj is_stopword;
         GRN_BOOL_INIT(&is_stopword, 0);
         GRN_BULK_REWIND(&is_stopword);
-        grn_obj_get_value(ctx, tokenizer->stopword_flag_column, id, &is_stopword);
+        grn_obj_get_value(ctx, tokenizer->stopword_column, id, &is_stopword);
         if (GRN_BOOL_VALUE(&is_stopword)) {
           status |= GRN_TOKENIZER_TOKEN_SKIP;
         }
@@ -580,8 +580,8 @@ yangram_fin(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
 {
   grn_yangram_tokenizer *tokenizer = user_data->ptr;
 
-  if (tokenizer->use_stopword_flag) {
-    grn_obj_unlink(ctx, tokenizer->stopword_flag_column);
+  if (tokenizer->use_stopword) {
+    grn_obj_unlink(ctx, tokenizer->stopword_column);
   }
 
   if (!tokenizer) {

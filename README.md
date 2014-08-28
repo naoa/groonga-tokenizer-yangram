@@ -176,10 +176,10 @@ tokenize TokenYaBigramCombhiraCombkata "今日は雨だ" NormalizerAuto --mode G
 ```
 table_create Terms TABLE_PAT_KEY ShortText --default_tokenizer TokenYaBigramOverskip --normalizer NormalizerAuto
 column_create Terms document_index COLUMN_INDEX|WITH_POSITION Entries body
-column_create Terms @stopword_flag COLUMN_SCALAR Bool
+column_create Terms @stopword COLUMN_SCALAR Bool
 ```
 
-* @stopword_flag
+* @stopword
 
 検索時のみこのカラムが``true``となっているキーのトークンがスキップされます。検索速度に影響が大きく、検索精度にはあまり影響のないキーを取捨選択して検索から除外することができます。インデックス更新からは除外されません。
 
