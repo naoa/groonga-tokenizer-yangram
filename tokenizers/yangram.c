@@ -47,7 +47,7 @@ void *source;
 
 grn_hash *comb_exclude = NULL;
 
-#define STOPWORD_FLAG_COLUMN_NAME "@stopword"
+#define STOPWORD_COLUMN_NAME "@stopword"
 
 typedef struct {
   grn_tokenizer_token token;
@@ -434,8 +434,8 @@ yangram_init(grn_ctx *ctx, int nargs, grn_obj **args, grn_user_data *user_data)
   grn_obj *stopword_column;
 
   stopword_column = grn_obj_column(ctx, lexicon,
-                                        STOPWORD_FLAG_COLUMN_NAME,
-                                        strlen(STOPWORD_FLAG_COLUMN_NAME));
+                                        STOPWORD_COLUMN_NAME,
+                                        strlen(STOPWORD_COLUMN_NAME));
   if (lexicon && stopword_column) {
     tokenizer->use_stopword = GRN_TRUE;
     tokenizer->lexicon = lexicon;
