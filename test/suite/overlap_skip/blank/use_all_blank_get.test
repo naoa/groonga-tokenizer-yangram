@@ -1,4 +1,0 @@
-register tokenizers/yangram
-
-yangram_register 2 --overlap_skip 1
-tokenize TokenYaBigramSkipOverlap "広告  評論家" NormalizerAuto --mode GET

@@ -1,0 +1,42 @@
+register tokenizers/yangram
+[[0,0.0,0.0],true]
+yangram_register 2 --split_symbol 1 --split_alpha 1 --skip_overlap 1
+[[0,0.0,0.0],"TokenYaBigramSplitSymbolAlphaSkipOverlap"]
+tokenize TokenYaBigramSplitSymbolAlphaSkipOverlap "This is" NormalizerAuto --mode ADD
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  [
+    {
+      "value": "th",
+      "position": 0
+    },
+    {
+      "value": "hi",
+      "position": 1
+    },
+    {
+      "value": "is",
+      "position": 2
+    },
+    {
+      "value": "s ",
+      "position": 3
+    },
+    {
+      "value": " i",
+      "position": 4
+    },
+    {
+      "value": "is",
+      "position": 5
+    },
+    {
+      "value": "s",
+      "position": 6
+    }
+  ]
+]

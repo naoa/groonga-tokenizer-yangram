@@ -1,0 +1,4 @@
+register tokenizers/yangram
+
+yangram_register 3 --skip_overlap 1
+tokenize TokenYaTrigramSkipOverlap "つつつつ きつつ" NormalizerAuto --mode GET

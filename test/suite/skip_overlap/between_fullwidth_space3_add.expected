@@ -1,0 +1,38 @@
+register tokenizers/yangram
+[[0,0.0,0.0],true]
+yangram_register 2 --skip_overlap 1
+[[0,0.0,0.0],"TokenYaBigramSkipOverlap"]
+tokenize TokenYaBigramSkipOverlap "広告評　論家" NormalizerAuto --mode ADD
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  [
+    {
+      "value": "広告",
+      "position": 0
+    },
+    {
+      "value": "告評",
+      "position": 1
+    },
+    {
+      "value": "評 ",
+      "position": 2
+    },
+    {
+      "value": " 論",
+      "position": 3
+    },
+    {
+      "value": "論家",
+      "position": 4
+    },
+    {
+      "value": "家",
+      "position": 5
+    }
+  ]
+]

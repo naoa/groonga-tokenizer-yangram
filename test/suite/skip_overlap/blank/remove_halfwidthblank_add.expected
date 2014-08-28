@@ -1,0 +1,30 @@
+register tokenizers/yangram
+[[0,0.0,0.0],true]
+yangram_register 2 --skip_overlap 1
+[[0,0.0,0.0],"TokenYaBigramSkipOverlap"]
+tokenize TokenYaBigramSkipOverlap "This is a pen" NormalizerAuto --mode ADD
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  [
+    {
+      "value": "this",
+      "position": 0
+    },
+    {
+      "value": "is",
+      "position": 1
+    },
+    {
+      "value": "a",
+      "position": 2
+    },
+    {
+      "value": "pen",
+      "position": 3
+    }
+  ]
+]

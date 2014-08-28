@@ -1,0 +1,82 @@
+register tokenizers/yangram
+[[0,0.0,0.0],true]
+yangram_register 3 --split_symbol 1 --split_alpha 1 --skip_overlap 1
+[[0,0.0,0.0],"TokenYaTrigramSplitSymbolAlphaSkipOverlap"]
+tokenize TokenYaTrigramSplitSymbolAlphaSkipOverlap "Tommorow is rainy" NormalizerAuto --mode ADD
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  [
+    {
+      "value": "tom",
+      "position": 0
+    },
+    {
+      "value": "omm",
+      "position": 1
+    },
+    {
+      "value": "mmo",
+      "position": 2
+    },
+    {
+      "value": "mor",
+      "position": 3
+    },
+    {
+      "value": "oro",
+      "position": 4
+    },
+    {
+      "value": "row",
+      "position": 5
+    },
+    {
+      "value": "ow ",
+      "position": 6
+    },
+    {
+      "value": "w i",
+      "position": 7
+    },
+    {
+      "value": " is",
+      "position": 8
+    },
+    {
+      "value": "is ",
+      "position": 9
+    },
+    {
+      "value": "s r",
+      "position": 10
+    },
+    {
+      "value": " ra",
+      "position": 11
+    },
+    {
+      "value": "rai",
+      "position": 12
+    },
+    {
+      "value": "ain",
+      "position": 13
+    },
+    {
+      "value": "iny",
+      "position": 14
+    },
+    {
+      "value": "ny",
+      "position": 15
+    },
+    {
+      "value": "y",
+      "position": 16
+    }
+  ]
+]

@@ -11,9 +11,6 @@ tokenizer_list
   ],
   [
     {
-      "name": "TokenMecab"
-    },
-    {
       "name": "TokenDelimit"
     },
     {

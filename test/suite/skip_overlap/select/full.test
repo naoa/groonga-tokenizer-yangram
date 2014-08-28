@@ -1,0 +1,18 @@
+register tokenizers/yangram
+
+yangram_register 2 --skip_overlap 1
+
+table_create Entries TABLE_NO_KEY
+column_create Entries body COLUMN_SCALAR ShortText
+
+table_create Terms TABLE_PAT_KEY ShortText --default_tokenizer TokenYaBigramSkipOverlap --normalizer NormalizerAuto
+column_create Terms document_index COLUMN_INDEX|WITH_POSITION Entries body
+
+load --table Entries
+[
+{"body": "今日は雨だ"}
+]
+
+select Entries --output_columns \
+  --match_columns body --query '今日は雨だ' \
+  --output_columns body

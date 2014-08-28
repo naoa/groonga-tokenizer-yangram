@@ -1,4 +1,0 @@
-register tokenizers/yangram
-yangram_register --combkata_filter 1
-tokenizer_list
-tokenize TokenYaBigramFilterCombkata "今日ハ雨ダ" NormalizerAuto

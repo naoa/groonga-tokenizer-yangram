@@ -1,0 +1,4 @@
+register tokenizers/yangram
+
+yangram_register 2 --split_symbol 1 --split_alpha 1 --skip_overlap 1
+tokenize TokenYaBigramSplitSymbolAlphaSkipOverlap "Thisis" NormalizerAuto --mode ADD
