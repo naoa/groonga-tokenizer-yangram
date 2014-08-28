@@ -169,33 +169,19 @@ tokenize TokenYaBigramCombhiraCombkata "今日は雨だ" NormalizerAuto --mode G
 ]
 ```
 
-### 語彙表拡張
+### ストップワード
 
-実験中。どの程度インデキシング速度に影響でるかを検証予定。
-
-語彙表に以下のカラムを作ると以下の機能が自動的に有効になります。
+語彙表に以下のカラムを作るとストップワードの機能が自動的に有効になります。
 
 ```
 table_create Terms TABLE_PAT_KEY ShortText --default_tokenizer TokenYaBigramOverskip --normalizer NormalizerAuto
 column_create Terms document_index COLUMN_INDEX|WITH_POSITION Entries body
-column_create Terms @@@term_freq COLUMN_SCALAR UInt32
-column_create Terms @@document_freq COLUMN_SCALAR UInt32
 column_create Terms @stopword_flag COLUMN_SCALAR Bool
 ```
 
 * @stopword_flag
 
-検索時のみこのカラムが``true``となっているキーのトークンがスキップされます。検索速度に影響が大きく、検索精度にはあまり影響のないキーを取捨選択して検索から除外することができます。
-
-* @@document_freq
-
-キーのドキュメントの出現頻度をカウントします。1文書追加につき1カウントアップ、1文書削除につき1カウントダウンされます。キーの重要度を示す指標に使うことができます。
-
-* @@@term_freq
-
-キーの出現頻度をカウントします。この値が非常に大きいものは検索速度に大きく影響します。@stopword_flagの選定等に使うことができます。
-
-
+検索時のみこのカラムが``true``となっているキーのトークンがスキップされます。検索速度に影響が大きく、検索精度にはあまり影響のないキーを取捨選択して検索から除外することができます。インデックス更新からは除外されません。
 
 ## Install
 
