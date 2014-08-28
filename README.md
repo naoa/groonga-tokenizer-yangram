@@ -239,7 +239,7 @@ tokenize TokenYaBigramFilterCombhiraCombkata "今日は雨だ" NormalizerAuto --
 
 検索時、追加時の両方で[Snowball stemmer](http://snowball.tartarus.org/)を使ってステミングします。
 
-英語などのトークンを語幹を抽出します。
+英語などのトークンの語幹を抽出します。
 複数形や過去形などの活用形の語尾を所定の規則に沿って切除します。
 Snowball stemmerが対応している以下の言語を使うことができます。
 
