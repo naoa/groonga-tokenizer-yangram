@@ -1,3 +1,6 @@
 register tokenizers/yangram
-yangram_register 3 1 1 1 1 1 1 1
+yangram_register --ngram_unit 3 --ignore_blank 1 \
+  --split_symbol 1 --split_alpha 1 --split_digit 1 \
+  --skip_overlap 1 --skip_stopword 1 \
+  --filter_combhira 1 --filter_combkata 1
 tokenizer_list

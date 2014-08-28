@@ -57,9 +57,9 @@ typedef struct {
   grn_bool split_alpha;
   grn_bool split_digit;
   grn_bool skip_overlap;
+  grn_bool skip_stopword;
   grn_bool filter_combhira;
   grn_bool filter_combkata;
-  grn_bool use_stopword;
   grn_obj *lexicon;
   grn_obj *stopword_column;
 } grn_yangram_tokenizer;
@@ -433,6 +433,10 @@ yangram_init(grn_ctx *ctx, int nargs, grn_obj **args, grn_user_data *user_data)
   if (GRN_TEXT_LEN(var) != 0) {
     tokenizer->split_digit = GRN_INT32_VALUE(var);
   }
+  var = grn_plugin_proc_get_var(ctx, user_data, "skip_stopword", -1);
+  if (GRN_TEXT_LEN(var) != 0) {
+    tokenizer->skip_stopword = GRN_INT32_VALUE(var);
+  }
   var = grn_plugin_proc_get_var(ctx, user_data, "filter_combhira", -1);
   if (GRN_TEXT_LEN(var) != 0) {
     tokenizer->filter_combhira = GRN_INT32_VALUE(var);
@@ -454,20 +458,22 @@ yangram_init(grn_ctx *ctx, int nargs, grn_obj **args, grn_user_data *user_data)
   tokenizer->pushed_token_tail = NULL;
   tokenizer->ctypes_next = 0;
 
-  grn_obj *lexicon = args[0];
-  grn_obj *stopword_column;
+  if (tokenizer->skip_stopword) {
+    grn_obj *lexicon = args[0];
+    grn_obj *stopword_column;
 
-  stopword_column = grn_obj_column(ctx, lexicon,
-                                        STOPWORD_COLUMN_NAME,
-                                        strlen(STOPWORD_COLUMN_NAME));
-  if (lexicon && stopword_column) {
-    tokenizer->use_stopword = GRN_TRUE;
-    tokenizer->lexicon = lexicon;
-    tokenizer->stopword_column = stopword_column;
-  } else {
-    tokenizer->use_stopword = GRN_FALSE;
-    tokenizer->lexicon = NULL;
-    grn_obj_unlink(ctx, stopword_column);
+    stopword_column = grn_obj_column(ctx, lexicon,
+                                     STOPWORD_COLUMN_NAME,
+                                     strlen(STOPWORD_COLUMN_NAME));
+    if (lexicon && stopword_column) {
+      tokenizer->skip_stopword = GRN_TRUE;
+      tokenizer->lexicon = lexicon;
+      tokenizer->stopword_column = stopword_column;
+    } else {
+      tokenizer->skip_stopword = GRN_FALSE;
+      tokenizer->lexicon = NULL;
+      grn_obj_unlink(ctx, stopword_column);
+    }
   }
 
   return NULL;
@@ -550,7 +556,7 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
 
   if (!(status & GRN_TOKENIZER_TOKEN_SKIP) &&
       !(status & GRN_TOKENIZER_TOKEN_SKIP_WITH_POSITION)) {
-    if (tokenizer->use_stopword &&
+    if (tokenizer->skip_stopword &&
         tokenizer->query->token_mode == GRN_TOKEN_GET) {
       grn_id id;
       id = grn_table_get(ctx, tokenizer->lexicon, token_top, token_tail - token_top);
@@ -590,10 +596,9 @@ yangram_fin(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
 {
   grn_yangram_tokenizer *tokenizer = user_data->ptr;
 
-  if (tokenizer->use_stopword) {
+  if (tokenizer->skip_stopword) {
     grn_obj_unlink(ctx, tokenizer->stopword_column);
   }
-
   if (!tokenizer) {
     return NULL;
   }
@@ -614,7 +619,7 @@ load_comb_exclude(grn_ctx *ctx)
   comb_exclude = grn_hash_create(ctx, NULL,
                               GRN_TABLE_MAX_KEY_SIZE,
                               0,
-                              GRN_OBJ_TABLE_HASH_KEY | GRN_OBJ_KEY_VAR_SIZE);
+                              GRN_OBJ_TABLE_HASH_KEY|GRN_OBJ_KEY_VAR_SIZE);
 
   for (i = 0; i < sizeof(excludes)/sizeof(excludes[0]); i++) {
     grn_hash_add(ctx, comb_exclude,
@@ -633,12 +638,13 @@ command_yangram_register(grn_ctx *ctx, GNUC_UNUSED int nargs,
   int split_alpha = 0;
   int split_digit = 0;
   int skip_overlap = 0;
+  int skip_stopword = 0;
   int filter_combhira = 0;
   int filter_combkata = 0;
 
   grn_obj tokenizer_name;
   grn_obj *var;
-  grn_expr_var vars[11];
+  grn_expr_var vars[12];
 
   grn_plugin_expr_var_init(ctx, &vars[0], NULL, -1);
   grn_plugin_expr_var_init(ctx, &vars[1], NULL, -1);
@@ -649,8 +655,9 @@ command_yangram_register(grn_ctx *ctx, GNUC_UNUSED int nargs,
   grn_plugin_expr_var_init(ctx, &vars[6], "split_alpha", -1);
   grn_plugin_expr_var_init(ctx, &vars[7], "split_digit", -1);
   grn_plugin_expr_var_init(ctx, &vars[8], "skip_overlap", -1);
-  grn_plugin_expr_var_init(ctx, &vars[9], "filter_combhira", -1);
-  grn_plugin_expr_var_init(ctx, &vars[10], "filter_combkata", -1);
+  grn_plugin_expr_var_init(ctx, &vars[9], "skip_stopword", -1);
+  grn_plugin_expr_var_init(ctx, &vars[10], "filter_combhira", -1);
+  grn_plugin_expr_var_init(ctx, &vars[11], "filter_combkata", -1);
 
   GRN_INT32_SET(ctx, &vars[3].value, ngram_unit);
   GRN_INT32_SET(ctx, &vars[4].value, ignore_blank);
@@ -658,8 +665,9 @@ command_yangram_register(grn_ctx *ctx, GNUC_UNUSED int nargs,
   GRN_INT32_SET(ctx, &vars[6].value, split_alpha);
   GRN_INT32_SET(ctx, &vars[7].value, split_digit);
   GRN_INT32_SET(ctx, &vars[8].value, skip_overlap);
-  GRN_INT32_SET(ctx, &vars[9].value, filter_combhira);
-  GRN_INT32_SET(ctx, &vars[10].value, filter_combkata);
+  GRN_INT32_SET(ctx, &vars[9].value, skip_stopword);
+  GRN_INT32_SET(ctx, &vars[10].value, filter_combhira);
+  GRN_INT32_SET(ctx, &vars[11].value, filter_combkata);
 
   GRN_TEXT_INIT(&tokenizer_name, 0);
   GRN_BULK_REWIND(&tokenizer_name);
@@ -753,22 +761,30 @@ command_yangram_register(grn_ctx *ctx, GNUC_UNUSED int nargs,
     skip_overlap = atoi(GRN_TEXT_VALUE(var));
     GRN_INT32_SET(ctx, &vars[8].value, skip_overlap);
   }
-  if (skip_overlap) {
+  var = grn_plugin_proc_get_var(ctx, user_data, "skip_stopword", -1);
+  if (GRN_TEXT_LEN(var) != 0) {
+    skip_stopword = atoi(GRN_TEXT_VALUE(var));
+    GRN_INT32_SET(ctx, &vars[9].value, skip_stopword);
+  }
+  if (skip_overlap || skip_stopword) {
     GRN_TEXT_PUTS(ctx, &tokenizer_name, "Skip");
   }
   if (skip_overlap) {
     GRN_TEXT_PUTS(ctx, &tokenizer_name, "Overlap");
   }
+  if (skip_stopword) {
+    GRN_TEXT_PUTS(ctx, &tokenizer_name, "Stopword");
+  }
 
   var = grn_plugin_proc_get_var(ctx, user_data, "filter_combhira", -1);
   if (GRN_TEXT_LEN(var) != 0) {
     filter_combhira = atoi(GRN_TEXT_VALUE(var));
-    GRN_INT32_SET(ctx, &vars[9].value, filter_combhira);
+    GRN_INT32_SET(ctx, &vars[10].value, filter_combhira);
   }
   var = grn_plugin_proc_get_var(ctx, user_data, "filter_combkata", -1);
   if (GRN_TEXT_LEN(var) != 0) {
     filter_combkata = atoi(GRN_TEXT_VALUE(var));
-    GRN_INT32_SET(ctx, &vars[10].value, filter_combkata);
+    GRN_INT32_SET(ctx, &vars[11].value, filter_combkata);
   }
 
   if (filter_combhira || filter_combkata) {
@@ -786,7 +802,7 @@ command_yangram_register(grn_ctx *ctx, GNUC_UNUSED int nargs,
   GRN_TEXT_PUTC(ctx, &tokenizer_name, '\0');
   grn_proc_create(ctx, GRN_TEXT_VALUE(&tokenizer_name), -1,
                   GRN_PROC_TOKENIZER,
-                  yangram_init, yangram_next, yangram_fin, 11, vars);
+                  yangram_init, yangram_next, yangram_fin, 12, vars);
 
   grn_ctx_output_cstr(ctx, GRN_TEXT_VALUE(&tokenizer_name));
   grn_obj_unlink(ctx, &tokenizer_name);
@@ -806,7 +822,7 @@ GRN_PLUGIN_INIT(grn_ctx *ctx)
 grn_rc
 GRN_PLUGIN_REGISTER(grn_ctx *ctx)
 {
-  grn_expr_var vars[8];
+  grn_expr_var vars[9];
 
   grn_plugin_expr_var_init(ctx, &vars[0], "ngram_unit", -1);
   grn_plugin_expr_var_init(ctx, &vars[1], "ignore_blank", -1);
@@ -814,11 +830,12 @@ GRN_PLUGIN_REGISTER(grn_ctx *ctx)
   grn_plugin_expr_var_init(ctx, &vars[3], "split_alpha", -1);
   grn_plugin_expr_var_init(ctx, &vars[4], "split_digit", -1);
   grn_plugin_expr_var_init(ctx, &vars[5], "skip_overlap", -1);
-  grn_plugin_expr_var_init(ctx, &vars[6], "filter_combhira", -1);
-  grn_plugin_expr_var_init(ctx, &vars[7], "filter_combkata", -1);
+  grn_plugin_expr_var_init(ctx, &vars[6], "skip_stopword", -1);
+  grn_plugin_expr_var_init(ctx, &vars[7], "filter_combhira", -1);
+  grn_plugin_expr_var_init(ctx, &vars[8], "filter_combkata", -1);
 
   grn_plugin_command_create(ctx, "yangram_register", -1,
-                            command_yangram_register, 8, vars);
+                            command_yangram_register, 9, vars);
   return ctx->rc;
 }
 
