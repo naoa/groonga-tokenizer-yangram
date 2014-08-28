@@ -37,14 +37,6 @@ typedef enum {
   GRN_TOKEN_DEL
 } grn_token_mode;
 
-typedef struct {
-grn_obj_header header;
-grn_id range; /* table: type of subrecords, column: type of values */
-grn_id id;
-grn_obj *db;
-void *source;
-} grn_db_obj;
-
 grn_hash *comb_exclude = NULL;
 
 #define STOPWORD_COLUMN_NAME "@stopword"
