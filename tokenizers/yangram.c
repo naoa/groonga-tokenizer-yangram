@@ -756,7 +756,12 @@ command_yangram_register(grn_ctx *ctx, GNUC_UNUSED int nargs,
   if (GRN_TEXT_LEN(var) != 0) {
     ignore_blank = atoi(GRN_TEXT_VALUE(var));
     GRN_INT32_SET(ctx, &vars[4].value, ignore_blank);
-    GRN_TEXT_PUTS(ctx, &tokenizer_name, "IgnoreBlank");
+  }
+  if (ignore_blank) {
+    GRN_TEXT_PUTS(ctx, &tokenizer_name, "Ignore");
+  }
+  if (ignore_blank) {
+    GRN_TEXT_PUTS(ctx, &tokenizer_name, "Blank");
   }
 
   var = grn_plugin_proc_get_var(ctx, user_data, "split_symbol", -1);

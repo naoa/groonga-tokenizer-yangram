@@ -24,7 +24,7 @@ register tokenizer/yangram
 * Example
 
 ```
-yangram_register --ngram_unit 2 --ignore_blank 1 \
+yangram_register --ngram_unit 2 --ignore_blank 0 \
   --split_symbol 1 --split_alpha 1 --split_digit 1 \
   --skip_overlap 1 --skip_stopword 1 \
   --filter_combhira 1 --filter_combkata 1 \
@@ -35,7 +35,7 @@ yangram_register --ngram_unit 2 --ignore_blank 1 \
     0.0,
     0.0
   ],
-  "TokenYaBigramIgnoreBlankSplitSymbolAlphaDigitSkipOverlapStopwordFilterCombhiraCombkataStemSnowball"
+  "TokenYaTrigramSplitAlphaDigitSkipOverlapStopwordFilterCombhiraCombkataStemSnowball"
 ]
 ```
 
@@ -52,7 +52,7 @@ yangram_register --ngram_unit 2 --ignore_blank 1 \
 |skip_stopword|[0-1]|SkipStopword|検索時のみ<BR>ストップワードカラムが<BR>trueのトークンをスキップ|
 |filter_combhira|[0-1]|FilterCombhira|検索時、更新時において<BR>[ひらがな+その他の字種]の<BR>組み合わせのトークンを除去|
 |filter_combkata|[0-1]|FilterCombkata|検索時、更新時において<BR>[カタカナ+漢字]の<BR>組み合わせのトークンを除去|
-|stem_snowball|[en/por/da/de/es/fi/fr/hu/<BR>it/nl/no/pt/ro/ru/sv/tr]|StemSnowball|検索時、更新時において<BR>Snowball stemmerを使ってトークンをステミング|
+|stem_snowball|[en/etc]|StemSnowball|検索時、更新時において<BR>Snowball stemmerを使って<BR>トークンをステミング|
 
 * Return value
 
