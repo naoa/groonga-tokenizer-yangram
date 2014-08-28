@@ -37,11 +37,18 @@ typedef enum {
   GRN_TOKEN_DEL
 } grn_token_mode;
 
+typedef struct {
+grn_obj_header header;
+grn_id range; /* table: type of subrecords, column: type of values */
+grn_id id;
+grn_obj *db;
+void *source;
+} grn_db_obj;
+
 grn_hash *comb_exclude = NULL;
+grn_obj lexicon_name;
 
 #define STOPWORD_FLAG_COLUMN_NAME "@stopword_flag"
-#define TERM_FREQUENCY_COUNT_COLUMN_NAME "@@@term_freq"
-#define DOCUMENT_FREQUENCY_COUNT_COLUMN_NAME "@@document_freq"
 
 typedef struct {
   grn_tokenizer_token token;
@@ -61,13 +68,8 @@ typedef struct {
   grn_bool combhira_filter;
   grn_bool combkata_filter;
   grn_bool use_stopword_flag;
-  grn_bool use_term_freq_count;
-  grn_bool use_document_freq_count;
   grn_obj *lexicon;
   grn_obj *stopword_flag_column;
-  grn_obj *term_freq_count_column;
-  grn_obj *document_freq_count_column;
-  grn_hash *term_count_hash;
 } grn_yangram_tokenizer;
 
 static grn_bool
@@ -378,6 +380,7 @@ yangram_init(grn_ctx *ctx, int nargs, grn_obj **args, grn_user_data *user_data)
   grn_tokenizer_token_init(ctx, &(tokenizer->token));
   tokenizer->query = query;
 
+
   grn_string_get_normalized(ctx, tokenizer->query->normalized_query,
                             &normalized, &normalized_length_in_bytes,
                             NULL);
@@ -432,8 +435,6 @@ yangram_init(grn_ctx *ctx, int nargs, grn_obj **args, grn_user_data *user_data)
   grn_obj *lexicon = args[0];
 
   grn_obj *stopword_flag_column;
-  grn_obj *term_freq_count_column;
-  grn_obj *document_freq_count_column;
 
   stopword_flag_column = grn_obj_column(ctx, lexicon,
                                         STOPWORD_FLAG_COLUMN_NAME,
@@ -446,41 +447,6 @@ yangram_init(grn_ctx *ctx, int nargs, grn_obj **args, grn_user_data *user_data)
     tokenizer->use_stopword_flag = GRN_FALSE;
     tokenizer->lexicon = NULL;
     grn_obj_unlink(ctx, stopword_flag_column);
-  }
-
-  term_freq_count_column = grn_obj_column(ctx, lexicon,
-                                          TERM_FREQUENCY_COUNT_COLUMN_NAME,
-                                          strlen(TERM_FREQUENCY_COUNT_COLUMN_NAME));
-  if (term_freq_count_column) {
-    tokenizer->use_term_freq_count = GRN_TRUE;
-    tokenizer->term_freq_count_column = term_freq_count_column;
-  } else {
-    tokenizer->use_term_freq_count = GRN_FALSE;
-    tokenizer->term_freq_count_column = NULL;
-    grn_obj_unlink(ctx, term_freq_count_column);
-  }
-
-  document_freq_count_column = grn_obj_column(ctx, lexicon,
-                                              DOCUMENT_FREQUENCY_COUNT_COLUMN_NAME,
-                                              strlen(DOCUMENT_FREQUENCY_COUNT_COLUMN_NAME));
-  if (document_freq_count_column) {
-    tokenizer->use_document_freq_count = GRN_TRUE;
-    tokenizer->document_freq_count_column = document_freq_count_column;
-  } else {
-    tokenizer->use_document_freq_count = GRN_FALSE;
-    tokenizer->document_freq_count_column = NULL;
-    grn_obj_unlink(ctx, document_freq_count_column);
-  }
-
-  if (term_freq_count_column || document_freq_count_column) {
-    grn_hash *term_count_hash;
-    term_count_hash = grn_hash_create(ctx, NULL,
-                                      GRN_TABLE_MAX_KEY_SIZE,
-                                      sizeof(unsigned int),
-                                      GRN_OBJ_TABLE_HASH_KEY|GRN_OBJ_KEY_VAR_SIZE);
-    tokenizer->term_count_hash = term_count_hash;
-  } else {
-    tokenizer->term_count_hash = NULL;
   }
 
   return NULL;
@@ -573,22 +539,6 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
   if (!(status & GRN_TOKENIZER_TOKEN_SKIP) &&
       !(status & GRN_TOKENIZER_TOKEN_SKIP_WITH_POSITION)) {
 
-    if ((tokenizer->use_term_freq_count || tokenizer->use_document_freq_count) &&
-        (tokenizer->query->token_mode == GRN_TOKEN_ADD || 
-         tokenizer->query->token_mode == GRN_TOKEN_DEL)) {
-      grn_id id;
-      id = grn_hash_add(ctx, tokenizer->term_count_hash,
-                        token_top, token_tail - token_top, NULL, NULL);
-      if (tokenizer->use_term_freq_count) {
-        if (id) {
-          unsigned int count_value;
-          grn_hash_get_value(ctx, tokenizer->term_count_hash, id, &count_value);
-          count_value++;
-          grn_hash_set_value(ctx, tokenizer->term_count_hash, id, &count_value, GRN_OBJ_SET);
-        } 
-      }
-    }
-
     if (tokenizer->use_stopword_flag &&
         tokenizer->query->token_mode == GRN_TOKEN_GET) {
       grn_id id;
@@ -630,78 +580,8 @@ yangram_fin(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
 {
   grn_yangram_tokenizer *tokenizer = user_data->ptr;
 
-  if ((tokenizer->use_term_freq_count || tokenizer->use_document_freq_count) &&
-      (tokenizer->query->token_mode == GRN_TOKEN_ADD ||
-       tokenizer->query->token_mode == GRN_TOKEN_DEL)) {
-    grn_hash_cursor *cur;
-
-    if ((cur = grn_hash_cursor_open(ctx, tokenizer->term_count_hash, NULL, 0, NULL,
-                                     0, 0, -1, GRN_CURSOR_BY_ID))) {
-      grn_id count_hash_id;
-      while ((count_hash_id = grn_hash_cursor_next(ctx, cur)) != GRN_ID_NIL) {
-        char buf[GRN_TABLE_MAX_KEY_SIZE];
-        int buf_size;
-        buf_size = grn_hash_get_key(ctx, tokenizer->term_count_hash, count_hash_id,
-                                    buf, GRN_TABLE_MAX_KEY_SIZE);
-        grn_id lexicon_id;
-        lexicon_id = grn_table_get(ctx, tokenizer->lexicon, buf, buf_size);
-        if (lexicon_id && tokenizer->use_document_freq_count) {
-          grn_obj count_value;
-          GRN_UINT32_INIT(&count_value, 0);
-          GRN_BULK_REWIND(&count_value);
-          grn_obj_get_value(ctx, tokenizer->document_freq_count_column, lexicon_id,
-                            &count_value);
-          unsigned int count_value_int = GRN_UINT32_VALUE(&count_value);
-          if (tokenizer->query->token_mode == GRN_TOKEN_ADD) {
-            count_value_int++;
-          } else if (tokenizer->query->token_mode == GRN_TOKEN_DEL) {
-            if (count_value_int > 0) {
-              count_value_int--;
-            }
-          }
-          GRN_UINT32_SET(ctx, &count_value, count_value_int);
-          grn_obj_set_value(ctx, tokenizer->document_freq_count_column, lexicon_id,
-                            &count_value, GRN_OBJ_SET);
-        }
-
-        if (lexicon_id && tokenizer->use_term_freq_count) {
-          grn_obj count_value;
-          GRN_UINT32_INIT(&count_value, 0);
-          GRN_BULK_REWIND(&count_value);
-          grn_obj_get_value(ctx, tokenizer->term_freq_count_column, lexicon_id,
-                            &count_value);
-          unsigned int count_value_int = GRN_UINT32_VALUE(&count_value);
-          unsigned int add_value_int;
-          grn_hash_get_value(ctx, tokenizer->term_count_hash, count_hash_id, &add_value_int);
-          if (tokenizer->query->token_mode == GRN_TOKEN_ADD) {
-            count_value_int += add_value_int;
-          } else if (tokenizer->query->token_mode == GRN_TOKEN_DEL) {
-            if (count_value_int > 0) {
-              count_value_int -= add_value_int;
-            }
-          }
-          GRN_UINT32_SET(ctx, &count_value, count_value_int);
-          grn_obj_set_value(ctx, tokenizer->term_freq_count_column, lexicon_id,
-                            &count_value, GRN_OBJ_SET);
-        }
-
-      }
-    }
-    grn_hash_cursor_close(ctx, cur);
-  }
-
   if (tokenizer->use_stopword_flag) {
     grn_obj_unlink(ctx, tokenizer->stopword_flag_column);
-  }
-  if (tokenizer->use_term_freq_count) {
-    grn_obj_unlink(ctx, tokenizer->term_freq_count_column);
-  }
-  if (tokenizer->use_document_freq_count) {
-    grn_obj_unlink(ctx, tokenizer->document_freq_count_column);
-  }
-  if (tokenizer->term_count_hash) {
-    grn_hash_close(ctx, tokenizer->term_count_hash);
-    tokenizer->term_count_hash = NULL;
   }
 
   if (!tokenizer) {
@@ -733,9 +613,24 @@ load_comb_exclude(grn_ctx *ctx)
 
 }
 
+static grn_obj*
+command_use_lexicon(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
+                    grn_user_data *user_data)
+{
+  grn_obj *var;
+  var = grn_plugin_proc_get_var(ctx, user_data, "lexicon_name", -1);
+
+  GRN_TEXT_SET(ctx, &lexicon_name, GRN_TEXT_VALUE(var), GRN_TEXT_LEN(var));
+
+  grn_ctx_output_bool(ctx, GRN_TRUE);
+  return NULL;
+}
+
 grn_rc
 GRN_PLUGIN_INIT(grn_ctx *ctx)
 {
+  GRN_TEXT_INIT(&lexicon_name, 0);
+  
   load_comb_exclude(ctx);
 
   return ctx->rc;
@@ -746,6 +641,10 @@ grn_rc
 GRN_PLUGIN_REGISTER(grn_ctx *ctx)
 {
   grn_expr_var vars[11];
+
+  grn_plugin_expr_var_init(ctx, &vars[0], "lexicon_name", -1);
+  grn_plugin_command_create(ctx, "use_lexicon", -1, command_use_lexicon, 1, vars);
+
   grn_plugin_expr_var_init(ctx, &vars[0], NULL, -1);
   grn_plugin_expr_var_init(ctx, &vars[1], NULL, -1);
   grn_plugin_expr_var_init(ctx, &vars[2], NULL, -1);
@@ -827,6 +726,9 @@ GRN_PLUGIN_FIN(GNUC_UNUSED grn_ctx *ctx)
   if (comb_exclude) {
     grn_hash_close(ctx, comb_exclude);
     comb_exclude = NULL;
+  }
+  if (GRN_TEXT_LEN(&lexicon_name)) {
+    grn_obj_unlink(ctx, &lexicon_name);
   }
 
   return GRN_SUCCESS;
