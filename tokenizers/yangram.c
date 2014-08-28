@@ -64,6 +64,32 @@ typedef struct {
 } grn_yangram_tokenizer;
 
 static grn_bool
+is_token_all_blank(grn_ctx *ctx, grn_yangram_tokenizer *tokenizer,
+                   const unsigned char *token_top,
+                   int token_size)
+{
+  unsigned int char_length;
+  int i = 0;
+  if ((char_length = grn_plugin_isspace(ctx, (char *)token_top,
+                                        tokenizer->rest_length,
+                                        tokenizer->query->encoding))) {
+    i = 1;
+    token_top += char_length;
+    while (i < token_size &&
+           (char_length = grn_plugin_isspace(ctx, (char *)token_top,
+                                             tokenizer->rest_length,
+                                             tokenizer->query->encoding))) {
+      token_top += char_length;
+      i++;
+    }
+  }
+  if (i == token_size) {
+    return GRN_TRUE;
+  }
+  return GRN_FALSE;
+}
+
+static grn_bool
 combhira_filter(grn_ctx *ctx, grn_yangram_tokenizer *tokenizer,
                 const unsigned char *ctypes,
                 const unsigned char *token_top)
@@ -122,13 +148,18 @@ combkata_filter(grn_ctx *ctx, grn_yangram_tokenizer *tokenizer,
 static grn_bool
 execute_token_filter(grn_ctx *ctx, grn_yangram_tokenizer *tokenizer,
                      const unsigned char *ctypes,
-                     const unsigned char *token_top)
+                     const unsigned char *token_top,
+                     int token_size)
 {
-  if (tokenizer->combhira_filter &&
+  if (tokenizer->overlap_skip &&
+      is_token_all_blank(ctx, tokenizer, token_top, token_size)) {
+    return GRN_TRUE;
+  }
+  if (tokenizer->combhira_filter && token_size >= 2 &&
       combhira_filter(ctx, tokenizer, ctypes, token_top)) {
     return GRN_TRUE;
   }
-  if (tokenizer->combkata_filter &&
+  if (tokenizer->combkata_filter && token_size >= 2 &&
       combkata_filter(ctx, tokenizer, ctypes, token_top)) {
     return GRN_TRUE;
   }
@@ -286,12 +317,12 @@ is_token_all_same(grn_ctx *ctx, grn_yangram_tokenizer *tokenizer,
   unsigned int char_length;
   const unsigned char *token_before = token_top;
 
-  int i = 1;
+  int i = 0;
 
   if ((char_length = grn_plugin_charlen(ctx, (char *)token_top, tokenizer->rest_length,
                                        tokenizer->query->encoding))) {
     token_top += char_length;
-
+    i = 1;
     while (i < token_size &&
       (char_length = grn_plugin_charlen(ctx, (char *)token_top, tokenizer->rest_length,
                                         tokenizer->query->encoding))) {
@@ -496,17 +527,8 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
       status |= GRN_TOKENIZER_TOKEN_UNMATURED;
   }
 
-  if (token_size >= 2) {
-    if (execute_token_filter(ctx, tokenizer, ctypes, token_top)) {
-      status |= GRN_TOKENIZER_TOKEN_SKIP_WITH_POSITION;
-    }
-  } else if (token_size == 1) {
-    char_length = grn_plugin_charlen(ctx, (char *)token_top,
-                                     tokenizer->rest_length,
-                                     tokenizer->query->encoding);
-    if (token_top + char_length &&
-        (!memcmp(token_top, "　", char_length) ||
-         !memcmp(token_top, " ", char_length))) {
+  if (token_size) {
+    if (execute_token_filter(ctx, tokenizer, ctypes, token_top, token_size)) {
       status |= GRN_TOKENIZER_TOKEN_SKIP_WITH_POSITION;
     }
   }
@@ -527,7 +549,6 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
 
   if (!(status & GRN_TOKENIZER_TOKEN_SKIP) &&
       !(status & GRN_TOKENIZER_TOKEN_SKIP_WITH_POSITION)) {
-
     if (tokenizer->use_stopword &&
         tokenizer->query->token_mode == GRN_TOKEN_GET) {
       grn_id id;
@@ -543,7 +564,6 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
         grn_obj_unlink(ctx, &is_stopword);
       }
     }
-
   }
 
   if (!(status & GRN_TOKENIZER_TOKEN_SKIP) &&
