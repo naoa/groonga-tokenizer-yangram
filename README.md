@@ -174,7 +174,7 @@ tokenize TokenYaBigramCombhiraCombkata "今日は雨だ" NormalizerAuto --mode G
 語彙表に以下の名前のカラムを作るとストップワードの機能が自動的に有効になります。
 
 ```
-column_create Terms @stopword COLUMN_SCALAR Bool
+column_create <lexicon_table_name> @stopword COLUMN_SCALAR Bool
 ```
 
 * @stopword
@@ -279,8 +279,8 @@ Mroonga:
     mysql> CREATE TABLE `Diaries` (
         -> id INT NOT NULL,
         -> body TEXT NOT NULL,
-        -> PRIMARY KEY id(id) USING HASH,
-        -> FULLTEXT INDEX body(body) COMMENT 'parser "TokenYaBigramOverskip"'
+        -> PRIMARY KEY (id) USING HASH,
+        -> FULLTEXT INDEX (body) COMMENT 'parser "TokenYaBigramOverskip"'
         -> ) ENGINE=mroonga DEFAULT CHARSET=utf8;
 
 Rroonga:
