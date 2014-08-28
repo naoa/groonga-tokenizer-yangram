@@ -25,7 +25,7 @@ register tokenizer/yangram
 
 ```
 yangram_register --ngram_unit 2 --ignore_blank 0 \
-  --split_symbol 1 --split_alpha 1 --split_digit 1 \
+  --split_symbol 1 --split_alpha 1 --split_digit 0 \
   --skip_overlap 1 --skip_stopword 1 \
   --filter_combhira 1 --filter_combkata 1 \
   --stem_snowball en
@@ -35,7 +35,7 @@ yangram_register --ngram_unit 2 --ignore_blank 0 \
     0.0,
     0.0
   ],
-  "TokenYaTrigramSplitAlphaDigitSkipOverlapStopwordFilterCombhiraCombkataStemSnowball"
+  "TokenYaBigramSplitSymbolAlphaSkipOverlapStopwordFilterCombhiraCombkataStemSnowball"
 ]
 ```
 
