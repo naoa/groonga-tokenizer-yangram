@@ -9,7 +9,7 @@ yum install -y groonga-devel autoconf automake libtool wget tar gcc-c++ make mec
 
 cd /usr/local/src/groonga-tokenizer-yangram
 make clean
-rm -rf Makefile.in aclocal.m4 autom4te.cache config.guess config.h.in config.sub configure depcomp install-sh ltmain.sh m4 missing groonga-tokenizer-yangram.pc packages/rpm/centos/groonga-tokenizer-yangram.spec packages/rpm/fedora/groonga-tokenizer-yangram.spec Makefile config.log config.h libtool stamp-h1 packages/Makefile packages/Makefile.in packages/apt/Makefile packages/apt/Makefile.in packages/rpm/Makefile packages/rpm/Makefile.in  packages/rpm/centos/Makefile packages/rpm/centos/Makefile.in packages/rpm/fedora/Makefile packages/rpm/fedora/Makefile.in packages/source/Makefile packages/source/Makefile.in  packages/yum/Makefile packages/yum/Makefile.in test/Makefile.in test/Makefile tokenizers/Makefile tokenizers/Makefile.in  tokenizers/.deps/ tokenizers/.libs/ config.status
+sh clean.sh
 sh autogen.sh
 ./configure && make
 
@@ -22,6 +22,7 @@ cp -rf groonga-tokenizer-yangram groonga-tokenizer-yangram-1.0.0
 tar zcvf groonga-tokenizer-yangram-1.0.0.tar.gz groonga-tokenizer-yangram-1.0.0
 mv groonga-tokenizer-yangram-1.0.0.tar.gz ~/rpmbuild/SOURCES/
 rpmbuild -ba ~/rpmbuild/SPECS/groonga-tokenizer-yangram.spec
+mkdir -p /usr/local/src/groonga-tokenizer-yangram/public/centos/6/
 mv ~/rpmbuild/RPMS/x86_64/groonga-tokenizer-yangram-1.0.0-1.el6.x86_64.rpm /usr/local/src/groonga-tokenizer-yangram/public/centos/6/
 ```
 
@@ -43,6 +44,7 @@ yum install -y groonga-devel autoconf automake libtool wget tar gcc-c++ make mec
 …
 cp packages/rpm/fedora/groonga-tokenizer-yangram.spec ~/rpmbuild/SPECS/
 …
+mkdir -p /usr/local/src/groonga-tokenizer-yangram/public/fedora/20/
 mv ~/rpmbuild/RPMS/x86_64/groonga-tokenizer-yangram-1.0.0-1.fc20.x86_64.rpm /usr/local/src/groonga-tokenizer-yangram/public/fedora/20/
 ```
 
@@ -60,7 +62,8 @@ apt-get update
 apt-get install -y groonga libgroonga-dev wget tar build-essential zlib1g-dev liblzo2-dev libmsgpack-dev libzmq-dev libevent-dev libmecab-dev autoconf automake libtool lsb-release aptitude devscripts
 
 cd /usr/local/src/groonga-tokenizer-yangram
-make clean                                                                                                             rm -rf Makefile.in aclocal.m4 autom4te.cache config.guess config.h.in config.sub configure depcomp install-sh ltmain.sh m4 missing groonga-tokenizer-yangram.pc packages/rpm/centos/groonga-tokenizer-yangram.spec packages/rpm/fedora/groonga-tokenizer-yangram.spec Makefile config.log config.h libtool stamp-h1 packages/Makefile packages/Makefile.in packages/apt/Makefile packages/apt/Makefile.in packages/rpm/Makefile packages/rpm/Makefile.in  packages/rpm/centos/Makefile packages/rpm/centos/Makefile.in packages/rpm/fedora/Makefile packages/rpm/fedora/Makefile.in packages/source/Makefile packages/source/Makefile.in  packages/yum/Makefile packages/yum/Makefile.in test/Makefile.in test/Makefile tokenizers/Makefile tokenizers/Makefile.in  tokenizers/.deps/ tokenizers/.libs/ config.status
+make clean
+sh clean.sh
 sh autogen.sh
 ./configure && make
 
@@ -78,6 +81,7 @@ cd groonga-tokenizer-yangram-1.0.0/
 cp -rf packages/debian .
 debuild -us -uc
 cd ..
+mkdir -p /usr/local/src/groonga-tokenizer-yangram/public/debian/wheezy/
 mv ~/build/groonga-tokenizer-yangram_1.0.0-1_amd64.deb /usr/local/src/groonga-tokenizer-yangram/public/debian/wheezy/
 ```
 
@@ -89,6 +93,7 @@ docker run -v /usr/local/src:/usr/local/src -i -t debian:jessie /bin/bash
 echo "deb http://packages.groonga.org/debian/ jessie main" >> /etc/apt/sources.list.d/groonga.list
 echo "deb-src http://packages.groonga.org/debian/ jessie main" >> /etc/apt/sources.list.d/groonga.list
 …
+mkdir -p /usr/local/src/groonga-tokenizer-yangram/public/debian/jessie/
 mv ~/build/groonga-tokenizer-yangram_1.0.0-1_amd64.deb /usr/local/src/groonga-tokenizer-yangram/public/debian/jessie/
 ```
 
@@ -104,6 +109,7 @@ add-apt-repository -y universe
 add-apt-repository -y ppa:groonga/ppa
 apt-get update
 …
+mkdir -p /usr/local/src/groonga-tokenizer-yangram/public/ubuntu/precise/
 mv ~/build/groonga-tokenizer-yangram_1.0.0-1_amd64.deb /usr/local/src/groonga-tokenizer-yangram/public/ubuntu/precise/
 ```
 
@@ -119,6 +125,7 @@ add-apt-repository -y universe
 add-apt-repository -y ppa:groonga/ppa
 apt-get update
 …
+mkdir -p /usr/local/src/groonga-tokenizer-yangram/public/ubuntu/trusty/
 mv ~/build/groonga-tokenizer-yangram_1.0.0-1_amd64.deb /usr/local/src/groonga-tokenizer-yangram/public/ubuntu/trusty/
 ```
 
