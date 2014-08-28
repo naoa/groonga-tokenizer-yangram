@@ -1,56 +1,102 @@
 # Yet another ngram tokenizer plugin for Groonga
 
-## Tokenizer
+このトークナイザープラグインは、原則、ビルトインのTokenBigramトークナイザー等と同様のルールで文字列をトークナイズします。
+それに加えストップワードやオーバーラップスキップ、トークンフィルターなどいくつかの機能を追加しています。  
+トークナイザープラグインの登録には、``register``コマンドを利用します。
 
-* TokenYaBigramOverskip
-* TokenYaBigramCombhiraCombkata
-* TokenYaBigramOverskipCombhiraCombkata
-* TokenYaTrigramOverskip
-* TokenYaTrigramCombhiraCombkata
-* TokenYaTrigramOverskipCombhiraCombkata
-* TokenYaBigramSplitSymbolAlphaOverskip
-* TokenYaTrigramSplitSymbolAlphaOverskip
+```
+register tokenizer/yangram
+```
 
-TokenYaBigram～等は、原則、通常のTokenBigram等と同じルールでトークナイズします。
+その後、``yangram_register``コマンドを使って必要な機能のオプションを指定してトークナイザーを登録します。
 
-それに加え、以下の機能が実行されるようにカスタマイズしています。
+## yangram_register
 
-### Overskip
+* Summary
 
-検索時のみNgramのオーバラップをスキップしてトークナイズします。  
-検索時のトークン数を減らすことができます。
-トークンの比較回数が減るため、検索処理の速度向上が見込めます。  
+``yangram_register``コマンドは、TokenYaNgram系トークナイザーを登録します。
+
+``TokenYa``の後に以下のオプションに応じた名前が追加されたトークナイザーが1つ登録されます。
+``Split``、``Skip``、``Filter``系を複数指定した場合は、先頭にのみ、それらの名前が追加されます。
+
+``Skip``は、検索時のみトークンをスキップします。``Filter``は、検索時、更新時の両方でトークンを除去します。
+
+* Example
+
+```
+yangram_register --ngram_unit 2 --ignore_blank 1 \
+  --split_symbol 1 --split_alpha 1 --split_digit 1 \
+  --skip_overlap 1 --skip_stopword 1 \
+  --filter_combhira 1 --filter_combkata 1
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  "TokenYaBigramIgnoreBlankSplitSymbolAlphaDigitSkipOverlapStopwordFilterCombhiraCombkata"
+]
+```
+
+* Parameters
+
+|Args|Input|Added_name|Description|
+|:---|-----|----------|-----------|
+|ngram_unit|[1-10]|[Uni/Bi/Tri/Quad/Pent/<BR>Hex/Hept/Oct/Non/Dec+gram]|NgramのNの値|
+|ignore_blank|[0-1]|IgnoreBlank|空白区切りを無視|
+|split_symbol|[0-1]|SplitSymbol|ノーマライザー使用時でも<BR>記号を分割|
+|split_alpha|[0-1]|SplitAlpha|ノーマライザー使用時でも<BR>アルファベットを分割|
+|split_digit|[0-1]|SplitDigit|ノーマライザー使用時でも<BR>数値を分割|
+|skip_overlap|[0-1]|SkipOverlap|検索時のみ<BR>オーバーラップしている<BR>トークンをスキップ|
+|skip_stopword|[0-1]|SkipStopword|検索時のみ<BR>ストップワードカラムが<BR>trueのトークンをスキップ|
+|filter_combhira|[0-1]|FilterCombhira|検索時、更新時において<BR>[ひらがな+その他の字種]の<BR>組み合わせのトークンを除去|
+|filter_combkata|[0-1]|FilterCombkata|検索時、更新時において<BR>[カタカナ+漢字]の<BR>組み合わせのトークンを除去|
+
+* Return value
+
+```
+[HEADER, tokenizer_name]
+```
+
+``tokenizer_name``
+
+登録されたトークナイザ名が出力されます。
+
+### SkipOverlap
+
+検索時のみNgramのオーバーラップをスキップしてトークナイズします。  
+検索時のトークン数を減らすことができ、検索処理の速度向上が見込めます。  
 
 トークンの末尾が最終まで到達した場合(``GRN_TOKENIZER_TOKEN_REACH_END``)、
 アルファベットや記号などトークンがグループ化される字種境界および次のトークンが
 フィルターされる場合ではスキップされません。
-すなわち、検索クエリ末尾や字種境界では、オーバラップしているトークンが含まれます。
+すなわち、検索クエリ末尾や字種境界では、オーバーラップしているトークンが含まれます。
 これはNgramのNに満たないトークンを含めてしまうと検索性能が劣化するため、
 あえてスキップしないようにしています。
 
-オーバラップスキップを有効にすると、通常のTokenBigram等と異なり空白が含まれた状態でトークナイズされます。オーバラップをスキップすると空白の有無をうまく区別することができないためです。このため、通常のTokenBigram等よりも若干インデックスサイズが増えます。なお、空白のみのトークンは除去されます。
+オーバーラップスキップを有効にすると、通常のTokenBigram等と異なり空白が含まれた状態でトークナイズされます。これはオーバーラップをスキップすると空白の有無をうまく区別することができないためです。このため、通常のTokenBigram等よりも若干インデックスサイズが増えます。なお、空白のみのトークンは除去されます。
 
-Wikipedia(ja)で1000回検索した場合の検索速度差とヒット件数差
+* Wikipedia(ja)で1000回検索した場合の検索速度差とヒット件数差
 
-|                       | TokenYaBigramOverskip | TokenBigram |
-|:----------------------|----------------------:|------------:|
-| Hits                  | 112378                | 112378      |
-| Searching time (Avg)  | 0.0325 sec            | 0.0508 sec  |
-| Offline Indexing time | 1224 sec              | 1200 sec    |
-| Index size            | 7.898GiB              | 7.580GiB    |
+|                       | TokenYaBigramSkipOverlap | TokenBigram |
+|:----------------------|-------------------------:|------------:|
+| Hits                  | 112378                   | 112378      |
+| Searching time (Avg)  | 0.0325 sec               | 0.0508 sec  |
+| Offline Indexing time | 1224 sec                 | 1200 sec    |
+| Index size            | 7.898GiB                 | 7.580GiB    |
 
 
-|                       | TokenYaTrigramOverskip | TokenTrigram |
-|:----------------------|-----------------------:|-------------:|
-| Hits                  | 112378                 | 112378       |
-| Searching time (Avg)  | 0.0063 sec             | 0.0146 sec   |
-| Offline Indexing time | 2293 sec               | 2333 sec     |
-| Index size            | 9.275GiB               | 9.009GiB     |
+|                       | TokenYaTrigramSkipOverlap | TokenTrigram |
+|:----------------------|--------------------------:|-------------:|
+| Hits                  | 112378                    | 112378       |
+| Searching time (Avg)  | 0.0063 sec                | 0.0146 sec   |
+| Offline Indexing time | 2293 sec                  | 2333 sec     |
+| Index size            | 9.275GiB                  | 9.009GiB     |
 
 * ADD mode
 
 ```
-tokenize TokenYaBigramOverskip "今日は雨だな" NormalizerAuto --mode ADD
+tokenize TokenYaBigramSkipOverlap "今日は雨だな" NormalizerAuto --mode ADD
 [
   [
     0,
@@ -90,7 +136,7 @@ tokenize TokenYaBigramOverskip "今日は雨だな" NormalizerAuto --mode ADD
 * GET mode
 
 ```
-tokenize TokenYaBigramOverskip "今日は雨だな" NormalizerAuto --mode GET
+tokenize TokenYaBigramSkipOverlap "今日は雨だな" NormalizerAuto --mode GET
 [
   [
     0,
@@ -114,7 +160,25 @@ tokenize TokenYaBigramOverskip "今日は雨だな" NormalizerAuto --mode GET
 ]
 ```
 
-### Combhira/Combkata
+### SkipStopword
+
+``SkipStopword``の機能を有効にするには、語彙表に``@stopword``という名前のカラムを作る必要があります。
+
+```
+column_create <lexicon_name> @stopword COLUMN_SCALAR Bool
+```
+
+検索時のみ``@stopword``のカラムが``true``となっているキーのトークンがスキップされます。検索速度に影響が大きく、
+検索精度にはあまり影響のないキーを取捨選択して検索から除外することができます。インデックス更新からは除外されません。
+
+```
+load --table <lexicon_name>
+[
+{"_key": "the", "@stopword": true }
+]
+```
+
+### FilterCombhira/FilterCombkata
 
 検索時、追加時の両方で``ひらがな1文字+他の字種``または``カタカナ1文字+漢字``の組み合わせで
 始まるトークンを除去します。
@@ -132,9 +196,9 @@ tokenize TokenYaBigramOverskip "今日は雨だな" NormalizerAuto --mode GET
     "型", "形", "変", "長", "短", "音", "階", "字"
 ```
 
-Wikipedia(ja)で1000回検索した場合の検索速度差とヒット件数差
+* Wikipedia(ja)で1000回検索した場合の検索速度差とヒット件数差
 
-|                       | TokenYaBigram<BR>CombhiraCombkata | TokenYaBigram<BR>OverskipCombhiraCombkata |
+|                       | TokenYaBigram<BR>FilterCombhiraCombkata | TokenYaBigramSkipOverlap<BR>FilterCombhiraCombkata |
 |:----------------------|------------------------------:|------------------------------------:|
 | Hits                  | 110549                        | 110748                              |
 | Searching time (Avg)  | 0.0471 sec                    | 0.0376 sec                          |
@@ -145,7 +209,7 @@ Wikipedia(ja)で1000回検索した場合の検索速度差とヒット件数差
 * ADD mode / GET mode
 
 ```
-tokenize TokenYaBigramCombhiraCombkata "今日は雨だ" NormalizerAuto --mode GET
+tokenize TokenYaBigramFilterCombhiraCombkata "今日は雨だ" NormalizerAuto --mode GET
 [
   [
     0,
@@ -168,18 +232,6 @@ tokenize TokenYaBigramCombhiraCombkata "今日は雨だ" NormalizerAuto --mode G
   ]
 ]
 ```
-
-### ストップワード
-
-語彙表に以下の名前のカラムを作るとストップワードの機能が自動的に有効になります。
-
-```
-column_create <lexicon_table_name> @stopword COLUMN_SCALAR Bool
-```
-
-* @stopword
-
-検索時のみこのカラムが``true``となっているキーのトークンがスキップされます。検索速度に影響が大きく、検索精度にはあまり影響のないキーを取捨選択して検索から除外することができます。インデックス更新からは除外されません。
 
 ## Install
 
@@ -225,7 +277,6 @@ Install ``groonga-tokenizer-yangram`` package:
 % sudo dpkg -i groonga-tokenizer-yangram_1.0.0-1_amd64.deb
 ```
 
-
 ### Ubuntu
 
 * precise
@@ -267,9 +318,11 @@ Groonga:
 
     % groonga db
     > register tokenizers/yangram
+    > yangram_register 2 --skip_overlap 1 --skip_stopword 1
     > table_create Diaries TABLE_HASH_KEY INT32
     > column_create Diaries body COLUMN_SCALAR TEXT
-    > table_create Terms TABLE_PAT_KEY ShortText --default_tokenizer TokenYaBigramOverskip
+    > table_create Terms TABLE_PAT_KEY ShortText \
+    >   --default_tokenizer TokenYaBigramSkipOverlapStopword
     > column_create Terms diaries_body COLUMN_INDEX|WITH_POSITION Diaries body
     > column_create Terms @stopword COLUMN_SCALAR Bool
 
@@ -277,11 +330,12 @@ Mroonga:
 
     mysql> use db;
     mysql> select mroonga_command("register tokenizers/yangram");
+    mysql> select mroonga_command("yangram_register 2 --skip_overlap 1 --skip_stopword 1");
     mysql> CREATE TABLE `Diaries` (
         -> id INT NOT NULL,
         -> body TEXT NOT NULL,
         -> PRIMARY KEY (id) USING HASH,
-        -> FULLTEXT INDEX (body) COMMENT 'parser "TokenYaBigramOverskip"'
+        -> FULLTEXT INDEX (body) COMMENT 'parser "TokenYaBigramSkipOverlapStopword"'
         -> ) ENGINE=mroonga DEFAULT CHARSET=utf8;
     mysql> select mroonga_command("column_create Diaries-body @stopword COLUMN_SCALAR Bool");
 
@@ -289,17 +343,21 @@ Rroonga:
 
     irb --simple-prompt -rubygems -rgroonga
     >> Groonga::Context.default_options = {:encoding => :utf8}   
-    >> Groonga::Database.create(:path => "/tmp/db")
-    >> Groonga::Plugin.register(:path => "/usr/lib/groonga/plugins/tokenizers/yangram.so")
+    >> context = Groonga::Context.new
+    >> Groonga::Database.create(:path => "/tmp/db", :context => context)
+    >> context.register_plugin(:path => "tokenizers/yangram.so")
+    >> context.execute_command("yangram_register 2 --skip_overlap 1 --skip_stopword 1")
     >> Groonga::Schema.create_table("Diaries",
     ?>                              :type => :hash,
-    ?>                              :key_type => :integer32) do |table|
+    ?>                              :key_type => :integer32,
+    ?>                              :context => context) do |table|
     ?>   table.text("body")
     >> end
     >> Groonga::Schema.create_table("Terms",
     ?>                              :type => :patricia_trie,
     ?>                              :normalizer => :NormalizerAuto,
-    ?>                              :default_tokenizer => "TokenYaBigramOverskip") do |table|
+    ?>                              :default_tokenizer => "TokenYaBigramSkipOverlapStopword",
+    ?>                              :context => context) do |table|
     ?>   table.index("Diaries.body")
     ?>   table.bool("@stopword")
     >> end
