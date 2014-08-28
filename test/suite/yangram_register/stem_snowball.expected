@@ -1,14 +1,7 @@
 register tokenizers/yangram
 [[0,0.0,0.0],true]
-yangram_register --ngram_unit 3 --ignore_blank 1   --split_symbol 1 --split_alpha 1 --split_digit 1   --skip_overlap 1 --skip_stopword 1   --filter_combhira 1 --filter_combkata 1   --stem_snowball en
-[
-  [
-    0,
-    0.0,
-    0.0
-  ],
-  "TokenYaTrigramIgnoreBlankSplitSymbolAlphaDigitSkipOverlapStopwordFilterCombhiraCombkataStemSnowball"
-]
+yangram_register --stem_snowball en
+[[0,0.0,0.0],"TokenYaBigramStemSnowball"]
 tokenizer_list
 [
   [
@@ -54,7 +47,7 @@ tokenizer_list
       "name": "TokenDelimitNull"
     },
     {
-      "name": "TokenYaTrigramIgnoreBlankSplitSymbolAlphaDigitSkipOverlapStopwordFilterCombhiraCombkataStemSnowball"
+      "name": "TokenYaBigramStemSnowball"
     }
   ]
 ]

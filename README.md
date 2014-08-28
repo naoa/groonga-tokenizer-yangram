@@ -27,14 +27,15 @@ register tokenizer/yangram
 yangram_register --ngram_unit 2 --ignore_blank 1 \
   --split_symbol 1 --split_alpha 1 --split_digit 1 \
   --skip_overlap 1 --skip_stopword 1 \
-  --filter_combhira 1 --filter_combkata 1
+  --filter_combhira 1 --filter_combkata 1 \
+  --stem_snowball en
 [
   [
     0,
     0.0,
     0.0
   ],
-  "TokenYaBigramIgnoreBlankSplitSymbolAlphaDigitSkipOverlapStopwordFilterCombhiraCombkata"
+  "TokenYaBigramIgnoreBlankSplitSymbolAlphaDigitSkipOverlapStopwordFilterCombhiraCombkataStemSnowball"
 ]
 ```
 
@@ -51,6 +52,7 @@ yangram_register --ngram_unit 2 --ignore_blank 1 \
 |skip_stopword|[0-1]|SkipStopword|検索時のみ<BR>ストップワードカラムが<BR>trueのトークンをスキップ|
 |filter_combhira|[0-1]|FilterCombhira|検索時、更新時において<BR>[ひらがな+その他の字種]の<BR>組み合わせのトークンを除去|
 |filter_combkata|[0-1]|FilterCombkata|検索時、更新時において<BR>[カタカナ+漢字]の<BR>組み合わせのトークンを除去|
+|stem_snowball|[en/por/da/de/es/fi/fr/hu/<BR>it/nl/no/pt/ro/ru/sv/tr]|StemSnowball|検索時、更新時において<BR>Snowball stemmerを使ってトークンをステミング|
 
 * Return value
 
@@ -227,6 +229,56 @@ tokenize TokenYaBigramFilterCombhiraCombkata "今日は雨だ" NormalizerAuto --
     },
     {
       "value": "雨だ",
+      "position": 2
+    }
+  ]
+]
+```
+
+### StemSnowball
+
+検索時、追加時の両方で[Snowball stemmer](http://snowball.tartarus.org/)を使ってステミングします。
+
+英語などのトークンを語幹を抽出します。
+複数形や過去形などの活用形の語尾を所定の規則に沿って切除します。
+Snowball stemmerが対応している以下の言語を使うことができます。
+
+| Desctiption           | Arg                   |
+|:----------------------|:----------------------|
+| 英語                  | english, en, eng      |
+| 英語(porter)          | porter, por           |
+| デンマーク語          | danish, da, dan       |
+| オランダ語            | dutch, nl, nld, dut   |
+| フィンランド語        | finnish, fi, fin      |
+| フランス語            | french, fr, fra, fre  |
+| ドイツ語              | german, de, deu, ger  |
+| イタリア語            | italian, it, ita      |
+| ノルウェー語          | norweigian, no, nor   |
+| ポルトガル語          | potuguese, pt         |
+| スペイン語            | spanish, es, esl, spa |
+| スウェーデン語        | swedish, sv, swe      |
+
+* ADD mode / GET mode
+
+```
+tokenize TokenYaBigramStemSnowball "There are cars" NormalizerAuto
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  [
+    {
+      "value": "there",
+      "position": 0
+    },
+    {
+      "value": "are",
+      "position": 1
+    },
+    {
+      "value": "car",
       "position": 2
     }
   ]

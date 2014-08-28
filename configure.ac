@@ -30,6 +30,20 @@ if test "x$sample_debug" != "xno"; then
   fi
 fi
 
+# snowball stemmer
+enable_snowball=yes
+if test "$enable_snowball" = "yes"; then
+  AC_DEFINE(GRN_WITH_SNOWBALL, [1], [Define to 1 if SNOWBALL is enabled.])
+  SNOWBALL_CFLAGS="-I../vendor/libstemmer_c/include"
+  SNOWBALL_LIBS="../vendor/libstemmer_c/libstemmer.la"
+else
+  SNOWBALL_CFLAGS=
+  SNOWBALL_LIBS=
+fi
+AC_SUBST(SNOWBALL_CFLAGS)
+AC_SUBST(SNOWBALL_LIBS)
+AM_CONDITIONAL(WITH_SNOWBALL, test "$enable_snowball" = "yes")
+
 GROONGA_REQUIRED_VERSION=4.0.5
 PKG_CHECK_MODULES([GROONGA], [groonga >= ${GROONGA_REQUIRED_VERSION}])
 
@@ -59,6 +73,8 @@ AC_CONFIG_FILES([
   packages/rpm/fedora/Makefile
   packages/rpm/fedora/groonga-tokenizer-yangram.spec
   packages/source/Makefile
+  vendor/Makefile
+  vendor/libstemmer_c/Makefile
 ])
 
 AC_OUTPUT
@@ -74,3 +90,8 @@ echo "groonga"
 echo "  CFLAGS:                ${GROONGA_CFLAGS}"
 echo "  Libraries:             ${GROONGA_LIBS}"
 echo "  install directory:     ${tokenizers_pluginsdir}"
+echo
+echo "snowball stemmer:        $enable_snowball"
+echo "  CFLAGS:                ${SNOWBALL_CFLAGS}"
+echo "  Libraries:             ${SNOWBALL_LIBS}"
+

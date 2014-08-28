@@ -1,0 +1,2 @@
+SUBDIRS =					\
+	libstemmer_c
