@@ -271,6 +271,7 @@ Groonga:
     > column_create Diaries body COLUMN_SCALAR TEXT
     > table_create Terms TABLE_PAT_KEY ShortText --default_tokenizer TokenYaBigramOverskip
     > column_create Terms diaries_body COLUMN_INDEX|WITH_POSITION Diaries body
+    > column_create Terms @stopword COLUMN_SCALAR Bool
 
 Mroonga:
 
@@ -282,6 +283,7 @@ Mroonga:
         -> PRIMARY KEY (id) USING HASH,
         -> FULLTEXT INDEX (body) COMMENT 'parser "TokenYaBigramOverskip"'
         -> ) ENGINE=mroonga DEFAULT CHARSET=utf8;
+    mysql> select mroonga_command("column_create Diaries-body @stopword COLUMN_SCALAR Bool");
 
 Rroonga:
 
@@ -299,6 +301,7 @@ Rroonga:
     ?>                              :normalizer => :NormalizerAuto,
     ?>                              :default_tokenizer => "TokenYaBigramOverskip") do |table|
     ?>   table.index("Diaries.body")
+    ?>   table.bool("@stopword")
     >> end
     
 ## Author
