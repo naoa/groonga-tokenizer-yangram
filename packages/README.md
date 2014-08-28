@@ -31,7 +31,8 @@ mv ~/rpmbuild/RPMS/x86_64/groonga-tokenizer-yangram-1.0.0-1.el6.x86_64.rpm /usr/
 ```
 docker run -v /usr/local/src:/usr/local/src -i -t centos:centos7 /bin/bash
 …
-mv ~/rpmbuild/RPMS/x86_64/groonga-tokenizer-yangram-1.0.0-1.el7.centos.x86_64.rpm /usr/local/src/groonga-tokenizer-yangram/public/centos/7/```
+mkdir -p /usr/local/src/groonga-tokenizer-yangram/public/centos/7/
+mv ~/rpmbuild/RPMS/x86_64/groonga-tokenizer-yangram-1.0.0-1.el7.centos.x86_64.rpm /usr/local/src/groonga-tokenizer-yangram/public/centos/7/
 ```
 
 #Fefora20
@@ -72,7 +73,7 @@ mkdir -p ~/build
 
 cd /usr/local/src
 
-cp -rf groonga-tokenizer-yadelirm -rf groonga-tokenizer-yangram-1.0.0mit groonga-tokenizer-yangram-1.0.0
+cp -rf groonga-tokenizer-yangram groonga-tokenizer-yangram-1.0.0
 tar zcvf groonga-tokenizer-yangram-1.0.0.tar.gz groonga-tokenizer-yangram-1.0.0
 mv groonga-tokenizer-yangram-1.0.0.tar.gz ~/build/groonga-tokenizer-yangram_1.0.0.orig.tar.gz
 cd ~/build
