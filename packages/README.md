@@ -52,6 +52,7 @@ mv ~/rpmbuild/RPMS/x86_64/groonga-tokenizer-yangram-1.0.0-1.fc20.x86_64.rpm /usr
 #Debian(wheezy)
 
 ```
+docker run -v /usr/local/src:/usr/local/src -i -t naoa/groonga-build-debian-wheezy /bin/bash
 docker run -v /usr/local/src:/usr/local/src -i -t debian:wheezy /bin/bash
 
 echo "deb http://packages.groonga.org/debian/ wheezy main" >> /etc/apt/sources.list.d/groonga.list
@@ -73,6 +74,7 @@ mkdir -p ~/build
 
 cd /usr/local/src
 
+rm -rf groonga-tokenizer-yangram-1.0.0
 cp -rf groonga-tokenizer-yangram groonga-tokenizer-yangram-1.0.0
 tar zcvf groonga-tokenizer-yangram-1.0.0.tar.gz groonga-tokenizer-yangram-1.0.0
 mv groonga-tokenizer-yangram-1.0.0.tar.gz ~/build/groonga-tokenizer-yangram_1.0.0.orig.tar.gz
@@ -80,7 +82,7 @@ cd ~/build
 tar xfz groonga-tokenizer-yangram_1.0.0.orig.tar.gz
 cd groonga-tokenizer-yangram-1.0.0/
 cp -rf packages/debian .
-debuild -us -uc
+debuild -us -uc -b
 cd ..
 mkdir -p /usr/local/src/groonga-tokenizer-yangram/public/debian/wheezy/
 mv ~/build/groonga-tokenizer-yangram_1.0.0-1_amd64.deb /usr/local/src/groonga-tokenizer-yangram/public/debian/wheezy/
@@ -89,6 +91,7 @@ mv ~/build/groonga-tokenizer-yangram_1.0.0-1_amd64.deb /usr/local/src/groonga-to
 #Debian(jessie)
 
 ```
+docker run -v /usr/local/src:/usr/local/src -i -t naoa/groonga-build-debian-jessie /bin/bash
 docker run -v /usr/local/src:/usr/local/src -i -t debian:jessie /bin/bash
 
 echo "deb http://packages.groonga.org/debian/ jessie main" >> /etc/apt/sources.list.d/groonga.list
@@ -101,6 +104,7 @@ mv ~/build/groonga-tokenizer-yangram_1.0.0-1_amd64.deb /usr/local/src/groonga-to
 #Ubuntu(precise)
 
 ```
+docker run -v /usr/local/src:/usr/local/src -i -t naoa/groonga-build-ubuntu-precise /bin/bash
 docker run -v /usr/local/src:/usr/local/src -i -t ubuntu:precise /bin/bash
 
 apt-get update
@@ -109,6 +113,8 @@ apt-get update
 add-apt-repository -y universe
 add-apt-repository -y ppa:groonga/ppa
 apt-get update
+apt-get install -y groonga libgroonga-dev wget tar build-essential zlib1g-dev liblzo2-dev libmsgpack-dev libzmq-dev libevent-dev libmecab-dev autoconf automake libtool lsb-release aptitude devscripts
+apt-get install -y dh-make
 …
 mkdir -p /usr/local/src/groonga-tokenizer-yangram/public/ubuntu/precise/
 mv ~/build/groonga-tokenizer-yangram_1.0.0-1_amd64.deb /usr/local/src/groonga-tokenizer-yangram/public/ubuntu/precise/
@@ -117,14 +123,8 @@ mv ~/build/groonga-tokenizer-yangram_1.0.0-1_amd64.deb /usr/local/src/groonga-to
 #Ubuntu(trusty)
 
 ```
+docker run -v /usr/local/src:/usr/local/src -i -t naoa/groonga-build-ubuntu-trusty /bin/bash
 docker run -v /usr/local/src:/usr/local/src -i -t ubuntu:trusty /bin/bash
-
-apt-get update
-apt-get -y install software-properties-common python-software-properties
-apt-get update
-add-apt-repository -y universe
-add-apt-repository -y ppa:groonga/ppa
-apt-get update
 …
 mkdir -p /usr/local/src/groonga-tokenizer-yangram/public/ubuntu/trusty/
 mv ~/build/groonga-tokenizer-yangram_1.0.0-1_amd64.deb /usr/local/src/groonga-tokenizer-yangram/public/ubuntu/trusty/
