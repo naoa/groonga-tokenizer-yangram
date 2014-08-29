@@ -1,0 +1,12 @@
+register tokenizers/yangram
+yangram_register --filter_stoptable stopwords
+
+table_create stopwords TABLE_HASH_KEY ShortText
+
+load --table stopwords
+[
+{"_key": "that"},
+{"_key": "He"}
+]
+
+tokenize TokenYaBigramFilterStoptable "This is a pen" NormalizerAuto

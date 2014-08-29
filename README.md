@@ -28,7 +28,7 @@ yangram_register --ngram_unit 2 --ignore_blank 0 \
   --split_symbol 1 --split_alpha 1 --split_digit 0 \
   --skip_overlap 1 --skip_stopword 1 \
   --filter_combhira 1 --filter_combkata 1 \
-  --filter_length 0 \
+  --filter_length 0 --filter_stoptable "" \
   --stem_snowball en
 [
   [
@@ -54,6 +54,7 @@ yangram_register --ngram_unit 2 --ignore_blank 0 \
 |filter_combhira|[0-1]|FilterCombhira|検索時、更新時において<BR>[ひらがな+その他の字種]の<BR>組み合わせのトークンを除去|
 |filter_combkata|[0-1]|FilterCombkata|検索時、更新時において<BR>[カタカナ+漢字]の<BR>組み合わせのトークンを除去|
 |filter_length|[0-]|FilterLength|検索時、更新時において<BR>指定バイトを超える<BR>トークンを除去|
+|filter_stoptable|[table_name]|FilterStoptable|検索時、更新時において<BR>指定したテーブルのキーに<BR>一致するトークンを除去|
 |stem_snowball|[en/etc]|StemSnowball|検索時、更新時において<BR>Snowball stemmerを使って<BR>トークンをステミング|
 
 * Return value
@@ -246,6 +247,31 @@ yangram_register --filter_length 5
 [[0,0.0,0.0],"TokenYaBigramFilterLength"]
 tokenize TokenYaBigramFilterLength "123456 digit" NormalizerAuto
 [[0,0.0,0.0],[{"value":"digit","position":0}]]
+```
+
+### FilterStoptable
+
+``FilterStoptable``を使うには、あらかじめ除外対象の語句が格納されたテーブルを作る必要があります。
+
+```
+yangram_register --filter_stoptable stopwords
+[[0,0.0,0.0],"TokenYaBigramFilterStoptable"]
+table_create stopwords TABLE_HASH_KEY ShortText
+[[0,0.0,0.0],true]
+load --table stopwords
+[
+{"_key": "this"},
+{"_key": "a"}
+]
+[[0,0.0,0.0],2]
+```
+
+検索時、追加時の両方でテーブルのキーと一致するトークンを除去します。
+検索速度に影響が大きく検索精度にあまり影響ないキーをあらかじめ設定することにより、検索速度の向上および転置索引のサイズを抑えることができます。
+
+```
+tokenize TokenYaBigramFilterStoptable "This is a pen" NormalizerAuto
+[[0,0.0,0.0],[{"value":"is","position":0},{"value":"pen","position":1}]]
 ```
 
 ### StemSnowball

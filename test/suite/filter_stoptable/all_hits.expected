@@ -1,0 +1,16 @@
+register tokenizers/yangram
+[[0,0.0,0.0],true]
+yangram_register --filter_stoptable stopwords
+[[0,0.0,0.0],"TokenYaBigramFilterStoptable"]
+table_create stopwords TABLE_HASH_KEY ShortText
+[[0,0.0,0.0],true]
+load --table stopwords
+[
+{"_key": "a"},
+{"_key": "pen"},
+{"_key": "this"},
+{"_key": "is"}
+]
+[[0,0.0,0.0],4]
+tokenize TokenYaBigramFilterStoptable "This is a pen" NormalizerAuto
+[[0,0.0,0.0],[]]

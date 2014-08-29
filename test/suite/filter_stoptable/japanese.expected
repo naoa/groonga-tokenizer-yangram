@@ -1,0 +1,45 @@
+register tokenizers/yangram
+[[0,0.0,0.0],true]
+yangram_register --filter_stoptable stopwords
+[[0,0.0,0.0],"TokenYaBigramFilterStoptable"]
+table_create stopwords TABLE_HASH_KEY ShortText
+[[0,0.0,0.0],true]
+load --table stopwords
+[
+{"_key": "これ"}
+]
+[[0,0.0,0.0],1]
+tokenize TokenYaBigramFilterStoptable "これはペンだ。" NormalizerAuto
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  [
+    {
+      "value": "れは",
+      "position": 0
+    },
+    {
+      "value": "はペ",
+      "position": 1
+    },
+    {
+      "value": "ペン",
+      "position": 2
+    },
+    {
+      "value": "ンだ",
+      "position": 3
+    },
+    {
+      "value": "だ",
+      "position": 4
+    },
+    {
+      "value": "。",
+      "position": 5
+    }
+  ]
+]
