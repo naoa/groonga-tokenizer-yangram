@@ -1,0 +1,3 @@
+register tokenizers/yangram
+yangram_register --filter_length 5
+tokenizer_list

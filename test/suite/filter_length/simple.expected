@@ -1,0 +1,6 @@
+register tokenizers/yangram
+[[0,0.0,0.0],true]
+yangram_register --filter_length 5
+[[0,0.0,0.0],"TokenYaBigramFilterLength"]
+tokenize TokenYaBigramFilterLength "123456 digit" NormalizerAuto
+[[0,0.0,0.0],[{"value":"digit","position":0}]]

@@ -64,6 +64,7 @@ typedef struct {
   grn_bool skip_stopword;
   grn_bool filter_combhira;
   grn_bool filter_combkata;
+  int filter_length;
   const char *stem_snowball;
   struct sb_stemmer *snowball_stemmer;
 } grn_yangram_tokenizer;
@@ -166,6 +167,10 @@ execute_token_filter(grn_ctx *ctx, grn_yangram_tokenizer *tokenizer,
   }
   if (tokenizer->filter_combkata && token_size >= 2 &&
       filter_combkata(ctx, tokenizer, ctypes, token_top)) {
+    return GRN_TRUE;
+  }
+  if (tokenizer->filter_length &&
+      tokenizer->filter_length < token_size) {
     return GRN_TRUE;
   }
 
@@ -449,10 +454,15 @@ yangram_init(grn_ctx *ctx, int nargs, grn_obj **args, grn_user_data *user_data)
   if (GRN_TEXT_LEN(var) != 0) {
     tokenizer->filter_combkata = GRN_INT32_VALUE(var);
   }
+  var = grn_plugin_proc_get_var(ctx, user_data, "filter_length", -1);
+  if (GRN_TEXT_LEN(var) != 0) {
+    tokenizer->filter_length = GRN_INT32_VALUE(var);
+  }
   var = grn_plugin_proc_get_var(ctx, user_data, "stem_snowball", -1);
   if (GRN_TEXT_LEN(var) != 0) {
     tokenizer->stem_snowball = GRN_TEXT_VALUE(var);
-    tokenizer->snowball_stemmer = sb_stemmer_new(tokenizer->stem_snowball, "UTF_8");
+    tokenizer->snowball_stemmer =
+      sb_stemmer_new(tokenizer->stem_snowball,"UTF_8");
   } else {
     tokenizer->stem_snowball = NULL;
     tokenizer->snowball_stemmer = NULL;
@@ -670,11 +680,12 @@ command_yangram_register(grn_ctx *ctx, GNUC_UNUSED int nargs,
   int skip_stopword = 0;
   int filter_combhira = 0;
   int filter_combkata = 0;
+  int filter_length = 0;
   char *stem_snowball = NULL;
 
   grn_obj tokenizer_name;
   grn_obj *var;
-  grn_expr_var vars[13];
+  grn_expr_var vars[14];
 
   grn_plugin_expr_var_init(ctx, &vars[0], NULL, -1);
   grn_plugin_expr_var_init(ctx, &vars[1], NULL, -1);
@@ -688,7 +699,8 @@ command_yangram_register(grn_ctx *ctx, GNUC_UNUSED int nargs,
   grn_plugin_expr_var_init(ctx, &vars[9], "skip_stopword", -1);
   grn_plugin_expr_var_init(ctx, &vars[10], "filter_combhira", -1);
   grn_plugin_expr_var_init(ctx, &vars[11], "filter_combkata", -1);
-  grn_plugin_expr_var_init(ctx, &vars[12], "stem_snowball", -1);
+  grn_plugin_expr_var_init(ctx, &vars[12], "filter_length", -1);
+  grn_plugin_expr_var_init(ctx, &vars[13], "stem_snowball", -1);
 
   GRN_INT32_SET(ctx, &vars[3].value, ngram_unit);
   GRN_INT32_SET(ctx, &vars[4].value, ignore_blank);
@@ -699,6 +711,7 @@ command_yangram_register(grn_ctx *ctx, GNUC_UNUSED int nargs,
   GRN_INT32_SET(ctx, &vars[9].value, skip_stopword);
   GRN_INT32_SET(ctx, &vars[10].value, filter_combhira);
   GRN_INT32_SET(ctx, &vars[11].value, filter_combkata);
+  GRN_INT32_SET(ctx, &vars[12].value, filter_length);
 
   GRN_TEXT_INIT(&tokenizer_name, 0);
   GRN_BULK_REWIND(&tokenizer_name);
@@ -822,23 +835,30 @@ command_yangram_register(grn_ctx *ctx, GNUC_UNUSED int nargs,
     filter_combkata = atoi(GRN_TEXT_VALUE(var));
     GRN_INT32_SET(ctx, &vars[11].value, filter_combkata);
   }
+  var = grn_plugin_proc_get_var(ctx, user_data, "filter_length", -1);
+  if (GRN_TEXT_LEN(var) != 0) {
+    filter_length = atoi(GRN_TEXT_VALUE(var));
+    GRN_INT32_SET(ctx, &vars[12].value, filter_length);
+  }
 
-  if (filter_combhira || filter_combkata) {
+  if (filter_combhira || filter_combkata || filter_length) {
     GRN_TEXT_PUTS(ctx, &tokenizer_name, "Filter");
   }
 
   if (filter_combhira) {
     GRN_TEXT_PUTS(ctx, &tokenizer_name, "Combhira");
   }
-
   if (filter_combkata) {
     GRN_TEXT_PUTS(ctx, &tokenizer_name, "Combkata");
+  }
+  if (filter_length) {
+    GRN_TEXT_PUTS(ctx, &tokenizer_name, "Length");
   }
 
   var = grn_plugin_proc_get_var(ctx, user_data, "stem_snowball", -1);
   if (GRN_TEXT_LEN(var) != 0) {
     stem_snowball = GRN_TEXT_VALUE(var);
-    GRN_TEXT_SET(ctx, &vars[12].value, stem_snowball, GRN_TEXT_LEN(var));
+    GRN_TEXT_SET(ctx, &vars[13].value, stem_snowball, GRN_TEXT_LEN(var));
   }
 
   if (stem_snowball) {
@@ -851,7 +871,7 @@ command_yangram_register(grn_ctx *ctx, GNUC_UNUSED int nargs,
   GRN_TEXT_PUTC(ctx, &tokenizer_name, '\0');
   grn_proc_create(ctx, GRN_TEXT_VALUE(&tokenizer_name), -1,
                   GRN_PROC_TOKENIZER,
-                  yangram_init, yangram_next, yangram_fin, 13, vars);
+                  yangram_init, yangram_next, yangram_fin, 14, vars);
 
   grn_ctx_output_cstr(ctx, GRN_TEXT_VALUE(&tokenizer_name));
   grn_obj_unlink(ctx, &tokenizer_name);
@@ -870,7 +890,7 @@ GRN_PLUGIN_INIT(grn_ctx *ctx)
 grn_rc
 GRN_PLUGIN_REGISTER(grn_ctx *ctx)
 {
-  grn_expr_var vars[10];
+  grn_expr_var vars[11];
 
   grn_plugin_expr_var_init(ctx, &vars[0], "ngram_unit", -1);
   grn_plugin_expr_var_init(ctx, &vars[1], "ignore_blank", -1);
@@ -881,10 +901,11 @@ GRN_PLUGIN_REGISTER(grn_ctx *ctx)
   grn_plugin_expr_var_init(ctx, &vars[6], "skip_stopword", -1);
   grn_plugin_expr_var_init(ctx, &vars[7], "filter_combhira", -1);
   grn_plugin_expr_var_init(ctx, &vars[8], "filter_combkata", -1);
-  grn_plugin_expr_var_init(ctx, &vars[9], "stem_snowball", -1);
+  grn_plugin_expr_var_init(ctx, &vars[9], "filter_length", -1);
+  grn_plugin_expr_var_init(ctx, &vars[10], "stem_snowball", -1);
 
   grn_plugin_command_create(ctx, "yangram_register", -1,
-                            command_yangram_register, 10, vars);
+                            command_yangram_register, 11, vars);
   return ctx->rc;
 }
 

@@ -28,6 +28,7 @@ yangram_register --ngram_unit 2 --ignore_blank 0 \
   --split_symbol 1 --split_alpha 1 --split_digit 0 \
   --skip_overlap 1 --skip_stopword 1 \
   --filter_combhira 1 --filter_combkata 1 \
+  --filter_length 0 \
   --stem_snowball en
 [
   [
@@ -52,6 +53,7 @@ yangram_register --ngram_unit 2 --ignore_blank 0 \
 |skip_stopword|[0-1]|SkipStopword|検索時のみ<BR>ストップワードカラムが<BR>trueのトークンをスキップ|
 |filter_combhira|[0-1]|FilterCombhira|検索時、更新時において<BR>[ひらがな+その他の字種]の<BR>組み合わせのトークンを除去|
 |filter_combkata|[0-1]|FilterCombkata|検索時、更新時において<BR>[カタカナ+漢字]の<BR>組み合わせのトークンを除去|
+|filter_length|[0-]|FilterLength|検索時、更新時において<BR>指定バイトを超える<BR>トークンを除去|
 |stem_snowball|[en/etc]|StemSnowball|検索時、更新時において<BR>Snowball stemmerを使って<BR>トークンをステミング|
 
 * Return value
@@ -233,6 +235,17 @@ tokenize TokenYaBigramFilterCombhiraCombkata "今日は雨だ" NormalizerAuto --
     }
   ]
 ]
+```
+### FilterLength
+
+検索時、追加時の両方でトークナイザー登録時に指定したバイト数を超えるトークンを除去します。
+無駄な長いキーによる語彙表のキーサイズの逼迫を防ぐことができます。
+
+```
+yangram_register --filter_length 5
+[[0,0.0,0.0],"TokenYaBigramFilterLength"]
+tokenize TokenYaBigramFilterLength "123456 digit" NormalizerAuto
+[[0,0.0,0.0],[{"value":"digit","position":0}]]
 ```
 
 ### StemSnowball
