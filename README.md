@@ -328,20 +328,18 @@ tokenize TokenYaBigramStemSnowball "There are cars" NormalizerAuto
 
 Install ``groonga-tokenizer-yangram`` package:
 
-準備中です。4.0.5がリリースされたら各パッケージを用意する予定です。
-
 ### CentOS
 
 * CentOS6
 
 ```
-% sudo yum localinstall -y http://github.com/naoa/groonga-tokenizer-yangram/public/centos/6/groonga-tokenizer-yangram-1.0.0-1.el6.x86_64.rpm
+% sudo yum localinstall -y http://packages.createfield.com/centos/6/groonga-tokenizer-yangram-1.0.0-1.el6.x86_64.rpm
 ```
 
 * CentOS7
 
 ```
-% sudo yum localinstall -y http://github.com/naoa/groonga-tokenizer-yangram/public/centos/7/groonga-tokenizer-yangram-1.0.0-1.el7.x86_64.rpm
+% sudo yum localinstall -y http://packages.createfield.com/centos/7/groonga-tokenizer-yangram-1.0.0-1.el7.centos.x86_64.rpm
 ```
 
 ### Fedora
@@ -349,7 +347,7 @@ Install ``groonga-tokenizer-yangram`` package:
 * Fedora 20
 
 ```
-% sudo yum localinstall -y http://github.com/naoa/groonga-tokenizer-yangram/public/fedora/20/groonga-tokenizer-yangram-1.0.0-1.fc20.x86_64.rpm
+% sudo yum localinstall -y http://packages.createfield.com/fedora/20/groonga-tokenizer-yangram-1.0.0-1.fc20.x86_64.rpm
 ```
 
 ### Debian GNU/LINUX
@@ -357,14 +355,14 @@ Install ``groonga-tokenizer-yangram`` package:
 * wheezy
 
 ```
-% wget http://github.com/naoa/groonga-tokenizer-yangram/public/debian/wheezy/groonga-tokenizer-yangram_1.0.0-1_amd64.deb
+% wget http://packages.createfield.com/debian/wheezy/groonga-tokenizer-yangram_1.0.0-1_amd64.deb
 % sudo dpkg -i groonga-tokenizer-yangram_1.0.0-1_amd64.deb
 ```
 
 * jessie
 
 ```
-% wget http://github.com/naoa/groonga-tokenizer-yangram/public/debian/jessie/groonga-tokenizer-yangram_1.0.0-1_amd64.deb
+% wget http://packages.createfield.com/debian/jessie/groonga-tokenizer-yangram_1.0.0-1_amd64.deb
 % sudo dpkg -i groonga-tokenizer-yangram_1.0.0-1_amd64.deb
 ```
 
@@ -373,14 +371,14 @@ Install ``groonga-tokenizer-yangram`` package:
 * precise
 
 ```
-% wget http://github.com/naoa/groonga-tokenizer-yangram/public/ubuntu/precise/groonga-tokenizer-yangram_1.0.0-1_amd64.deb
+% wget http://packages.createfield.com/ubuntu/precise/groonga-tokenizer-yangram_1.0.0-1_amd64.deb
 % sudo dpkg -i groonga-tokenizer-yangram_1.0.0-1_amd64.deb
 ```
 
 * trusty
 
 ```
-% wget http://github.com/naoa/groonga-tokenizer-yangram/public/ubuntu/trusty/groonga-tokenizer-yangram_1.0.0-1_amd64.deb
+% wget http://packages.createfield.com/ubuntu/trusty/groonga-tokenizer-yangram_1.0.0-1_amd64.deb
 % sudo dpkg -i groonga-tokenizer-yangram_1.0.0-1_amd64.deb
 ```
 
