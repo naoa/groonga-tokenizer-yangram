@@ -5,7 +5,7 @@ Maintainer: Naoya Murakami <naoya@createfield.com>
 Build-Depends:
   debhelper (>= 9),
   autotools-dev
-Standards-Version: 1.0.0
+Standards-Version: 3.9.5
 Homepage: https://github.com/naoa/groonga-tokenizer-yangram/
 
 Package: groonga-tokenizer-yangram
