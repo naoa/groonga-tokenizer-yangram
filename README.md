@@ -5,7 +5,7 @@
 トークナイザープラグインの登録には、``register``コマンドを利用します。
 
 ```
-register tokenizer/yangram
+register tokenizers/yangram
 ```
 
 その後、``yangram_register``コマンドを使って必要な機能のオプションを指定してトークナイザーを登録します。
