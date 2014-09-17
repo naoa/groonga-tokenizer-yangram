@@ -10,6 +10,8 @@ register tokenizers/yangram
 
 その後、``yangram_register``コマンドを使って必要な機能のオプションを指定してトークナイザーを登録します。
 
+現在、データベースを起動しなおすと、自動的にトークナイザーを正しく再登録することができないバグがあります。
+
 ## yangram_register
 
 * Summary
