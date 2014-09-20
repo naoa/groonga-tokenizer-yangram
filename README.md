@@ -117,7 +117,7 @@ tokenize TokenYaBigram "今日は雨だな" NormalizerAuto --mode GET
 検索時のみ語彙表の``@stopword``のカラムが``true``となっているキーのトークンがスキップされます。検索速度に影響が大きく、
 検索精度にはあまり影響のないキーを取捨選択して検索から除外することができます。インデックス更新からは除外されません。  
 ``SkipStopword``を使うには、語彙表に``@stopword``という名前のカラムを作る必要があります。
-検索時のみスキップれるため、運用中に適宜変更することが可能です。
+検索時のみスキップされるため、運用中に適宜変更することが可能です。
 
 ```
 column_create <lexicon_name> @stopword COLUMN_SCALAR Bool
