@@ -115,9 +115,9 @@ tokenize TokenYaBigram "今日は雨だな" NormalizerAuto --mode GET
 ### ``SkipStopword``
 
 検索時のみ語彙表の``@stopword``のカラムが``true``となっているキーのトークンがスキップされます。検索速度に影響が大きく、
-検索精度にはあまり影響のないキーを取捨選択して検索から除外することができます。インデックス更新からは除外されません。
+検索精度にはあまり影響のないキーを取捨選択して検索から除外することができます。インデックス更新からは除外されません。  
 ``SkipStopword``を使うには、語彙表に``@stopword``という名前のカラムを作る必要があります。
-検索時のみ飛ばされるため、運用中に適宜変更することが可能です。
+検索時のみスキップれるため、運用中に適宜変更することが可能です。
 
 ```
 column_create <lexicon_name> @stopword COLUMN_SCALAR Bool
@@ -135,10 +135,10 @@ load --table <lexicon_name>
 ### ``FilterStoptable``
 
 検索時、追加時の両方でテーブルのキーと一致するトークンを除去します。
-検索速度に影響が大きく検索精度にあまり影響ないキーをあらかじめ設定することにより、検索速度の向上および転置索引のサイズを抑えることができます。
-``FilterStoptable``を使うには、あらかじめ除外対象の語句が格納されたテーブル``@yangram_stopwords``を作る必要があります。
-整合性を保つため、ストップワードを追加した場合は、インデックス再構築が必要です。
-ノーマライザー後のトークンに対してフィルターするため、ノーマライザー後のストップワードを登録する必要があります(NormalizerMySQLGeneralCIなどでは英数字は大文字、NormalizerAUtoでは英数字は小文字)。
+検索速度に影響が大きく検索精度にあまり影響ないキーをあらかじめ設定することにより、検索速度の向上および転置索引のサイズを抑えることができます。  
+``FilterStoptable``を使うには、あらかじめ除外対象の語句が格納されたテーブル``@yangram_stopwords``を作る必要があります。  
+整合性を保つため、ストップワードを追加した場合は、インデックス再構築が必要です。  
+ノーマライザー後のトークンに対してフィルターするため、ノーマライザー後のストップワードを登録する必要があります。``NormalizerMySQLGeneralCI``などでは英数字は大文字、``NormalizerAUtoでは英数字は小文字``です。
 
 ```
 table_create @yangram_stopwords TABLE_HASH_KEY ShortText
@@ -153,7 +153,7 @@ tokenize TokenYaBigramFilterStoptable "This is a pen" NormalizerAuto
 
 ### ``Snowball``
 
-検索時、追加時の両方で[Snowball stemmer](http://snowball.tartarus.org/)を使ってステミングします。
+検索時、追加時の両方で[Snowball](http://snowball.tartarus.org/)を使ってステミングします。
 
 英語のトークンの語幹を抽出します。
 複数形や過去形などの活用形の語尾を所定の規則に沿って切除します。
