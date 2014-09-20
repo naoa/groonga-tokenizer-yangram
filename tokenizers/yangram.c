@@ -1,5 +1,4 @@
-/*
-  Copyright(C) 2014 Naoya Murakami <naoya@createfield.com>
+/* Copyright(C) 2014 Naoya Murakami <naoya@createfield.com>
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -40,9 +39,9 @@ typedef enum {
   GRN_TOKEN_DEL
 } grn_token_mode;
 
-grn_hash *comb_exclude = NULL;
-
 #define STOPWORD_COLUMN_NAME "@stopword"
+#define STOPWORDS_TABLE_NAME "@yangram_stopwords"
+#define STOPWORDS_TABLE_NAME_MRN "@0040yangram_stopwords"
 
 typedef struct {
   grn_tokenizer_token token;
@@ -63,8 +62,6 @@ typedef struct {
   grn_bool split_digit;
   grn_bool skip_overlap;
   grn_bool skip_stopword;
-  grn_bool filter_combhira;
-  grn_bool filter_combkata;
   int filter_length;
   const char *filter_stoptable;
   const char *stem_snowball;
@@ -98,78 +95,14 @@ is_token_all_blank(grn_ctx *ctx, grn_yangram_tokenizer *tokenizer,
 }
 
 static grn_bool
-filter_combhira(grn_ctx *ctx, grn_yangram_tokenizer *tokenizer,
-                const unsigned char *ctypes,
-                const unsigned char *token_top)
-{
-  grn_id id;
-  unsigned int char_length;
-
-  if (ctypes && GRN_STR_CTYPE(*ctypes) == GRN_CHAR_HIRAGANA) {
-    if (GRN_STR_CTYPE(*++ctypes) != GRN_CHAR_HIRAGANA) {
-      char_length = grn_plugin_charlen(ctx, (char *)token_top,
-                                       tokenizer->rest_length,
-                                       tokenizer->query->encoding);
-      token_top += char_length;
-      char_length = grn_plugin_charlen(ctx, (char *)token_top,
-                                       tokenizer->rest_length,
-                                       tokenizer->query->encoding);
-      if (token_top + char_length &&
-          !memcmp(token_top, "ー", char_length)){
-        return GRN_FALSE;
-      }
-      id = grn_hash_get(ctx, comb_exclude, token_top, char_length, NULL);
-      if (!id) {
-        return GRN_TRUE;
-      }
-    }
-  }
-  return GRN_FALSE;
-}
-
-static grn_bool
-filter_combkata(grn_ctx *ctx, grn_yangram_tokenizer *tokenizer,
-                const unsigned char *ctypes,
-                const unsigned char *token_top)
-{
-  grn_id id;
-  unsigned int char_length;
-
-  if (ctypes && GRN_STR_CTYPE(*ctypes) == GRN_CHAR_KATAKANA) {
-    if (GRN_STR_CTYPE(*++ctypes) == GRN_CHAR_KANJI) {
-      char_length = grn_plugin_charlen(ctx, (char *)token_top,
-                                       tokenizer->rest_length,
-                                       tokenizer->query->encoding);
-      token_top += char_length;
-      char_length = grn_plugin_charlen(ctx, (char *)token_top,
-                                       tokenizer->rest_length,
-                                       tokenizer->query->encoding);
-      id = grn_hash_get(ctx, comb_exclude, token_top, char_length, NULL);
-      if (!id) {
-        return GRN_TRUE;
-      }
-    }
-  }
-  return GRN_FALSE;
-}
-
-static grn_bool
 execute_token_filter(grn_ctx *ctx, grn_yangram_tokenizer *tokenizer,
-                     const unsigned char *ctypes,
+                     GNUC_UNUSED const unsigned char *ctypes,
                      const unsigned char *token_top,
                      const unsigned char *token_tail,
                      int token_size)
 {
   if (tokenizer->skip_overlap &&
       is_token_all_blank(ctx, tokenizer, token_top, token_size)) {
-    return GRN_TRUE;
-  }
-  if (tokenizer->filter_combhira && token_size >= 2 &&
-      filter_combhira(ctx, tokenizer, ctypes, token_top)) {
-    return GRN_TRUE;
-  }
-  if (tokenizer->filter_combkata && token_size >= 2 &&
-      filter_combkata(ctx, tokenizer, ctypes, token_top)) {
     return GRN_TRUE;
   }
   if (tokenizer->filter_length &&
@@ -367,28 +300,13 @@ is_token_all_same(grn_ctx *ctx, grn_yangram_tokenizer *tokenizer,
 static grn_bool
 ignore_token_skip_overlap(grn_ctx *ctx, grn_yangram_tokenizer *tokenizer,
                           const unsigned char *ctypes,
-                          unsigned int ctypes_skip_size,
+                          GNUC_UNUSED unsigned int ctypes_skip_size,
                           GNUC_UNUSED const unsigned char *token_top,
-                          const unsigned char *token_next,
+                          GNUC_UNUSED const unsigned char *token_next,
                           int token_size)
 {
   if (is_next_token_group(ctx, tokenizer, ctypes, token_size)) {
     return GRN_TRUE;
-  }
-  if (tokenizer->filter_combhira || tokenizer->filter_combkata) {
-    if (ctypes) {
-      ctypes = ctypes + ctypes_skip_size;
-    }
-  }
-  if (tokenizer->filter_combhira) {
-    if (filter_combhira(ctx, tokenizer, ctypes, token_next)) {
-      return GRN_TRUE;
-    }
-  }
-  if (tokenizer->filter_combkata) {
-    if (filter_combkata(ctx, tokenizer, ctypes, token_next)) {
-      return GRN_TRUE;
-    }
   }
 
   return GRN_FALSE;
@@ -456,14 +374,6 @@ yangram_init(grn_ctx *ctx, int nargs, grn_obj **args, grn_user_data *user_data)
   if (GRN_TEXT_LEN(var) != 0) {
     tokenizer->skip_stopword = GRN_INT32_VALUE(var);
   }
-  var = grn_plugin_proc_get_var(ctx, user_data, "filter_combhira", -1);
-  if (GRN_TEXT_LEN(var) != 0) {
-    tokenizer->filter_combhira = GRN_INT32_VALUE(var);
-  }
-  var = grn_plugin_proc_get_var(ctx, user_data, "filter_combkata", -1);
-  if (GRN_TEXT_LEN(var) != 0) {
-    tokenizer->filter_combkata = GRN_INT32_VALUE(var);
-  }
   var = grn_plugin_proc_get_var(ctx, user_data, "filter_length", -1);
   if (GRN_TEXT_LEN(var) != 0) {
     tokenizer->filter_length = GRN_INT32_VALUE(var);
@@ -472,15 +382,17 @@ yangram_init(grn_ctx *ctx, int nargs, grn_obj **args, grn_user_data *user_data)
   if (GRN_TEXT_LEN(var) != 0) {
     tokenizer->filter_stoptable = GRN_TEXT_VALUE(var);
     tokenizer->stopword_table = grn_ctx_get(ctx,
-                                            GRN_TEXT_VALUE(var),
-                                            GRN_TEXT_LEN(var));
+                                            STOPWORDS_TABLE_NAME,
+                                            strlen(STOPWORDS_TABLE_NAME));
+    if (!tokenizer->stopword_table) {
+      tokenizer->stopword_table = grn_ctx_get(ctx,
+                                              STOPWORDS_TABLE_NAME_MRN,
+                                              strlen(STOPWORDS_TABLE_NAME_MRN));
+    } 
     if (!tokenizer->stopword_table) {
       tokenizer->filter_stoptable = NULL;
       tokenizer->stopword_table = NULL;
     }
-  } else {
-    tokenizer->filter_stoptable = NULL;
-    tokenizer->stopword_table = NULL;
   }
   var = grn_plugin_proc_get_var(ctx, user_data, "stem_snowball", -1);
   if (GRN_TEXT_LEN(var) != 0) {
@@ -675,46 +587,16 @@ yangram_fin(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
   return NULL;
 }
 
-static void
-load_comb_exclude(grn_ctx *ctx)
+grn_rc
+GRN_PLUGIN_INIT(grn_ctx *ctx)
 {
-  const char *excludes[]= {
-    "段", "行", "列", "組", "号", "回", "連", "式", "系",
-    "型", "形", "変", "長", "短", "音", "階", "字"
-  };
-  unsigned int i;
-  comb_exclude = grn_hash_create(ctx, NULL,
-                              GRN_TABLE_MAX_KEY_SIZE,
-                              0,
-                              GRN_OBJ_TABLE_HASH_KEY|GRN_OBJ_KEY_VAR_SIZE);
-
-  for (i = 0; i < sizeof(excludes)/sizeof(excludes[0]); i++) {
-    grn_hash_add(ctx, comb_exclude,
-                 excludes[i], strlen(excludes[i]), NULL, NULL);
-  }
-
+  return ctx->rc;
 }
 
-static grn_obj *
-command_yangram_register(grn_ctx *ctx, GNUC_UNUSED int nargs,
-                         GNUC_UNUSED grn_obj **args, grn_user_data *user_data)
+grn_rc
+GRN_PLUGIN_REGISTER(grn_ctx *ctx)
 {
-  int ngram_unit = 2;
-  int ignore_blank = 0;
-  int split_symbol = 0;
-  int split_alpha = 0;
-  int split_digit = 0;
-  int skip_overlap = 0;
-  int skip_stopword = 0;
-  int filter_combhira = 0;
-  int filter_combkata = 0;
-  int filter_length = 0;
-  char *filter_stoptable = NULL;
-  char *stem_snowball = NULL;
-
-  grn_obj tokenizer_name;
-  grn_obj *var;
-  grn_expr_var vars[15];
+  grn_expr_var vars[13];
 
   grn_plugin_expr_var_init(ctx, &vars[0], NULL, -1);
   grn_plugin_expr_var_init(ctx, &vars[1], NULL, -1);
@@ -726,235 +608,63 @@ command_yangram_register(grn_ctx *ctx, GNUC_UNUSED int nargs,
   grn_plugin_expr_var_init(ctx, &vars[7], "split_digit", -1);
   grn_plugin_expr_var_init(ctx, &vars[8], "skip_overlap", -1);
   grn_plugin_expr_var_init(ctx, &vars[9], "skip_stopword", -1);
-  grn_plugin_expr_var_init(ctx, &vars[10], "filter_combhira", -1);
-  grn_plugin_expr_var_init(ctx, &vars[11], "filter_combkata", -1);
-  grn_plugin_expr_var_init(ctx, &vars[12], "filter_length", -1);
-  grn_plugin_expr_var_init(ctx, &vars[13], "filter_stoptable", -1);
-  grn_plugin_expr_var_init(ctx, &vars[14], "stem_snowball", -1);
+  grn_plugin_expr_var_init(ctx, &vars[10], "filter_length", -1);
+  grn_plugin_expr_var_init(ctx, &vars[11], "filter_stoptable", -1);
+  grn_plugin_expr_var_init(ctx, &vars[12], "stem_snowball", -1);
 
-  GRN_INT32_SET(ctx, &vars[3].value, ngram_unit);
-  GRN_INT32_SET(ctx, &vars[4].value, ignore_blank);
-  GRN_INT32_SET(ctx, &vars[5].value, split_symbol);
-  GRN_INT32_SET(ctx, &vars[6].value, split_alpha);
-  GRN_INT32_SET(ctx, &vars[7].value, split_digit);
-  GRN_INT32_SET(ctx, &vars[8].value, skip_overlap);
-  GRN_INT32_SET(ctx, &vars[9].value, skip_stopword);
-  GRN_INT32_SET(ctx, &vars[10].value, filter_combhira);
-  GRN_INT32_SET(ctx, &vars[11].value, filter_combkata);
-  GRN_INT32_SET(ctx, &vars[12].value, filter_length);
+  GRN_INT32_SET(ctx, &vars[3].value, 2);
+  GRN_INT32_SET(ctx, &vars[4].value, 0);
+  GRN_INT32_SET(ctx, &vars[5].value, 0);
+  GRN_INT32_SET(ctx, &vars[6].value, 0);
+  GRN_INT32_SET(ctx, &vars[7].value, 0);
+  GRN_INT32_SET(ctx, &vars[8].value, 1);
+  GRN_INT32_SET(ctx, &vars[9].value, 1);
+  GRN_INT32_SET(ctx, &vars[10].value, 64);
+  GRN_TEXT_SET(ctx, &vars[11].value, STOPWORDS_TABLE_NAME, strlen(STOPWORDS_TABLE_NAME));
+  GRN_TEXT_SET(ctx, &vars[12].value, "", 0);
 
-  GRN_TEXT_INIT(&tokenizer_name, 0);
-  GRN_BULK_REWIND(&tokenizer_name);
-  GRN_TEXT_PUTS(ctx, &tokenizer_name, "TokenYa");
-
-  var = grn_plugin_proc_get_var(ctx, user_data, "ngram_unit", -1);
-  if (GRN_TEXT_LEN(var) != 0) {
-    ngram_unit = atoi(GRN_TEXT_VALUE(var));
-    GRN_INT32_SET(ctx, &vars[3].value, ngram_unit);
-    switch (ngram_unit) {
-    case 1 :
-      GRN_TEXT_PUTS(ctx, &tokenizer_name, "Unigram");
-      break;
-    case 2 :
-      GRN_TEXT_PUTS(ctx, &tokenizer_name, "Bigram");
-      break;
-    case 3 :
-      GRN_TEXT_PUTS(ctx, &tokenizer_name, "Trigram");
-      break;
-    case 4 :
-      GRN_TEXT_PUTS(ctx, &tokenizer_name, "Quadgram");
-      break;
-    case 5 :
-      GRN_TEXT_PUTS(ctx, &tokenizer_name, "Pentgram");
-      break;
-    case 6 :
-      GRN_TEXT_PUTS(ctx, &tokenizer_name, "Hexgram");
-      break;
-    case 7 :
-      GRN_TEXT_PUTS(ctx, &tokenizer_name, "Heptgram");
-      break;
-    case 8 :
-      GRN_TEXT_PUTS(ctx, &tokenizer_name, "Octgram");
-      break;
-    case 9 :
-      GRN_TEXT_PUTS(ctx, &tokenizer_name, "Nongram");
-      break;
-    case 10 :
-      GRN_TEXT_PUTS(ctx, &tokenizer_name, "Decgram");
-      break;
-    default :
-      GRN_PLUGIN_LOG(ctx, GRN_LOG_WARNING,
-                     "[yangram_register] invalid ngram_unit %d", ngram_unit);
-      grn_obj_unlink(ctx, &tokenizer_name);
-      grn_ctx_output_cstr(ctx, "invalid ngram_unit");
-      return NULL;
-    }
-  } else {
-    ngram_unit = 2;
-    GRN_INT32_SET(ctx, &vars[3].value, ngram_unit);
-    GRN_TEXT_PUTS(ctx, &tokenizer_name, "Bigram");
-  }
-
-  var = grn_plugin_proc_get_var(ctx, user_data, "ignore_blank", -1);
-  if (GRN_TEXT_LEN(var) != 0) {
-    ignore_blank = atoi(GRN_TEXT_VALUE(var));
-    GRN_INT32_SET(ctx, &vars[4].value, ignore_blank);
-  }
-  if (ignore_blank) {
-    GRN_TEXT_PUTS(ctx, &tokenizer_name, "Ignore");
-  }
-  if (ignore_blank) {
-    GRN_TEXT_PUTS(ctx, &tokenizer_name, "Blank");
-  }
-
-  var = grn_plugin_proc_get_var(ctx, user_data, "split_symbol", -1);
-  if (GRN_TEXT_LEN(var) != 0) {
-    split_symbol = atoi(GRN_TEXT_VALUE(var));
-    GRN_INT32_SET(ctx, &vars[5].value, split_symbol);
-  }
-  var = grn_plugin_proc_get_var(ctx, user_data, "split_alpha", -1);
-  if (GRN_TEXT_LEN(var) != 0) {
-    split_alpha = atoi(GRN_TEXT_VALUE(var));
-    GRN_INT32_SET(ctx, &vars[6].value, split_alpha);
-  }
-  var = grn_plugin_proc_get_var(ctx, user_data, "split_digit", -1);
-  if (GRN_TEXT_LEN(var) != 0) {
-    split_digit = atoi(GRN_TEXT_VALUE(var));
-    GRN_INT32_SET(ctx, &vars[7].value, split_digit);
-  }
-  if (split_symbol || split_alpha || split_digit) {
-    GRN_TEXT_PUTS(ctx, &tokenizer_name, "Split");
-  }
-  if (split_symbol) {
-    GRN_TEXT_PUTS(ctx, &tokenizer_name, "Symbol");
-  }
-  if (split_alpha) {
-    GRN_TEXT_PUTS(ctx, &tokenizer_name, "Alpha");
-  }
-  if (split_digit) {
-    GRN_TEXT_PUTS(ctx, &tokenizer_name, "Digit");
-  }
-
-  var = grn_plugin_proc_get_var(ctx, user_data, "skip_overlap", -1);
-  if (GRN_TEXT_LEN(var) != 0) {
-    skip_overlap = atoi(GRN_TEXT_VALUE(var));
-    GRN_INT32_SET(ctx, &vars[8].value, skip_overlap);
-  }
-  var = grn_plugin_proc_get_var(ctx, user_data, "skip_stopword", -1);
-  if (GRN_TEXT_LEN(var) != 0) {
-    skip_stopword = atoi(GRN_TEXT_VALUE(var));
-    GRN_INT32_SET(ctx, &vars[9].value, skip_stopword);
-  }
-  if (skip_overlap || skip_stopword) {
-    GRN_TEXT_PUTS(ctx, &tokenizer_name, "Skip");
-  }
-  if (skip_overlap) {
-    GRN_TEXT_PUTS(ctx, &tokenizer_name, "Overlap");
-  }
-  if (skip_stopword) {
-    GRN_TEXT_PUTS(ctx, &tokenizer_name, "Stopword");
-  }
-
-  var = grn_plugin_proc_get_var(ctx, user_data, "filter_combhira", -1);
-  if (GRN_TEXT_LEN(var) != 0) {
-    filter_combhira = atoi(GRN_TEXT_VALUE(var));
-    GRN_INT32_SET(ctx, &vars[10].value, filter_combhira);
-  }
-  var = grn_plugin_proc_get_var(ctx, user_data, "filter_combkata", -1);
-  if (GRN_TEXT_LEN(var) != 0) {
-    filter_combkata = atoi(GRN_TEXT_VALUE(var));
-    GRN_INT32_SET(ctx, &vars[11].value, filter_combkata);
-  }
-  var = grn_plugin_proc_get_var(ctx, user_data, "filter_length", -1);
-  if (GRN_TEXT_LEN(var) != 0) {
-    filter_length = atoi(GRN_TEXT_VALUE(var));
-    GRN_INT32_SET(ctx, &vars[12].value, filter_length);
-  }
-  var = grn_plugin_proc_get_var(ctx, user_data, "filter_stoptable", -1);
-  if (GRN_TEXT_LEN(var) != 0) {
-    filter_stoptable = GRN_TEXT_VALUE(var);
-    GRN_TEXT_SET(ctx, &vars[13].value, filter_stoptable, GRN_TEXT_LEN(var));
-  }
-
-  if (filter_combhira || filter_combkata ||
-      filter_length || filter_stoptable) {
-    GRN_TEXT_PUTS(ctx, &tokenizer_name, "Filter");
-  }
-
-  if (filter_combhira) {
-    GRN_TEXT_PUTS(ctx, &tokenizer_name, "Combhira");
-  }
-  if (filter_combkata) {
-    GRN_TEXT_PUTS(ctx, &tokenizer_name, "Combkata");
-  }
-  if (filter_length) {
-    GRN_TEXT_PUTS(ctx, &tokenizer_name, "Length");
-  }
-  if (filter_stoptable) {
-    GRN_TEXT_PUTS(ctx, &tokenizer_name, "Stoptable");
-  }
-
-  var = grn_plugin_proc_get_var(ctx, user_data, "stem_snowball", -1);
-  if (GRN_TEXT_LEN(var) != 0) {
-    stem_snowball = GRN_TEXT_VALUE(var);
-    GRN_TEXT_SET(ctx, &vars[14].value, stem_snowball, GRN_TEXT_LEN(var));
-  }
-  if (stem_snowball) {
-    GRN_TEXT_PUTS(ctx, &tokenizer_name, "Stem");
-  }
-  if (stem_snowball) {
-    GRN_TEXT_PUTS(ctx, &tokenizer_name, "Snowball");
-  }
-
-  GRN_TEXT_PUTC(ctx, &tokenizer_name, '\0');
-  grn_proc_create(ctx, GRN_TEXT_VALUE(&tokenizer_name), -1,
+  grn_proc_create(ctx, "TokenYaBigram", -1,
                   GRN_PROC_TOKENIZER,
-                  yangram_init, yangram_next, yangram_fin, 15, vars);
+                  yangram_init, yangram_next, yangram_fin, 13, vars);
 
-  grn_ctx_output_cstr(ctx, GRN_TEXT_VALUE(&tokenizer_name));
-  grn_obj_unlink(ctx, &tokenizer_name);
+  GRN_INT32_SET(ctx, &vars[5].value, 1);
+  GRN_INT32_SET(ctx, &vars[6].value, 1);
+  grn_proc_create(ctx, "TokenYaBigramSplitSymbolAlpha", -1,
+                  GRN_PROC_TOKENIZER,
+                  yangram_init, yangram_next, yangram_fin, 13, vars);
 
-  return NULL;
-}
+  GRN_INT32_SET(ctx, &vars[3].value, 3);
+  GRN_INT32_SET(ctx, &vars[5].value, 0);
+  GRN_INT32_SET(ctx, &vars[6].value, 0);
+  grn_proc_create(ctx, "TokenYaTrigram", -1,
+                  GRN_PROC_TOKENIZER,
+                  yangram_init, yangram_next, yangram_fin, 13, vars);
 
-grn_rc
-GRN_PLUGIN_INIT(grn_ctx *ctx)
-{
-  load_comb_exclude(ctx);
+  GRN_INT32_SET(ctx, &vars[5].value, 1);
+  GRN_INT32_SET(ctx, &vars[6].value, 1);
+  grn_proc_create(ctx, "TokenYaTrigramSplitSymbolAlpha", -1,
+                  GRN_PROC_TOKENIZER,
+                  yangram_init, yangram_next, yangram_fin, 13, vars);
 
-  return ctx->rc;
-}
+  GRN_INT32_SET(ctx, &vars[3].value, 2);
+  GRN_INT32_SET(ctx, &vars[5].value, 0);
+  GRN_INT32_SET(ctx, &vars[6].value, 0);
+  GRN_TEXT_SET(ctx, &vars[12].value, "en", 2);
+  grn_proc_create(ctx, "TokenYaBigramSnowball", -1,
+                  GRN_PROC_TOKENIZER,
+                  yangram_init, yangram_next, yangram_fin, 13, vars);
 
-grn_rc
-GRN_PLUGIN_REGISTER(grn_ctx *ctx)
-{
-  grn_expr_var vars[12];
+  GRN_INT32_SET(ctx, &vars[3].value, 3);
+  grn_proc_create(ctx, "TokenYaTrigramSnowball", -1,
+                  GRN_PROC_TOKENIZER,
+                  yangram_init, yangram_next, yangram_fin, 13, vars);
 
-  grn_plugin_expr_var_init(ctx, &vars[0], "ngram_unit", -1);
-  grn_plugin_expr_var_init(ctx, &vars[1], "ignore_blank", -1);
-  grn_plugin_expr_var_init(ctx, &vars[2], "split_symbol", -1);
-  grn_plugin_expr_var_init(ctx, &vars[3], "split_alpha", -1);
-  grn_plugin_expr_var_init(ctx, &vars[4], "split_digit", -1);
-  grn_plugin_expr_var_init(ctx, &vars[5], "skip_overlap", -1);
-  grn_plugin_expr_var_init(ctx, &vars[6], "skip_stopword", -1);
-  grn_plugin_expr_var_init(ctx, &vars[7], "filter_combhira", -1);
-  grn_plugin_expr_var_init(ctx, &vars[8], "filter_combkata", -1);
-  grn_plugin_expr_var_init(ctx, &vars[9], "filter_length", -1);
-  grn_plugin_expr_var_init(ctx, &vars[10], "filter_stoptable", -1);
-  grn_plugin_expr_var_init(ctx, &vars[11], "stem_snowball", -1);
-
-  grn_plugin_command_create(ctx, "yangram_register", -1,
-                            command_yangram_register, 12, vars);
   return ctx->rc;
 }
 
 grn_rc
 GRN_PLUGIN_FIN(GNUC_UNUSED grn_ctx *ctx)
 {
-  if (comb_exclude) {
-    grn_hash_close(ctx, comb_exclude);
-    comb_exclude = NULL;
-  }
 
   return GRN_SUCCESS;
 }

@@ -1,8 +1,0 @@
-register tokenizers/yangram
-yangram_register --ngram_unit 3 --ignore_blank 1 \
-  --split_symbol 1 --split_alpha 1 --split_digit 1 \
-  --skip_overlap 1 --skip_stopword 1 \
-  --filter_combhira 1 --filter_combkata 1 \
-  --filter_length 5 --filter_stoptable stopwords \
-  --stem_snowball en
-tokenizer_list

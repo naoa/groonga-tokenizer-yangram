@@ -1,4 +1,0 @@
-register tokenizers/yangram
-yangram_register --filter_combhira 1
-tokenizer_list
-tokenize TokenYaBigramFilterCombhira "今日は雨だ" NormalizerAuto

@@ -1,3 +1,2 @@
 register tokenizers/yangram
-yangram_register --filter_length 5
-tokenize TokenYaBigramFilterLength "123456 digit" NormalizerAuto
+tokenize TokenYaBigram "12345678901234567890123456789012345678901234567890123456789012345 digit" NormalizerAuto

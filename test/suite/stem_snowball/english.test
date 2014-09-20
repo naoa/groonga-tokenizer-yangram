@@ -1,3 +1,2 @@
 register tokenizers/yangram
-yangram_register --stem_snowball en
-tokenize TokenYaBigramStemSnowball "There are cars" NormalizerAuto
+tokenize TokenYaBigramSnowball "There are cars" NormalizerAuto

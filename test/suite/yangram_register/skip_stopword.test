@@ -1,4 +1,0 @@
-register tokenizers/yangram
-yangram_register --skip_stopword 1
-tokenizer_list
-tokenize TokenYaBigramSkipStopword "今日は雨だ" NormalizerAuto

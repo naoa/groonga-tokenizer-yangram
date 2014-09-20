@@ -1,11 +1,10 @@
 register tokenizers/yangram
-yangram_register --filter_stoptable stopwords
 
-table_create stopwords TABLE_HASH_KEY ShortText
+table_create @yangram_stopwords TABLE_HASH_KEY ShortText
 
-load --table stopwords
+load --table @yangram_stopwords
 [
 {"_key": "これ"}
 ]
 
-tokenize TokenYaBigramFilterStoptable "これはペンだ。" NormalizerAuto
+tokenize TokenYaBigram "これはペンだ。" NormalizerAuto

@@ -1,8 +1,6 @@
 register tokenizers/yangram
 [[0,0.0,0.0],true]
-yangram_register 3 --skip_overlap 1
-[[0,0.0,0.0],"TokenYaTrigramSkipOverlap"]
-tokenize TokenYaTrigramSkipOverlap "つつきつAきつつ" NormalizerAuto --mode GET
+tokenize TokenYaTrigram "つつきつAきつつ" NormalizerAuto --mode GET
 [
   [
     0,

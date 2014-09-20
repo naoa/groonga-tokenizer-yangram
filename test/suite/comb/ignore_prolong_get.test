@@ -1,4 +1,0 @@
-register tokenizers/yangram
-
-yangram_register 2 --filter_combhira 1 --filter_combkata 1
-tokenize TokenYaBigramFilterCombhiraCombkata "でーた装置" NormalizerAuto --mode GET

@@ -1,4 +1,0 @@
-register tokenizers/yangram
-
-yangram_register 2 --skip_overlap 1 --filter_combhira 1 --filter_combkata 1
-tokenize TokenYaBigramSkipOverlapFilterCombhiraCombkata "データ装置" NormalizerAuto --mode GET

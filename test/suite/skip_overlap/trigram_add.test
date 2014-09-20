@@ -1,4 +1,3 @@
 register tokenizers/yangram
 
-yangram_register 3 --skip_overlap 1
-tokenize TokenYaTrigramSkipOverlap "今日は、雨だな。" NormalizerAuto --mode ADD
+tokenize TokenYaTrigram "今日は、雨だな。" NormalizerAuto --mode ADD

@@ -1,8 +1,6 @@
 register tokenizers/yangram
 [[0,0.0,0.0],true]
-yangram_register 2 --skip_overlap 1
-[[0,0.0,0.0],"TokenYaBigramSkipOverlap"]
-tokenize TokenYaBigramSkipOverlap "広告  評論家" NormalizerAuto --mode GET
+tokenize TokenYaBigram "広告  評論家" NormalizerAuto --mode GET
 [
   [
     0,

@@ -1,4 +1,0 @@
-register tokenizers/yangram
-yangram_register --ngram_unit 2 --split_alpha 0
-tokenizer_list
-tokenize TokenYaBigram "abc de" NormalizerAuto

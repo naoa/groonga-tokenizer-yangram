@@ -1,4 +1,0 @@
-register tokenizers/yangram
-yangram_register --split_digit 1
-tokenizer_list
-tokenize TokenYaBigramSplitDigit "12345" NormalizerAuto

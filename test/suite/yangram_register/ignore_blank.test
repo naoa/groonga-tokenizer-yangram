@@ -1,6 +1,0 @@
-register tokenizers/yangram
-yangram_register --ngram_unit 3 --split_alpha 1
-yangram_register --ngram_unit 3 --split_alpha 1 --ignore_blank 1
-tokenizer_list
-tokenize TokenYaTrigramSplitAlpha "ab cde" NormalizerAuto
-tokenize TokenYaTrigramIgnoreBlankSplitAlpha "ab cde" NormalizerAuto

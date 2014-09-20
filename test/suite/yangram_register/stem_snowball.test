@@ -1,3 +1,0 @@
-register tokenizers/yangram
-yangram_register --stem_snowball en
-tokenizer_list
