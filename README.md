@@ -195,13 +195,13 @@ Install ``groonga-tokenizer-yangram`` package:
 * CentOS6
 
 ```
-% sudo yum localinstall -y http://packages.createfield.com/centos/6/groonga-tokenizer-yangram-1.0.0-1.el6.x86_64.rpm
+% sudo yum localinstall -y http://packages.createfield.com/centos/6/groonga-tokenizer-yangram-1.0.1-1.el6.x86_64.rpm
 ```
 
 * CentOS7
 
 ```
-% sudo yum localinstall -y http://packages.createfield.com/centos/7/groonga-tokenizer-yangram-1.0.0-1.el7.centos.x86_64.rpm
+% sudo yum localinstall -y http://packages.createfield.com/centos/7/groonga-tokenizer-yangram-1.0.1-1.el7.centos.x86_64.rpm
 ```
 
 ### Fedora
@@ -209,7 +209,13 @@ Install ``groonga-tokenizer-yangram`` package:
 * Fedora 20
 
 ```
-% sudo yum localinstall -y http://packages.createfield.com/fedora/20/groonga-tokenizer-yangram-1.0.0-1.fc20.x86_64.rpm
+% sudo yum localinstall -y http://packages.createfield.com/fedora/20/groonga-tokenizer-yangram-1.0.1-1.fc20.x86_64.rpm
+```
+
+* Fedora 21
+
+```
+% sudo yum localinstall -y http://packages.createfield.com/fedora/21/groonga-tokenizer-yangram-1.0.1-1.fc21.x86_64.rpm
 ```
 
 ### Debian GNU/LINUX
@@ -217,15 +223,15 @@ Install ``groonga-tokenizer-yangram`` package:
 * wheezy
 
 ```
-% wget http://packages.createfield.com/debian/wheezy/groonga-tokenizer-yangram_1.0.0-1_amd64.deb
-% sudo dpkg -i groonga-tokenizer-yangram_1.0.0-1_amd64.deb
+% wget http://packages.createfield.com/debian/wheezy/groonga-tokenizer-yangram_1.0.1-1_amd64.deb
+% sudo dpkg -i groonga-tokenizer-yangram_1.0.1-1_amd64.deb
 ```
 
 * jessie
 
 ```
-% wget http://packages.createfield.com/debian/jessie/groonga-tokenizer-yangram_1.0.0-1_amd64.deb
-% sudo dpkg -i groonga-tokenizer-yangram_1.0.0-1_amd64.deb
+% wget http://packages.createfield.com/debian/jessie/groonga-tokenizer-yangram_1.0.1-1_amd64.deb
+% sudo dpkg -i groonga-tokenizer-yangram_1.0.1-1_amd64.deb
 ```
 
 ### Ubuntu
@@ -233,15 +239,15 @@ Install ``groonga-tokenizer-yangram`` package:
 * precise
 
 ```
-% wget http://packages.createfield.com/ubuntu/precise/groonga-tokenizer-yangram_1.0.0-1_amd64.deb
-% sudo dpkg -i groonga-tokenizer-yangram_1.0.0-1_amd64.deb
+% wget http://packages.createfield.com/ubuntu/precise/groonga-tokenizer-yangram_1.0.1-1_amd64.deb
+% sudo dpkg -i groonga-tokenizer-yangram_1.0.1-1_amd64.deb
 ```
 
 * trusty
 
 ```
-% wget http://packages.createfield.com/ubuntu/trusty/groonga-tokenizer-yangram_1.0.0-1_amd64.deb
-% sudo dpkg -i groonga-tokenizer-yangram_1.0.0-1_amd64.deb
+% wget http://packages.createfield.com/ubuntu/trusty/groonga-tokenizer-yangram_1.0.1-1_amd64.deb
+% sudo dpkg -i groonga-tokenizer-yangram_1.0.1-1_amd64.deb
 ```
 
 ### Source install

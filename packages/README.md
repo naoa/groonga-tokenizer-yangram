@@ -17,13 +17,13 @@ mkdir -p ~/rpmbuild/{BUILD,SRPMS,SPECS,SOURCES,RPMS}
 cp packages/rpm/centos/groonga-tokenizer-yangram.spec ~/rpmbuild/SPECS/
 
 cd /usr/local/src
-rm -rf groonga-tokenizer-yangram-1.0.0
-cp -rf groonga-tokenizer-yangram groonga-tokenizer-yangram-1.0.0
-tar zcvf groonga-tokenizer-yangram-1.0.0.tar.gz groonga-tokenizer-yangram-1.0.0
-mv groonga-tokenizer-yangram-1.0.0.tar.gz ~/rpmbuild/SOURCES/
+rm -rf groonga-tokenizer-yangram-1.0.1
+cp -rf groonga-tokenizer-yangram groonga-tokenizer-yangram-1.0.1
+tar zcvf groonga-tokenizer-yangram-1.0.1.tar.gz groonga-tokenizer-yangram-1.0.1
+mv groonga-tokenizer-yangram-1.0.1.tar.gz ~/rpmbuild/SOURCES/
 rpmbuild -ba ~/rpmbuild/SPECS/groonga-tokenizer-yangram.spec
 mkdir -p /usr/local/src/groonga-tokenizer-yangram/public/centos/6/
-mv ~/rpmbuild/RPMS/x86_64/groonga-tokenizer-yangram-1.0.0-1.el6.x86_64.rpm /usr/local/src/groonga-tokenizer-yangram/public/centos/6/
+mv ~/rpmbuild/RPMS/x86_64/groonga-tokenizer-yangram-1.0.1-1.el6.x86_64.rpm /usr/local/src/groonga-tokenizer-yangram/public/centos/6/
 ```
 
 #CentOS7
@@ -32,7 +32,7 @@ mv ~/rpmbuild/RPMS/x86_64/groonga-tokenizer-yangram-1.0.0-1.el6.x86_64.rpm /usr/
 docker run -v /usr/local/src:/usr/local/src -i -t centos:centos7 /bin/bash
 …
 mkdir -p /usr/local/src/groonga-tokenizer-yangram/public/centos/7/
-mv ~/rpmbuild/RPMS/x86_64/groonga-tokenizer-yangram-1.0.0-1.el7.centos.x86_64.rpm /usr/local/src/groonga-tokenizer-yangram/public/centos/7/
+mv ~/rpmbuild/RPMS/x86_64/groonga-tokenizer-yangram-1.0.1-1.el7.centos.x86_64.rpm /usr/local/src/groonga-tokenizer-yangram/public/centos/7/
 ```
 
 #Fefora20
@@ -46,7 +46,7 @@ yum install -y groonga-devel autoconf automake libtool wget tar gcc-c++ make mec
 cp packages/rpm/fedora/groonga-tokenizer-yangram.spec ~/rpmbuild/SPECS/
 …
 mkdir -p /usr/local/src/groonga-tokenizer-yangram/public/fedora/20/
-mv ~/rpmbuild/RPMS/x86_64/groonga-tokenizer-yangram-1.0.0-1.fc20.x86_64.rpm /usr/local/src/groonga-tokenizer-yangram/public/fedora/20/
+mv ~/rpmbuild/RPMS/x86_64/groonga-tokenizer-yangram-1.0.1-1.fc20.x86_64.rpm /usr/local/src/groonga-tokenizer-yangram/public/fedora/20/
 ```
 
 #Debian(wheezy)
@@ -74,18 +74,18 @@ mkdir -p ~/build
 
 cd /usr/local/src
 
-rm -rf groonga-tokenizer-yangram-1.0.0
-cp -rf groonga-tokenizer-yangram groonga-tokenizer-yangram-1.0.0
-tar zcvf groonga-tokenizer-yangram-1.0.0.tar.gz groonga-tokenizer-yangram-1.0.0
-mv groonga-tokenizer-yangram-1.0.0.tar.gz ~/build/groonga-tokenizer-yangram_1.0.0.orig.tar.gz
+rm -rf groonga-tokenizer-yangram-1.0.1
+cp -rf groonga-tokenizer-yangram groonga-tokenizer-yangram-1.0.1
+tar zcvf groonga-tokenizer-yangram-1.0.1.tar.gz groonga-tokenizer-yangram-1.0.1
+mv groonga-tokenizer-yangram-1.0.1.tar.gz ~/build/groonga-tokenizer-yangram_1.0.1.orig.tar.gz
 cd ~/build
-tar xfz groonga-tokenizer-yangram_1.0.0.orig.tar.gz
-cd groonga-tokenizer-yangram-1.0.0/
+tar xfz groonga-tokenizer-yangram_1.0.1.orig.tar.gz
+cd groonga-tokenizer-yangram-1.0.1/
 cp -rf packages/debian .
 debuild -us -uc -b
 cd ..
 mkdir -p /usr/local/src/groonga-tokenizer-yangram/public/debian/wheezy/
-mv ~/build/groonga-tokenizer-yangram_1.0.0-1_amd64.deb /usr/local/src/groonga-tokenizer-yangram/public/debian/wheezy/
+mv ~/build/groonga-tokenizer-yangram_1.0.1-1_amd64.deb /usr/local/src/groonga-tokenizer-yangram/public/debian/wheezy/
 ```
 
 #Debian(jessie)
@@ -98,7 +98,7 @@ echo "deb http://packages.groonga.org/debian/ jessie main" >> /etc/apt/sources.l
 echo "deb-src http://packages.groonga.org/debian/ jessie main" >> /etc/apt/sources.list.d/groonga.list
 …
 mkdir -p /usr/local/src/groonga-tokenizer-yangram/public/debian/jessie/
-mv ~/build/groonga-tokenizer-yangram_1.0.0-1_amd64.deb /usr/local/src/groonga-tokenizer-yangram/public/debian/jessie/
+mv ~/build/groonga-tokenizer-yangram_1.0.1-1_amd64.deb /usr/local/src/groonga-tokenizer-yangram/public/debian/jessie/
 ```
 
 #Ubuntu(precise)
@@ -117,7 +117,7 @@ apt-get install -y groonga libgroonga-dev wget tar build-essential zlib1g-dev li
 apt-get install -y dh-make
 …
 mkdir -p /usr/local/src/groonga-tokenizer-yangram/public/ubuntu/precise/
-mv ~/build/groonga-tokenizer-yangram_1.0.0-1_amd64.deb /usr/local/src/groonga-tokenizer-yangram/public/ubuntu/precise/
+mv ~/build/groonga-tokenizer-yangram_1.0.1-1_amd64.deb /usr/local/src/groonga-tokenizer-yangram/public/ubuntu/precise/
 ```
 
 #Ubuntu(trusty)
@@ -127,6 +127,6 @@ docker run -v /usr/local/src:/usr/local/src -i -t naoa/groonga-build-ubuntu-trus
 docker run -v /usr/local/src:/usr/local/src -i -t ubuntu:trusty /bin/bash
 …
 mkdir -p /usr/local/src/groonga-tokenizer-yangram/public/ubuntu/trusty/
-mv ~/build/groonga-tokenizer-yangram_1.0.0-1_amd64.deb /usr/local/src/groonga-tokenizer-yangram/public/ubuntu/trusty/
+mv ~/build/groonga-tokenizer-yangram_1.0.1-1_amd64.deb /usr/local/src/groonga-tokenizer-yangram/public/ubuntu/trusty/
 ```
 
