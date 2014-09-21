@@ -3,11 +3,17 @@
 ## Tokenizer
 
 * ``TokenYaBigram``
+* ``TokenYaBigramIgnoreBlank``
 * ``TokenYaBigramSplitSymbolAlpha``
+* ``TokenYaBigramIgnoreBlankSplitSymbolAlpha``
 * ``TokenYaTrigram``
+* ``TokenYaTrigramIgnoreBlank``
 * ``TokenYaTrigramSplitSymbolAlpha``
+* ``TokenYaTrigramIgnoreBlankSplitSymbolAlpha``
 * ``TokenYaBigramSnowball``
+* ``TokenYaBigramIgnoreBlankSnowball``
 * ``TokenYaTrigramSnowball``
+* ``TokenYaTrigramIgnoreBlankSnowball``
 
 原則、ビルトインのTokenBigramトークナイザー等と同様のルールで文字列をトークナイズします。
 それに加え、以下の機能をカスタマイズしています。
@@ -26,7 +32,7 @@
 これはNgramのNに満たないトークンを含めてしまうと検索性能が劣化するため、
 あえてスキップしないようにしています。
 
-オーバーラップスキップを有効にすると、通常のTokenBigram等と異なり空白が含まれた状態でトークナイズされます。これはオーバーラップをスキップすると空白の有無をうまく区別することができないためです。このため、通常のTokenBigram等よりも若干インデックスサイズが増えます。なお、空白のみのトークンは除去されます。
+オーバーラップスキップを有効にし、且つ、``IgnoreBlank``が有効でない場合、通常のTokenBigram等と異なり空白が含まれた状態でトークナイズされます。これはオーバーラップをスキップすると空白の有無をうまく区別することができないためです。このため、通常のTokenBigram等よりも若干インデックスサイズが増えます。なお、空白のみのトークンは除去されます。
 
 * Wikipedia(ja)で1000回検索した場合の検索速度差とヒット件数差
 

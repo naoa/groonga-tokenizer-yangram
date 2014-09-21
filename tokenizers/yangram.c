@@ -337,12 +337,18 @@ yangram_init(grn_ctx *ctx, int nargs, grn_obj **args, grn_user_data *user_data)
   grn_yangram_tokenizer *tokenizer;
   grn_obj *var;
   grn_bool skip_overlap = GRN_FALSE;
+  grn_bool ignore_blank = GRN_FALSE;
 
   var = grn_plugin_proc_get_var(ctx, user_data, "skip_overlap", -1);
   if (GRN_TEXT_LEN(var) != 0) {
     skip_overlap = GRN_INT32_VALUE(var);
   }
-  if (!skip_overlap) {
+  var = grn_plugin_proc_get_var(ctx, user_data, "ignore_blank", -1);
+  if (GRN_TEXT_LEN(var) != 0) {
+    ignore_blank = GRN_INT32_VALUE(var);
+  }
+
+  if (!skip_overlap || ignore_blank) {
     normalize_flags |= GRN_STRING_REMOVE_BLANK;
   }
 
@@ -361,14 +367,11 @@ yangram_init(grn_ctx *ctx, int nargs, grn_obj **args, grn_user_data *user_data)
   grn_tokenizer_token_init(ctx, &(tokenizer->token));
   tokenizer->query = query;
   tokenizer->skip_overlap = skip_overlap;
+  tokenizer->ignore_blank = ignore_blank;
 
   var = grn_plugin_proc_get_var(ctx, user_data, "ngram_unit", -1);
   if (GRN_TEXT_LEN(var) != 0) {
     tokenizer->ngram_unit = GRN_INT32_VALUE(var);
-  }
-  var = grn_plugin_proc_get_var(ctx, user_data, "ignore_blank", -1);
-  if (GRN_TEXT_LEN(var) != 0) {
-    tokenizer->ignore_blank = GRN_INT32_VALUE(var);
   }
   var = grn_plugin_proc_get_var(ctx, user_data, "split_symbol", -1);
   if (GRN_TEXT_LEN(var) != 0) {
@@ -639,26 +642,50 @@ GRN_PLUGIN_REGISTER(grn_ctx *ctx)
                   GRN_PROC_TOKENIZER,
                   yangram_init, yangram_next, yangram_fin, 13, vars);
 
+  GRN_INT32_SET(ctx, &vars[4].value, 1);
+  grn_proc_create(ctx, "TokenYaBigramIgnoreBlank", -1,
+                  GRN_PROC_TOKENIZER,
+                  yangram_init, yangram_next, yangram_fin, 13, vars);
+
+  GRN_INT32_SET(ctx, &vars[4].value, 0);
   GRN_INT32_SET(ctx, &vars[5].value, 1);
   GRN_INT32_SET(ctx, &vars[6].value, 1);
   grn_proc_create(ctx, "TokenYaBigramSplitSymbolAlpha", -1,
                   GRN_PROC_TOKENIZER,
                   yangram_init, yangram_next, yangram_fin, 13, vars);
 
+  GRN_INT32_SET(ctx, &vars[4].value, 1);
+  grn_proc_create(ctx, "TokenYaBigramIgnoreBlankSplitSymbolAlpha", -1,
+                  GRN_PROC_TOKENIZER,
+                  yangram_init, yangram_next, yangram_fin, 13, vars);
+
   GRN_INT32_SET(ctx, &vars[3].value, 3);
+  GRN_INT32_SET(ctx, &vars[4].value, 0);
   GRN_INT32_SET(ctx, &vars[5].value, 0);
   GRN_INT32_SET(ctx, &vars[6].value, 0);
   grn_proc_create(ctx, "TokenYaTrigram", -1,
                   GRN_PROC_TOKENIZER,
                   yangram_init, yangram_next, yangram_fin, 13, vars);
 
+  GRN_INT32_SET(ctx, &vars[4].value, 1);
+  grn_proc_create(ctx, "TokenYaTrigramIgnoreBlank", -1,
+                  GRN_PROC_TOKENIZER,
+                  yangram_init, yangram_next, yangram_fin, 13, vars);
+
+  GRN_INT32_SET(ctx, &vars[4].value, 0);
   GRN_INT32_SET(ctx, &vars[5].value, 1);
   GRN_INT32_SET(ctx, &vars[6].value, 1);
   grn_proc_create(ctx, "TokenYaTrigramSplitSymbolAlpha", -1,
                   GRN_PROC_TOKENIZER,
                   yangram_init, yangram_next, yangram_fin, 13, vars);
 
+  GRN_INT32_SET(ctx, &vars[4].value, 1);
+  grn_proc_create(ctx, "TokenYaTrigramIgnoreBlankSplitSymbolAlpha", -1,
+                  GRN_PROC_TOKENIZER,
+                  yangram_init, yangram_next, yangram_fin, 13, vars);
+
   GRN_INT32_SET(ctx, &vars[3].value, 2);
+  GRN_INT32_SET(ctx, &vars[4].value, 0);
   GRN_INT32_SET(ctx, &vars[5].value, 0);
   GRN_INT32_SET(ctx, &vars[6].value, 0);
   GRN_TEXT_SET(ctx, &vars[12].value, "en", 2);
@@ -666,8 +693,19 @@ GRN_PLUGIN_REGISTER(grn_ctx *ctx)
                   GRN_PROC_TOKENIZER,
                   yangram_init, yangram_next, yangram_fin, 13, vars);
 
+  GRN_INT32_SET(ctx, &vars[4].value, 1);
+  grn_proc_create(ctx, "TokenYaBigramIgnoreBlankSnowball", -1,
+                  GRN_PROC_TOKENIZER,
+                  yangram_init, yangram_next, yangram_fin, 13, vars);
+
   GRN_INT32_SET(ctx, &vars[3].value, 3);
+  GRN_INT32_SET(ctx, &vars[4].value, 0);
   grn_proc_create(ctx, "TokenYaTrigramSnowball", -1,
+                  GRN_PROC_TOKENIZER,
+                  yangram_init, yangram_next, yangram_fin, 13, vars);
+
+  GRN_INT32_SET(ctx, &vars[4].value, 1);
+  grn_proc_create(ctx, "TokenYaTrigramIgnoreBlankSnowball", -1,
                   GRN_PROC_TOKENIZER,
                   yangram_init, yangram_next, yangram_fin, 13, vars);
 
