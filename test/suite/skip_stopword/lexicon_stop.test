@@ -3,7 +3,7 @@ register tokenizers/yangram
 table_create Entries TABLE_NO_KEY
 column_create Entries body COLUMN_SCALAR ShortText
 
-table_create Terms TABLE_PAT_KEY ShortText --default_tokenizer TokenYaBigramSkipOverlap --normalizer NormalizerAuto
+table_create Terms TABLE_PAT_KEY ShortText --default_tokenizer TokenYaBigram --normalizer NormalizerAuto
 column_create Terms document_index COLUMN_INDEX|WITH_POSITION Entries body
 column_create Terms @stopword COLUMN_SCALAR Bool
 
