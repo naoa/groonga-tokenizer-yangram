@@ -74,17 +74,20 @@ is_token_all_blank(grn_ctx *ctx, grn_yangram_tokenizer *tokenizer,
                    int token_size)
 {
   unsigned int char_length;
+  unsigned int rest_length = tokenizer->rest_length;
   int i = 0;
   if ((char_length = grn_plugin_isspace(ctx, (char *)token_top,
-                                        tokenizer->rest_length,
+                                        rest_length,
                                         tokenizer->query->encoding))) {
     i = 1;
     token_top += char_length;
+    rest_length -= char_length;
     while (i < token_size &&
            (char_length = grn_plugin_isspace(ctx, (char *)token_top,
-                                             tokenizer->rest_length,
+                                             rest_length,
                                              tokenizer->query->encoding))) {
       token_top += char_length;
+      rest_length -= char_length;
       i++;
     }
   }
@@ -144,14 +147,15 @@ forward_grouped_token_tail(grn_ctx *ctx, grn_yangram_tokenizer *tokenizer,
 {
   int token_size = 0;
   unsigned int char_length;
-
+  unsigned int rest_length = tokenizer->rest_length;
   if (ctypes &&
       tokenizer->split_alpha == GRN_FALSE &&
       GRN_STR_CTYPE(*ctypes) == GRN_CHAR_ALPHA) {
-    while ((char_length = grn_plugin_charlen(ctx, (char *)*token_tail, tokenizer->rest_length,
+    while ((char_length = grn_plugin_charlen(ctx, (char *)*token_tail, rest_length,
                                              tokenizer->query->encoding))) {
       token_size++;
       *token_tail += char_length;
+      rest_length -= char_length;
       if (GRN_STR_ISBLANK(*ctypes)) {
         break;
       }
@@ -162,10 +166,11 @@ forward_grouped_token_tail(grn_ctx *ctx, grn_yangram_tokenizer *tokenizer,
   } else if (ctypes &&
              tokenizer->split_digit == GRN_FALSE &&
              GRN_STR_CTYPE(*ctypes) == GRN_CHAR_DIGIT) {
-    while ((char_length = grn_plugin_charlen(ctx, (char *)*token_tail, tokenizer->rest_length,
+    while ((char_length = grn_plugin_charlen(ctx, (char *)*token_tail, rest_length,
                                              tokenizer->query->encoding))) {
       token_size++;
       *token_tail += char_length;
+      rest_length -= char_length;
       if (GRN_STR_ISBLANK(*ctypes)) {
         break;
       }
@@ -176,10 +181,11 @@ forward_grouped_token_tail(grn_ctx *ctx, grn_yangram_tokenizer *tokenizer,
   } else if (ctypes &&
              tokenizer->split_symbol == GRN_FALSE &&
              GRN_STR_CTYPE(*ctypes) == GRN_CHAR_SYMBOL) {
-    while ((char_length = grn_plugin_charlen(ctx, (char *)*token_tail, tokenizer->rest_length,
+    while ((char_length = grn_plugin_charlen(ctx, (char *)*token_tail, rest_length,
                                              tokenizer->query->encoding))) {
       token_size++;
       *token_tail += char_length;
+      rest_length -= char_length;
       if (!tokenizer->ignore_blank && GRN_STR_ISBLANK(*ctypes)) {
         break;
       }
@@ -198,13 +204,15 @@ forward_ngram_token_tail(grn_ctx *ctx, grn_yangram_tokenizer *tokenizer,
 {
   int token_size = 0;
   unsigned int char_length;
+  unsigned int rest_length = tokenizer->rest_length;
 
-  if ((char_length = grn_plugin_charlen(ctx, (char *)*token_tail, tokenizer->rest_length,
+  if ((char_length = grn_plugin_charlen(ctx, (char *)*token_tail, rest_length,
                                         tokenizer->query->encoding))) {
     token_size++;
     *token_tail += char_length;
+    rest_length -= char_length;
     while (token_size < tokenizer->ngram_unit &&
-           (char_length = grn_plugin_charlen(ctx, (char *)*token_tail, tokenizer->rest_length,
+           (char_length = grn_plugin_charlen(ctx, (char *)*token_tail, rest_length,
                                              tokenizer->query->encoding))) {
       if (ctypes) {
         if (!tokenizer->ignore_blank && GRN_STR_ISBLANK(*ctypes)) {
@@ -222,6 +230,7 @@ forward_ngram_token_tail(grn_ctx *ctx, grn_yangram_tokenizer *tokenizer,
       }
       token_size++;
       *token_tail += char_length;
+      rest_length -= char_length;
     }
   }
   return token_size;
@@ -268,16 +277,18 @@ is_token_all_same(grn_ctx *ctx, grn_yangram_tokenizer *tokenizer,
                   int token_size)
 {
   unsigned int char_length;
+  unsidned int rest_length;
   const unsigned char *token_before = token_top;
 
   int i = 0;
 
-  if ((char_length = grn_plugin_charlen(ctx, (char *)token_top, tokenizer->rest_length,
+  if ((char_length = grn_plugin_charlen(ctx, (char *)token_top, rest_length,
                                        tokenizer->query->encoding))) {
     token_top += char_length;
+    rest_length -= char_length;
     i = 1;
     while (i < token_size &&
-      (char_length = grn_plugin_charlen(ctx, (char *)token_top, tokenizer->rest_length,
+      (char_length = grn_plugin_charlen(ctx, (char *)token_top, rest_length,
                                         tokenizer->query->encoding))) {
       if (token_top + char_length &&
           !memcmp(token_before, token_top, char_length)){
@@ -285,6 +296,7 @@ is_token_all_same(grn_ctx *ctx, grn_yangram_tokenizer *tokenizer,
       }
       token_before = token_top;
       token_top += char_length;
+      rest_length -= char_length;
       i++;
     }
   }
