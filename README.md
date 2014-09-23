@@ -269,7 +269,7 @@ Build this tokenizer.
 
 * Groonga >= 4.0.5
 
-Install ``groonga-devel`` in CentOS/Fedora. Install ``libgroonga-dev`` in Debian/Ubutu.
+Install ``groonga-devel`` in CentOS/Fedora. Install ``libgroonga-dev`` in Debian/Ubuntu.
 
 See http://groonga.org/docs/install.html
 
