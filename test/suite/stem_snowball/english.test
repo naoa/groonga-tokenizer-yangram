@@ -1,2 +1,0 @@
-register tokenizers/yangram
-tokenize TokenYaBigramSnowball "There are cars" NormalizerAuto

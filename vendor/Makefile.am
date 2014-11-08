@@ -1,2 +1,0 @@
-SUBDIRS =					\
-	libstemmer_c

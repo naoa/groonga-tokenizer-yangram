@@ -21,8 +21,6 @@
 #include <string.h>
 #include <ctype.h>
 
-#include <libstemmer.h>
-
 #ifdef __GNUC__
 #  define GNUC_UNUSED __attribute__((__unused__))
 #else
@@ -64,8 +62,6 @@ typedef struct {
   grn_bool skip_stopword;
   int filter_length;
   const char *filter_stoptable;
-  const char *stem_snowball;
-  struct sb_stemmer *snowball_stemmer;
 } grn_yangram_tokenizer;
 
 static grn_bool
@@ -409,15 +405,6 @@ yangram_init(grn_ctx *ctx, int nargs, grn_obj **args, grn_user_data *user_data)
       tokenizer->stopword_table = NULL;
     }
   }
-  var = grn_plugin_proc_get_var(ctx, user_data, "stem_snowball", -1);
-  if (GRN_TEXT_LEN(var) != 0) {
-    tokenizer->stem_snowball = GRN_TEXT_VALUE(var);
-    tokenizer->snowball_stemmer =
-      sb_stemmer_new(tokenizer->stem_snowball,"UTF_8");
-  } else {
-    tokenizer->stem_snowball = NULL;
-    tokenizer->snowball_stemmer = NULL;
-  }
 
   grn_string_get_normalized(ctx, tokenizer->query->normalized_query,
                             &normalized, &normalized_length_in_bytes,
@@ -555,26 +542,11 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
   tokenizer->rest_length = string_end - token_next;
   tokenizer->ctypes_next = tokenizer->ctypes_next + ctypes_skip_size;
 
-  if (tokenizer->stem_snowball &&
-      !(status & GRN_TOKENIZER_TOKEN_SKIP) &&
-      !(status & GRN_TOKENIZER_TOKEN_SKIP_WITH_POSITION)) {
-    const sb_symbol * stemmed = sb_stemmer_stem(tokenizer->snowball_stemmer,
-                                                (sb_symbol *)token_top,
-                                                token_tail - token_top);
-    int stemmed_length = sb_stemmer_length(tokenizer->snowball_stemmer);
-    grn_tokenizer_token_push(ctx,
-                             &(tokenizer->token),
-                             (const char *)stemmed,
-                             stemmed_length,
-                             status);
-
-  } else {
-    grn_tokenizer_token_push(ctx,
-                             &(tokenizer->token),
-                             (const char *)token_top,
-                             token_tail - token_top,
-                             status);
-  }
+  grn_tokenizer_token_push(ctx,
+                           &(tokenizer->token),
+                           (const char *)token_top,
+                           token_tail - token_top,
+                           status);
   return NULL;
 }
 
@@ -589,9 +561,6 @@ yangram_fin(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
   }
   if (tokenizer->filter_stoptable) {
     grn_obj_unlink(ctx, tokenizer->stopword_table);
-  }
-  if (tokenizer->stem_snowball) {
-    sb_stemmer_delete(tokenizer->snowball_stemmer);
   }
   if (!tokenizer) {
     return NULL;
@@ -611,7 +580,7 @@ GRN_PLUGIN_INIT(grn_ctx *ctx)
 grn_rc
 GRN_PLUGIN_REGISTER(grn_ctx *ctx)
 {
-  grn_expr_var vars[13];
+  grn_expr_var vars[12];
 
   grn_plugin_expr_var_init(ctx, &vars[0], NULL, -1);
   grn_plugin_expr_var_init(ctx, &vars[1], NULL, -1);
@@ -625,7 +594,6 @@ GRN_PLUGIN_REGISTER(grn_ctx *ctx)
   grn_plugin_expr_var_init(ctx, &vars[9], "skip_stopword", -1);
   grn_plugin_expr_var_init(ctx, &vars[10], "filter_length", -1);
   grn_plugin_expr_var_init(ctx, &vars[11], "filter_stoptable", -1);
-  grn_plugin_expr_var_init(ctx, &vars[12], "stem_snowball", -1);
 
   GRN_INT32_SET(ctx, &vars[3].value, 2);
   GRN_INT32_SET(ctx, &vars[4].value, 0);
@@ -636,28 +604,27 @@ GRN_PLUGIN_REGISTER(grn_ctx *ctx)
   GRN_INT32_SET(ctx, &vars[9].value, 1);
   GRN_INT32_SET(ctx, &vars[10].value, 64);
   GRN_TEXT_SET(ctx, &vars[11].value, STOPWORDS_TABLE_NAME, strlen(STOPWORDS_TABLE_NAME));
-  GRN_TEXT_SET(ctx, &vars[12].value, "", 0);
 
   grn_proc_create(ctx, "TokenYaBigram", -1,
                   GRN_PROC_TOKENIZER,
-                  yangram_init, yangram_next, yangram_fin, 13, vars);
+                  yangram_init, yangram_next, yangram_fin, 12, vars);
 
   GRN_INT32_SET(ctx, &vars[4].value, 1);
   grn_proc_create(ctx, "TokenYaBigramIgnoreBlank", -1,
                   GRN_PROC_TOKENIZER,
-                  yangram_init, yangram_next, yangram_fin, 13, vars);
+                  yangram_init, yangram_next, yangram_fin, 12, vars);
 
   GRN_INT32_SET(ctx, &vars[4].value, 0);
   GRN_INT32_SET(ctx, &vars[5].value, 1);
   GRN_INT32_SET(ctx, &vars[6].value, 1);
   grn_proc_create(ctx, "TokenYaBigramSplitSymbolAlpha", -1,
                   GRN_PROC_TOKENIZER,
-                  yangram_init, yangram_next, yangram_fin, 13, vars);
+                  yangram_init, yangram_next, yangram_fin, 12, vars);
 
   GRN_INT32_SET(ctx, &vars[4].value, 1);
   grn_proc_create(ctx, "TokenYaBigramIgnoreBlankSplitSymbolAlpha", -1,
                   GRN_PROC_TOKENIZER,
-                  yangram_init, yangram_next, yangram_fin, 13, vars);
+                  yangram_init, yangram_next, yangram_fin, 12, vars);
 
   GRN_INT32_SET(ctx, &vars[3].value, 3);
   GRN_INT32_SET(ctx, &vars[4].value, 0);
@@ -665,49 +632,24 @@ GRN_PLUGIN_REGISTER(grn_ctx *ctx)
   GRN_INT32_SET(ctx, &vars[6].value, 0);
   grn_proc_create(ctx, "TokenYaTrigram", -1,
                   GRN_PROC_TOKENIZER,
-                  yangram_init, yangram_next, yangram_fin, 13, vars);
+                  yangram_init, yangram_next, yangram_fin, 12, vars);
 
   GRN_INT32_SET(ctx, &vars[4].value, 1);
   grn_proc_create(ctx, "TokenYaTrigramIgnoreBlank", -1,
                   GRN_PROC_TOKENIZER,
-                  yangram_init, yangram_next, yangram_fin, 13, vars);
+                  yangram_init, yangram_next, yangram_fin, 12, vars);
 
   GRN_INT32_SET(ctx, &vars[4].value, 0);
   GRN_INT32_SET(ctx, &vars[5].value, 1);
   GRN_INT32_SET(ctx, &vars[6].value, 1);
   grn_proc_create(ctx, "TokenYaTrigramSplitSymbolAlpha", -1,
                   GRN_PROC_TOKENIZER,
-                  yangram_init, yangram_next, yangram_fin, 13, vars);
+                  yangram_init, yangram_next, yangram_fin, 12, vars);
 
   GRN_INT32_SET(ctx, &vars[4].value, 1);
   grn_proc_create(ctx, "TokenYaTrigramIgnoreBlankSplitSymbolAlpha", -1,
                   GRN_PROC_TOKENIZER,
-                  yangram_init, yangram_next, yangram_fin, 13, vars);
-
-  GRN_INT32_SET(ctx, &vars[3].value, 2);
-  GRN_INT32_SET(ctx, &vars[4].value, 0);
-  GRN_INT32_SET(ctx, &vars[5].value, 0);
-  GRN_INT32_SET(ctx, &vars[6].value, 0);
-  GRN_TEXT_SET(ctx, &vars[12].value, "en", 2);
-  grn_proc_create(ctx, "TokenYaBigramSnowball", -1,
-                  GRN_PROC_TOKENIZER,
-                  yangram_init, yangram_next, yangram_fin, 13, vars);
-
-  GRN_INT32_SET(ctx, &vars[4].value, 1);
-  grn_proc_create(ctx, "TokenYaBigramIgnoreBlankSnowball", -1,
-                  GRN_PROC_TOKENIZER,
-                  yangram_init, yangram_next, yangram_fin, 13, vars);
-
-  GRN_INT32_SET(ctx, &vars[3].value, 3);
-  GRN_INT32_SET(ctx, &vars[4].value, 0);
-  grn_proc_create(ctx, "TokenYaTrigramSnowball", -1,
-                  GRN_PROC_TOKENIZER,
-                  yangram_init, yangram_next, yangram_fin, 13, vars);
-
-  GRN_INT32_SET(ctx, &vars[4].value, 1);
-  grn_proc_create(ctx, "TokenYaTrigramIgnoreBlankSnowball", -1,
-                  GRN_PROC_TOKENIZER,
-                  yangram_init, yangram_next, yangram_fin, 13, vars);
+                  yangram_init, yangram_next, yangram_fin, 12, vars);
 
   return ctx->rc;
 }
