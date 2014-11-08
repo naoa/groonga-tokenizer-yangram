@@ -14,7 +14,7 @@ Architecture: any
 Depends:
   ${misc:Depends},
   ${shlibs:Depends},
-  libgroonga-dev (>= 4.0.5)
+  libgroonga-dev (>= 4.0.7)
 Description: Yet another ngram tokenizer plugin for Groonga
  This package provides yet another ngram tokenizer plugin.
 

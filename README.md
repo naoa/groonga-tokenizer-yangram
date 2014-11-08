@@ -228,7 +228,7 @@ Build this tokenizer.
 
 ## Dependencies
 
-* Groonga >= 4.0.5
+* Groonga >= 4.0.7
 
 Install ``groonga-devel`` in CentOS/Fedora. Install ``libgroonga-dev`` in Debian/Ubuntu.
 

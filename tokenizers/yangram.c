@@ -31,12 +31,6 @@
 #define GRN_STR_ISBLANK(c) (c & 0x80)
 #define GRN_STR_CTYPE(c) (c & 0x7f)
 
-typedef enum {
-  GRN_TOKEN_GET = 0,
-  GRN_TOKEN_ADD,
-  GRN_TOKEN_DEL
-} grn_token_mode;
-
 #define STOPWORD_COLUMN_NAME "@stopword"
 #define STOPWORDS_TABLE_NAME "@yangram_stopwords"
 #define STOPWORDS_TABLE_NAME_MRN "@0040yangram_stopwords"

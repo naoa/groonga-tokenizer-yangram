@@ -11,8 +11,8 @@ URL:		http://github.com/naoa/groonga-tokenizer-yangram
 Source0:	http://packages.createfield.com/source/%{name}/%{name}-%{version}.tar.gz
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-%(%{__id_u} -n)
-BuildRequires:	groonga-devel >= 4.0.5
-Requires:	groonga-libs >= 4.0.5
+BuildRequires:	groonga-devel >= 4.0.7
+Requires:	groonga-libs >= 4.0.7
 
 %description
 This package provides yet another ngram tokenizer plugin.

@@ -30,7 +30,7 @@ if test "x$sample_debug" != "xno"; then
   fi
 fi
 
-GROONGA_REQUIRED_VERSION=4.0.5
+GROONGA_REQUIRED_VERSION=4.0.7
 PKG_CHECK_MODULES([GROONGA], [groonga >= ${GROONGA_REQUIRED_VERSION}])
 
 _PKG_CONFIG(GROONGA_PLUGINS_DIR, [variable=pluginsdir],    [groonga])
