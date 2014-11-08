@@ -114,21 +114,6 @@ tokenize TokenYaBigram "今日は雨だな" NormalizerAuto --mode GET
 ]
 ```
 
-### ``SkipStopword``
-
-検索時のみ語彙表の``@stopword``のカラムが``true``となっているキーのトークンがスキップされます。検索速度に影響が大きく、
-検索精度にはあまり影響のないキーを取捨選択して検索から除外することができます。インデックス更新からは除外されません。  
-``SkipStopword``を使うには、語彙表に``@stopword``という名前のカラムを作る必要があります。
-検索時のみスキップされるため、運用中に適宜変更することが可能です。
-
-```
-column_create <lexicon_name> @stopword COLUMN_SCALAR Bool
-load --table <lexicon_name>
-[
-{"_key": "the", "@stopword": true }
-]
-```
-
 ### ``FilterLength``
 
 検索時、追加時の両方で64バイトを超えるトークンを除去します。
@@ -247,7 +232,6 @@ Groonga:
     > table_create Terms TABLE_PAT_KEY ShortText \
     >   --default_tokenizer TokenYaBigram
     > column_create Terms diaries_body COLUMN_INDEX|WITH_POSITION Diaries body
-    > column_create Terms @stopword COLUMN_SCALAR Bool
 
 Mroonga:
 
@@ -259,7 +243,6 @@ Mroonga:
         -> PRIMARY KEY (id) USING HASH,
         -> FULLTEXT INDEX (body) COMMENT 'parser "TokenYaBigram"'
         -> ) ENGINE=mroonga DEFAULT CHARSET=utf8;
-    mysql> select mroonga_command("column_create Diaries-body @stopword COLUMN_SCALAR Bool");
     mysql> CREATE TABLE `@yangram_stopwords` (
         -> stopword VARCHAR(64) NOT NULL,
         -> PRIMARY KEY (stopword) USING HASH
@@ -282,7 +265,6 @@ Rroonga:
     ?>                              :normalizer => :NormalizerAuto,
     ?>                              :default_tokenizer => "TokenYaBigram") do |table|
     ?>   table.index("Diaries.body")
-    ?>   table.bool("@stopword")
     >> end
     
 ## Author
