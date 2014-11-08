@@ -10,10 +10,6 @@
 * ``TokenYaTrigramIgnoreBlank``
 * ``TokenYaTrigramSplitSymbolAlpha``
 * ``TokenYaTrigramIgnoreBlankSplitSymbolAlpha``
-* ``TokenYaBigramSnowball``
-* ``TokenYaBigramIgnoreBlankSnowball``
-* ``TokenYaTrigramSnowball``
-* ``TokenYaTrigramIgnoreBlankSnowball``
 
 原則、ビルトインのTokenBigramトークナイザー等と同様のルールで文字列をトークナイズします。
 それに加え、以下の機能をカスタマイズしています。
@@ -157,41 +153,6 @@ tokenize TokenYaBigramFilterStoptable "This is a pen" NormalizerAuto
 [[0,0.0,0.0],[{"value":"is","position":0},{"value":"pen","position":1}]]
 ```
 
-### ``Snowball``
-
-検索時、追加時の両方で[Snowball](http://snowball.tartarus.org/)を使ってステミングします。
-
-英語のトークンの語幹を抽出します。
-複数形や過去形などの活用形の語尾を所定の規則に沿って切除します。
-
-
-* ADD mode / GET mode
-
-```
-tokenize TokenYaBigramSnowball "There are cars" NormalizerAuto
-[
-  [
-    0,
-    0.0,
-    0.0
-  ],
-  [
-    {
-      "value": "there",
-      "position": 0
-    },
-    {
-      "value": "are",
-      "position": 1
-    },
-    {
-      "value": "car",
-      "position": 2
-    }
-  ]
-]
-```
-
 ## Install
 
 Install ``groonga-tokenizer-yangram`` package:
@@ -291,8 +252,6 @@ Groonga:
 Mroonga:
 
     mysql> use db;
-    mysql> CREATE TABLE `temp` (id INT NOT NULL) ENGINE=mroonga DEFAULT CHARSET=utf8;
-    mysql> DROP TABLE `temp`;
     mysql> select mroonga_command("register tokenizers/yangram");
     mysql> CREATE TABLE `Diaries` (
         -> id INT NOT NULL,
