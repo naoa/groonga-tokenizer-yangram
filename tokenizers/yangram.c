@@ -432,7 +432,7 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
                                      tokenizer->query->encoding);
     token_next += char_length;
 
-    {
+    if (tokenizer->use_vgram) {
       grn_id id;
       id = grn_table_get(ctx, tokenizer->vgram_table,
                          (const char *)token_top, token_tail - token_top);
