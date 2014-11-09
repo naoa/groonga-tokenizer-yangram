@@ -363,19 +363,21 @@ yangram_init(grn_ctx *ctx, int nargs, grn_obj **args, grn_user_data *user_data)
   var = grn_plugin_proc_get_var(ctx, user_data, "use_vgram", -1);
   if (GRN_TEXT_LEN(var) != 0) {
     tokenizer->use_vgram = GRN_INT32_VALUE(var);
-    tokenizer->vgram_table = grn_ctx_get(ctx,
-                                         VGRAM_WORD_TABLE_NAME,
-                                         strlen(VGRAM_WORD_TABLE_NAME));
-    if (!tokenizer->vgram_table) {
+    if (tokenizer->use_vgram) {
       tokenizer->vgram_table = grn_ctx_get(ctx,
-                                           VGRAM_WORD_TABLE_NAME_MRN,
-                                           strlen(VGRAM_WORD_TABLE_NAME_MRN));
-    }
-    if (!tokenizer->vgram_table) {
-       GRN_PLUGIN_ERROR(ctx, GRN_NO_MEMORY_AVAILABLE,
-                        "[tokenizer][yangram] "
-                        "couldn't open a vgram table");
-       return NULL;
+                                           VGRAM_WORD_TABLE_NAME,
+                                           strlen(VGRAM_WORD_TABLE_NAME));
+      if (!tokenizer->vgram_table) {
+        tokenizer->vgram_table = grn_ctx_get(ctx,
+                                             VGRAM_WORD_TABLE_NAME_MRN,
+                                             strlen(VGRAM_WORD_TABLE_NAME_MRN));
+      }
+      if (!tokenizer->vgram_table) {
+         GRN_PLUGIN_ERROR(ctx, GRN_NO_MEMORY_AVAILABLE,
+                          "[tokenizer][yangram] "
+                          "couldn't open a vgram table");
+         return NULL;
+      }
     }
   }
 
