@@ -1,4 +1,0 @@
-register tokenizers/yangram
-[[0,0.0,0.0],true]
-tokenize TokenYaBigram "12345678901234567890123456789012345678901234567890123456789012345 digit" NormalizerAuto
-[[0,0.0,0.0],[{"value":"digit","position":0}]]

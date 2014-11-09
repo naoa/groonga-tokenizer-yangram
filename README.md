@@ -112,30 +112,6 @@ tokenize TokenYaBigram "今日は雨だな" NormalizerAuto --mode GET
 ]
 ```
 
-### ``FilterLength``
-
-検索時、追加時の両方で64バイトを超えるトークンを除去します。
-無駄な長いキーによる語彙表のキーサイズの逼迫を防ぐことができます。
-
-### ``FilterStoptable``
-
-検索時、追加時の両方でテーブルのキーと一致するトークンを除去します。
-検索速度に影響が大きく検索精度にあまり影響ないキーをあらかじめ設定することにより、検索速度の向上および転置索引のサイズを抑えることができます。  
-``FilterStoptable``を使うには、あらかじめ除外対象の語句が格納されたテーブル``@yangram_stopwords``を作る必要があります。  
-整合性を保つため、除外対象の語句を追加した場合は、インデックス再構築が必要です。  
-除外対象の語句は、ノーマライズ後のワードを登録する必要があります。``NormalizerMySQLGeneralCI``などでは英字は大文字、``NormalizerAuto``では英字は小文字です。
-
-```
-table_create @yangram_stopwords TABLE_HASH_KEY ShortText
-load --table @yangram_stopwords
-[
-{"_key": "this"},
-{"_key": "a"}
-]
-tokenize TokenYaBigramFilterStoptable "This is a pen" NormalizerAuto
-[[0,0.0,0.0],[{"value":"is","position":0},{"value":"pen","position":1}]]
-```
-
 ## Install
 
 Install ``groonga-tokenizer-yangram`` package:
