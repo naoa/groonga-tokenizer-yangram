@@ -584,11 +584,6 @@ GRN_PLUGIN_REGISTER(grn_ctx *ctx)
                   GRN_PROC_TOKENIZER,
                   yangram_init, yangram_next, yangram_fin, 10, vars);
 
-  GRN_INT32_SET(ctx, &vars[4].value, 1);
-  grn_proc_create(ctx, "TokenYaBigramIgnoreBlankSplitSymbolAlpha", -1,
-                  GRN_PROC_TOKENIZER,
-                  yangram_init, yangram_next, yangram_fin, 10, vars);
-
   GRN_INT32_SET(ctx, &vars[3].value, 3);
   GRN_INT32_SET(ctx, &vars[4].value, 0);
   GRN_INT32_SET(ctx, &vars[5].value, 0);
@@ -606,11 +601,6 @@ GRN_PLUGIN_REGISTER(grn_ctx *ctx)
   GRN_INT32_SET(ctx, &vars[5].value, 1);
   GRN_INT32_SET(ctx, &vars[6].value, 1);
   grn_proc_create(ctx, "TokenYaTrigramSplitSymbolAlpha", -1,
-                  GRN_PROC_TOKENIZER,
-                  yangram_init, yangram_next, yangram_fin, 10, vars);
-
-  GRN_INT32_SET(ctx, &vars[4].value, 1);
-  grn_proc_create(ctx, "TokenYaTrigramIgnoreBlankSplitSymbolAlpha", -1,
                   GRN_PROC_TOKENIZER,
                   yangram_init, yangram_next, yangram_fin, 10, vars);
 

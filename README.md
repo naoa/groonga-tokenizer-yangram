@@ -5,11 +5,9 @@
 * ``TokenYaBigram``
 * ``TokenYaBigramIgnoreBlank``
 * ``TokenYaBigramSplitSymbolAlpha``
-* ``TokenYaBigramIgnoreBlankSplitSymbolAlpha``
 * ``TokenYaTrigram``
 * ``TokenYaTrigramIgnoreBlank``
 * ``TokenYaTrigramSplitSymbolAlpha``
-* ``TokenYaTrigramIgnoreBlankSplitSymbolAlpha``
 
 原則、ビルトインのTokenBigramトークナイザー等と同様のルールで文字列をトークナイズします。
 それに加え、以下の機能をカスタマイズしています。
