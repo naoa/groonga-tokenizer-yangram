@@ -2,17 +2,17 @@
 
 ## Tokenizer
 
+原則、ビルトインのTokenBigramトークナイザー等と同様のルールで文字列をトークナイズします。
+それに加え、以下の機能をカスタマイズしています。
+
+### 検索時のオーバラップスキップ
+
 * ``TokenYaBigram``
 * ``TokenYaBigramIgnoreBlank``
 * ``TokenYaBigramSplitSymbolAlpha``
 * ``TokenYaTrigram``
 * ``TokenYaTrigramIgnoreBlank``
 * ``TokenYaTrigramSplitSymbolAlpha``
-
-原則、ビルトインのTokenBigramトークナイザー等と同様のルールで文字列をトークナイズします。
-それに加え、以下の機能をカスタマイズしています。
-
-### 検索時のオーバラップスキップ
 
 検索時のみNgramのオーバーラップをスキップしてトークナイズします。  
 検索時のトークン数を減らすことができ、検索処理の速度向上が見込めます。  
