@@ -440,7 +440,7 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
         char_length = grn_plugin_charlen(ctx, (char *)token_tail,
                                          tokenizer->rest_length,
                                          tokenizer->query->encoding);
-        if (ctypes) {
+        if (ctypes_vgram) {
           if (!tokenizer->ignore_blank && GRN_STR_ISBLANK(*ctypes_vgram)) {
             is_vgram = GRN_FALSE;
           }
