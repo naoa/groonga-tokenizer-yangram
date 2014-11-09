@@ -1,0 +1,82 @@
+register tokenizers/yangram
+[[0,0.0,0.0],true]
+table_create #vgram_words TABLE_HASH_KEY ShortText
+[[0,0.0,0.0],true]
+load --table #vgram_words
+[
+{"_key": "今日"},
+{"_key": "雨だ"}
+]
+[[0,0.0,0.0],2]
+tokenize TokenYaVgramSplitSymbolAlpha "今日はaは雨だなb" NormalizerAuto --mode ADD
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  [
+    {
+      "value": "今日は",
+      "position": 0
+    },
+    {
+      "value": "日は",
+      "position": 1
+    },
+    {
+      "value": "はa",
+      "position": 2
+    },
+    {
+      "value": "aは",
+      "position": 3
+    },
+    {
+      "value": "は雨",
+      "position": 4
+    },
+    {
+      "value": "雨だな",
+      "position": 5
+    },
+    {
+      "value": "だな",
+      "position": 6
+    },
+    {
+      "value": "なb",
+      "position": 7
+    },
+    {
+      "value": "b",
+      "position": 8
+    }
+  ]
+]
+tokenize TokenYaVgramSplitSymbolAlpha "今日はaは雨だなb" NormalizerAuto --mode GET
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  [
+    {
+      "value": "今日は",
+      "position": 0
+    },
+    {
+      "value": "aは",
+      "position": 3
+    },
+    {
+      "value": "雨だな",
+      "position": 5
+    },
+    {
+      "value": "なb",
+      "position": 7
+    }
+  ]
+]

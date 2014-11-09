@@ -112,6 +112,114 @@ tokenize TokenYaBigram "今日は雨だな" NormalizerAuto --mode GET
 ]
 ```
 
+### 可変Ngram
+
+* ``TokenYaVgram``
+* ``TokenYaVgramSplitSymbolAlpha``
+
+検索時、更新時において``#vgram_words``テーブルのキーに含まれるBigramトークンのみをTrigramにします。  
+日本語などの異なり字数の多い言語は、Bigramトークンの出現頻度に大きな偏りがあります。  
+出現頻度が高いBigramトークンのみをあらかじめ``#vgram_words``テーブルに格納しておくことで、転置索引の増大を抑えつつ、検索速度向上に効果的なトークンのみをTrigramにすることができます。  
+整合性を保つため、Vgram対象の語句を追加した場合は、インデックス再構築が必要です。  
+なお、これらのトークナイザーも上記同様に検索時のみNgramのオーバーラップをスキップしてトークナイズします。
+
+後日、効果を検証予定
+
+```
+table_create #vgram_words TABLE_HASH_KEY ShortText
+[[0,0.0,0.0],true]
+load --table #vgram_words
+[
+{"_key": "今日"},
+{"_key": "雨だ"}
+]
+[[0,0.0,0.0],2]
+tokenize TokenYaVgram "今日はaは雨だなb" NormalizerAuto --mode ADD
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  [
+    {
+      "value": "今日は",
+      "position": 0
+    },
+    {
+      "value": "日は",
+      "position": 1
+    },
+    {
+      "value": "は",
+      "position": 2
+    },
+    {
+      "value": "a",
+      "position": 3
+    },
+    {
+      "value": "は雨",
+      "position": 4
+    },
+    {
+      "value": "雨だな",
+      "position": 5
+    },
+    {
+      "value": "だな",
+      "position": 6
+    },
+    {
+      "value": "な",
+      "position": 7
+    },
+    {
+      "value": "b",
+      "position": 8
+    }
+  ]
+]
+tokenize TokenYaVgram "今日はaは雨だなb" NormalizerAuto --mode GET
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  [
+    {
+      "value": "今日は",
+      "position": 0
+    },
+    {
+      "value": "a",
+      "position": 3
+    },
+    {
+      "value": "は雨",
+      "position": 4
+    },
+    {
+      "value": "雨だな",
+      "position": 5
+    },
+    {
+      "value": "b",
+      "position": 8
+    }
+  ]
+]
+```
+
+出現頻度の高いBigramトークンの抽出は、以下の``token_count``コマンドプラグインを使うと便利です。日本語のBigramトークンのみを出現頻度の多い順でソートして出力してくれます。
+
+https://github.com/naoa/groonga-command-token-count
+
+```
+token_count Terms document_index --token_size 2 --ctype ja --threshold 10000000
+```
+
 ## Install
 
 Install ``groonga-tokenizer-yangram`` package:

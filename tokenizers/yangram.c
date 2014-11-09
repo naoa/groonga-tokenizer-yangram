@@ -31,6 +31,9 @@
 #define GRN_STR_ISBLANK(c) (c & 0x80)
 #define GRN_STR_CTYPE(c) (c & 0x7f)
 
+#define VGRAM_WORD_TABLE_NAME "#vgram_words"
+#define VGRAM_WORD_TABLE_NAME_MRN "@0023vgram_words"
+
 typedef struct {
   grn_tokenizer_token token;
   grn_tokenizer_query *query;
@@ -46,6 +49,8 @@ typedef struct {
   grn_bool split_alpha;
   grn_bool split_digit;
   grn_bool skip_overlap;
+  grn_bool use_vgram;
+  grn_obj *vgram_table;
 } grn_yangram_tokenizer;
 
 static grn_bool
@@ -281,11 +286,14 @@ ignore_token_skip_overlap(grn_ctx *ctx, grn_yangram_tokenizer *tokenizer,
                           const unsigned char *ctypes,
                           GNUC_UNUSED unsigned int ctypes_skip_size,
                           GNUC_UNUSED const unsigned char *token_top,
+                          const unsigned char *token_tail,
                           GNUC_UNUSED const unsigned char *token_next,
                           int token_size)
 {
-  if (is_next_token_group(ctx, tokenizer, ctypes, token_size)) {
-    return GRN_TRUE;
+  if (token_tail > tokenizer->pushed_token_tail) {
+    if (is_next_token_group(ctx, tokenizer, ctypes, token_size)) {
+      return GRN_TRUE;
+    }
   }
 
   return GRN_FALSE;
@@ -352,6 +360,24 @@ yangram_init(grn_ctx *ctx, int nargs, grn_obj **args, grn_user_data *user_data)
   if (GRN_TEXT_LEN(var) != 0) {
     tokenizer->split_digit = GRN_INT32_VALUE(var);
   }
+  var = grn_plugin_proc_get_var(ctx, user_data, "use_vgram", -1);
+  if (GRN_TEXT_LEN(var) != 0) {
+    tokenizer->use_vgram = GRN_INT32_VALUE(var);
+    tokenizer->vgram_table = grn_ctx_get(ctx,
+                                         VGRAM_WORD_TABLE_NAME,
+                                         strlen(VGRAM_WORD_TABLE_NAME));
+    if (!tokenizer->vgram_table) {
+      tokenizer->vgram_table = grn_ctx_get(ctx,
+                                           VGRAM_WORD_TABLE_NAME_MRN,
+                                           strlen(VGRAM_WORD_TABLE_NAME_MRN));
+    }
+    if (!tokenizer->vgram_table) {
+       GRN_PLUGIN_ERROR(ctx, GRN_NO_MEMORY_AVAILABLE,
+                        "[tokenizer][yangram] "
+                        "couldn't open a vgram table");
+       return NULL;
+    }
+  }
 
   grn_string_get_normalized(ctx, tokenizer->query->normalized_query,
                             &normalized, &normalized_length_in_bytes,
@@ -402,6 +428,39 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
                                      tokenizer->rest_length,
                                      tokenizer->query->encoding);
     token_next += char_length;
+
+    {
+      grn_id id;
+      id = grn_table_get(ctx, tokenizer->vgram_table,
+                         (const char *)token_top, token_tail - token_top);
+
+      if (id != GRN_ID_NIL) {
+        const unsigned char *ctypes_vgram = ctypes + 1;
+        grn_bool is_vgram = GRN_TRUE;
+        char_length = grn_plugin_charlen(ctx, (char *)token_tail,
+                                         tokenizer->rest_length,
+                                         tokenizer->query->encoding);
+        if (ctypes) {
+          if (!tokenizer->ignore_blank && GRN_STR_ISBLANK(*ctypes_vgram)) {
+            is_vgram = GRN_FALSE;
+          }
+          ctypes_vgram++;
+          if ((tokenizer->split_alpha == GRN_FALSE &&
+              GRN_STR_CTYPE(*ctypes_vgram) == GRN_CHAR_ALPHA) ||
+              (tokenizer->split_digit == GRN_FALSE &&
+              GRN_STR_CTYPE(*ctypes_vgram) == GRN_CHAR_DIGIT) ||
+              (tokenizer->split_symbol == GRN_FALSE &&
+              GRN_STR_CTYPE(*ctypes_vgram) == GRN_CHAR_SYMBOL)) {
+            is_vgram = GRN_FALSE;
+          }
+        }
+        if (is_vgram) {
+          token_size++;
+          token_tail += char_length;
+        }
+      }
+
+    }
   }
 
   if (token_top == token_tail || token_next == string_end) {
@@ -438,7 +497,7 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
         !(status & GRN_TOKENIZER_TOKEN_SKIP_WITH_POSITION) &&
         tokenizer->query->token_mode == GRN_TOKEN_GET) {
       if (!ignore_token_skip_overlap(ctx, tokenizer, ctypes, ctypes_skip_size,
-                                     token_top, token_next, token_size)) {
+                                     token_top, token_tail, token_next, token_size)) {
         status |= GRN_TOKENIZER_TOKEN_SKIP;
       }
     }
@@ -485,7 +544,7 @@ GRN_PLUGIN_INIT(grn_ctx *ctx)
 grn_rc
 GRN_PLUGIN_REGISTER(grn_ctx *ctx)
 {
-  grn_expr_var vars[9];
+  grn_expr_var vars[10];
 
   grn_plugin_expr_var_init(ctx, &vars[0], NULL, -1);
   grn_plugin_expr_var_init(ctx, &vars[1], NULL, -1);
@@ -496,6 +555,7 @@ GRN_PLUGIN_REGISTER(grn_ctx *ctx)
   grn_plugin_expr_var_init(ctx, &vars[6], "split_alpha", -1);
   grn_plugin_expr_var_init(ctx, &vars[7], "split_digit", -1);
   grn_plugin_expr_var_init(ctx, &vars[8], "skip_overlap", -1);
+  grn_plugin_expr_var_init(ctx, &vars[9], "use_vgram", -1);
 
   GRN_INT32_SET(ctx, &vars[3].value, 2);
   GRN_INT32_SET(ctx, &vars[4].value, 0);
@@ -503,27 +563,28 @@ GRN_PLUGIN_REGISTER(grn_ctx *ctx)
   GRN_INT32_SET(ctx, &vars[6].value, 0);
   GRN_INT32_SET(ctx, &vars[7].value, 0);
   GRN_INT32_SET(ctx, &vars[8].value, 1);
+  GRN_INT32_SET(ctx, &vars[9].value, 0);
 
   grn_proc_create(ctx, "TokenYaBigram", -1,
                   GRN_PROC_TOKENIZER,
-                  yangram_init, yangram_next, yangram_fin, 9, vars);
+                  yangram_init, yangram_next, yangram_fin, 10, vars);
 
   GRN_INT32_SET(ctx, &vars[4].value, 1);
   grn_proc_create(ctx, "TokenYaBigramIgnoreBlank", -1,
                   GRN_PROC_TOKENIZER,
-                  yangram_init, yangram_next, yangram_fin, 9, vars);
+                  yangram_init, yangram_next, yangram_fin, 10, vars);
 
   GRN_INT32_SET(ctx, &vars[4].value, 0);
   GRN_INT32_SET(ctx, &vars[5].value, 1);
   GRN_INT32_SET(ctx, &vars[6].value, 1);
   grn_proc_create(ctx, "TokenYaBigramSplitSymbolAlpha", -1,
                   GRN_PROC_TOKENIZER,
-                  yangram_init, yangram_next, yangram_fin, 9, vars);
+                  yangram_init, yangram_next, yangram_fin, 10, vars);
 
   GRN_INT32_SET(ctx, &vars[4].value, 1);
   grn_proc_create(ctx, "TokenYaBigramIgnoreBlankSplitSymbolAlpha", -1,
                   GRN_PROC_TOKENIZER,
-                  yangram_init, yangram_next, yangram_fin, 9, vars);
+                  yangram_init, yangram_next, yangram_fin, 10, vars);
 
   GRN_INT32_SET(ctx, &vars[3].value, 3);
   GRN_INT32_SET(ctx, &vars[4].value, 0);
@@ -531,24 +592,42 @@ GRN_PLUGIN_REGISTER(grn_ctx *ctx)
   GRN_INT32_SET(ctx, &vars[6].value, 0);
   grn_proc_create(ctx, "TokenYaTrigram", -1,
                   GRN_PROC_TOKENIZER,
-                  yangram_init, yangram_next, yangram_fin, 9, vars);
+                  yangram_init, yangram_next, yangram_fin, 10, vars);
 
   GRN_INT32_SET(ctx, &vars[4].value, 1);
   grn_proc_create(ctx, "TokenYaTrigramIgnoreBlank", -1,
                   GRN_PROC_TOKENIZER,
-                  yangram_init, yangram_next, yangram_fin, 9, vars);
+                  yangram_init, yangram_next, yangram_fin, 10, vars);
 
   GRN_INT32_SET(ctx, &vars[4].value, 0);
   GRN_INT32_SET(ctx, &vars[5].value, 1);
   GRN_INT32_SET(ctx, &vars[6].value, 1);
   grn_proc_create(ctx, "TokenYaTrigramSplitSymbolAlpha", -1,
                   GRN_PROC_TOKENIZER,
-                  yangram_init, yangram_next, yangram_fin, 9, vars);
+                  yangram_init, yangram_next, yangram_fin, 10, vars);
 
   GRN_INT32_SET(ctx, &vars[4].value, 1);
   grn_proc_create(ctx, "TokenYaTrigramIgnoreBlankSplitSymbolAlpha", -1,
                   GRN_PROC_TOKENIZER,
-                  yangram_init, yangram_next, yangram_fin, 9, vars);
+                  yangram_init, yangram_next, yangram_fin, 10, vars);
+
+  GRN_INT32_SET(ctx, &vars[3].value, 2);
+  GRN_INT32_SET(ctx, &vars[4].value, 0);
+  GRN_INT32_SET(ctx, &vars[5].value, 0);
+  GRN_INT32_SET(ctx, &vars[6].value, 0);
+  GRN_INT32_SET(ctx, &vars[7].value, 0);
+  GRN_INT32_SET(ctx, &vars[8].value, 1);
+  GRN_INT32_SET(ctx, &vars[9].value, 1);
+
+  grn_proc_create(ctx, "TokenYaVgram", -1,
+                  GRN_PROC_TOKENIZER,
+                  yangram_init, yangram_next, yangram_fin, 10, vars);
+
+  GRN_INT32_SET(ctx, &vars[5].value, 1);
+  GRN_INT32_SET(ctx, &vars[6].value, 1);
+  grn_proc_create(ctx, "TokenYaVgramSplitSymbolAlpha", -1,
+                  GRN_PROC_TOKENIZER,
+                  yangram_init, yangram_next, yangram_fin, 10, vars);
 
   return ctx->rc;
 }
