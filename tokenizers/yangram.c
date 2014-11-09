@@ -529,6 +529,9 @@ yangram_fin(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
   if (!tokenizer) {
     return NULL;
   }
+  if (tokenizer->vgram_table) {
+    grn_obj_unlink(ctx, tokenizer->vgram_table);
+  }
   grn_tokenizer_query_close(ctx, tokenizer->query);
   grn_tokenizer_token_fin(ctx, &(tokenizer->token));
   GRN_PLUGIN_FREE(ctx,tokenizer);
