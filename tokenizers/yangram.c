@@ -413,6 +413,7 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
   const unsigned char *ctypes;
   unsigned int ctypes_skip_size;
   int char_length = 0;
+  grn_bool is_vgram = GRN_TRUE;
 
   if (tokenizer->ctypes) {
     ctypes = tokenizer->ctypes + tokenizer->ctypes_next;
@@ -438,7 +439,6 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
 
       if (id != GRN_ID_NIL) {
         const unsigned char *ctypes_vgram = ctypes + 1;
-        grn_bool is_vgram = GRN_TRUE;
         char_length = grn_plugin_charlen(ctx, (char *)token_tail,
                                          tokenizer->rest_length,
                                          tokenizer->query->encoding);
@@ -457,8 +457,14 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
           }
         }
         if (is_vgram) {
-          token_size++;
-          token_tail += char_length;
+          if (token_tail < string_end) {
+            token_size++;
+            token_tail += char_length;
+          } else {
+            //Vgram対象なのに文末で伸ばせなかったら文中では3文字になっている可能性があるため強制前方一致
+            status |= GRN_TOKENIZER_TOKEN_UNMATURED;
+            status |= GRN_TOKENIZER_TOKEN_LAST;
+          }
         }
       }
 
@@ -481,7 +487,7 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
   }
 
   if (!is_token_grouped && token_size < tokenizer->ngram_unit) {
-      status |= GRN_TOKENIZER_TOKEN_UNMATURED;
+    status |= GRN_TOKENIZER_TOKEN_UNMATURED;
   }
 
   if (token_size) {
