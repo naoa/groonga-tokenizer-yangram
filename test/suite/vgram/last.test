@@ -7,3 +7,4 @@ load --table #vgram_words
 ]
 tokenize TokenYaVgram "今日は雨だ" NormalizerAuto --mode ADD
 tokenize TokenYaVgram "今日" NormalizerAuto --mode GET
+tokenize TokenYaVgram "今日" NormalizerAuto --mode ADD
