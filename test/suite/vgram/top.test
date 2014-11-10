@@ -1,0 +1,13 @@
+register tokenizers/yangram
+
+table_create #vgram_words TABLE_HASH_KEY ShortText
+load --table #vgram_words
+[
+{"_key": "画像"}
+]
+tokenize TokenYaVgram "画像" NormalizerAuto --mode ADD
+tokenize TokenYaVgram "画像" NormalizerAuto --mode GET
+tokenize TokenYaVgram "画像処" NormalizerAuto --mode ADD
+tokenize TokenYaVgram "画像処" NormalizerAuto --mode GET
+tokenize TokenYaVgram "画像処理" NormalizerAuto --mode ADD
+tokenize TokenYaVgram "画像処理" NormalizerAuto --mode GET

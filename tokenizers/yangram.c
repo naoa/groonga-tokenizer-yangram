@@ -438,9 +438,8 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
     if (tokenizer->use_vgram) {
       grn_id id;
       if (tokenizer->is_vgram) {
-        if (token_tail < string_end) {
-          if (token_size >= tokenizer->ngram_unit ||
-              !is_next_token_group(ctx, tokenizer, ctypes, token_size)) {
+        if (tokenizer->previous < token_top) {
+          if (token_size >= tokenizer->ngram_unit) {
             token_top = tokenizer->previous;
             token_next -= char_length;
             tokenizer->ctypes_next -= 1;
