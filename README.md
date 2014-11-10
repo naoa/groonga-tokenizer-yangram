@@ -222,6 +222,8 @@ token_count Terms document_index --token_size 2 --ctype ja --threshold 10000000
 
 Install ``groonga-tokenizer-yangram`` package:
 
+以下のパッケージにはまだTokenYaVgramは含まれていません。検証後、問題なければ作ります。
+
 ### CentOS
 
 * CentOS6
