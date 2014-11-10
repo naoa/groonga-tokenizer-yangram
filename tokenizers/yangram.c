@@ -462,10 +462,12 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
             token_tail += char_length;
           } else {
             //Vgram対象なのに文末で伸ばせなかったら文中では3文字になっている可能性があるため強制前方一致
-            //この方法だとstatusにLASTがついてしまうので、最後の1文字トークンが追加されなくなってしまう。
-            //force_prefixをつけるための特別なステータスが欲しい。
-            status |= GRN_TOKENIZER_TOKEN_UNMATURED;
-            status |= GRN_TOKENIZER_TOKEN_LAST;
+            //GET時のみなのはADD時は1文字トークンとかを追加する必要があるから。
+            //とてもややこしい。Groongaにforce_prefixのためのステータスがあるとよさそう
+            if (tokenizer->query->token_mode == GRN_TOKEN_GET) {
+              status |= GRN_TOKENIZER_TOKEN_UNMATURED;
+              status |= GRN_TOKENIZER_TOKEN_LAST;
+            }
           }
         }
       }
