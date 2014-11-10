@@ -115,9 +115,8 @@ tokenize TokenYaBigram "今日は雨だな" NormalizerAuto --mode GET
 * ``TokenYaVgram``
 * ``TokenYaVgramSplitSymbolAlpha``
 
-検索時、更新時において``#vgram_words``テーブルのキーに含まれるBigramトークンのみをTrigramにします。  
-日本語などの異なり字数の多い言語は、Bigramトークンの出現頻度に大きな偏りがあります。  
-出現頻度が高いBigramトークンのみをあらかじめ``#vgram_words``テーブルに格納しておくことで、転置索引の増大を抑えつつ、検索速度向上に効果的なトークンのみをTrigramにすることができます。  
+検索時、更新時において``#vgram_words``テーブルのキーに含まれるBigramトークンを伸ばしてTrigramにしたトークンを追加します。文末や字種境界など伸ばせないケースがあるため、元のBigramトークンも残しておきます。 
+出現頻度が高いBigramトークンのみをあらかじめ``#vgram_words``テーブルに格納しておくことで、転置索引の増大を抑えつつ、検索速度向上に効果的なトークンのみをTrigramにすることができるかもしれません(検証中)。  
 整合性を保つため、Vgram対象の語句を追加した場合は、インデックス再構築が必要です。  
 なお、これらのトークナイザーも上記同様に検索時のみNgramのオーバーラップをスキップしてトークナイズします。
 
@@ -128,11 +127,10 @@ table_create #vgram_words TABLE_HASH_KEY ShortText
 [[0,0.0,0.0],true]
 load --table #vgram_words
 [
-{"_key": "今日"},
-{"_key": "雨だ"}
+{"_key": "タベ"}
 ]
 [[0,0.0,0.0],2]
-tokenize TokenYaVgram "今日はaは雨だなb" NormalizerAuto --mode ADD
+tokenize TokenYaVgram "データベース" NormalizerAuto --mode ADD
 [
   [
     0,
@@ -141,44 +139,36 @@ tokenize TokenYaVgram "今日はaは雨だなb" NormalizerAuto --mode ADD
   ],
   [
     {
-      "value": "今日は",
+      "value": "デー",
       "position": 0
     },
     {
-      "value": "日は",
+      "value": "ータ",
       "position": 1
     },
     {
-      "value": "は",
+      "value": "タベ",
       "position": 2
     },
     {
-      "value": "a",
+      "value": "タベー",
       "position": 3
     },
     {
-      "value": "は雨",
+      "value": "ベー",
       "position": 4
     },
     {
-      "value": "雨だな",
+      "value": "ース",
       "position": 5
     },
     {
-      "value": "だな",
+      "value": "ス",
       "position": 6
-    },
-    {
-      "value": "な",
-      "position": 7
-    },
-    {
-      "value": "b",
-      "position": 8
     }
   ]
 ]
-tokenize TokenYaVgram "今日はaは雨だなb" NormalizerAuto --mode GET
+tokenize TokenYaVgram "データベース" NormalizerAuto --mode GET
 [
   [
     0,
@@ -187,24 +177,16 @@ tokenize TokenYaVgram "今日はaは雨だなb" NormalizerAuto --mode GET
   ],
   [
     {
-      "value": "今日は",
+      "value": "デー",
       "position": 0
     },
     {
-      "value": "a",
+      "value": "タベー",
       "position": 3
     },
     {
-      "value": "は雨",
-      "position": 4
-    },
-    {
-      "value": "雨だな",
+      "value": "ース",
       "position": 5
-    },
-    {
-      "value": "b",
-      "position": 8
     }
   ]
 ]

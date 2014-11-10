@@ -38,6 +38,7 @@ typedef struct {
   grn_tokenizer_token token;
   grn_tokenizer_query *query;
   const unsigned char *next;
+  const unsigned char *previous;
   const unsigned char *end;
   int rest_length;
   const unsigned char *pushed_token_tail;
@@ -50,6 +51,7 @@ typedef struct {
   grn_bool split_digit;
   grn_bool skip_overlap;
   grn_bool use_vgram;
+  grn_bool is_vgram;
   grn_obj *vgram_table;
 } grn_yangram_tokenizer;
 
@@ -380,11 +382,13 @@ yangram_init(grn_ctx *ctx, int nargs, grn_obj **args, grn_user_data *user_data)
       }
     }
   }
+  tokenizer->is_vgram = GRN_FALSE;
 
   grn_string_get_normalized(ctx, tokenizer->query->normalized_query,
                             &normalized, &normalized_length_in_bytes,
                             NULL);
   tokenizer->next = (const unsigned char *)normalized;
+  tokenizer->previous = tokenizer->next;
   tokenizer->end = tokenizer->next + normalized_length_in_bytes;
   tokenizer->rest_length = tokenizer->end - tokenizer->next;
   tokenizer->ctypes =
@@ -413,7 +417,6 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
   const unsigned char *ctypes;
   unsigned int ctypes_skip_size;
   int char_length = 0;
-  grn_bool is_vgram = GRN_TRUE;
 
   if (tokenizer->ctypes) {
     ctypes = tokenizer->ctypes + tokenizer->ctypes_next;
@@ -434,44 +437,29 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
 
     if (tokenizer->use_vgram) {
       grn_id id;
-      id = grn_table_get(ctx, tokenizer->vgram_table,
-                         (const char *)token_top, token_tail - token_top);
-
-      if (id != GRN_ID_NIL) {
-        const unsigned char *ctypes_vgram = ctypes + 1;
-        char_length = grn_plugin_charlen(ctx, (char *)token_tail,
-                                         tokenizer->rest_length,
-                                         tokenizer->query->encoding);
-        if (ctypes_vgram) {
-          if (!tokenizer->ignore_blank && GRN_STR_ISBLANK(*ctypes_vgram)) {
-            is_vgram = GRN_FALSE;
-          }
-          ctypes_vgram++;
-          if ((tokenizer->split_alpha == GRN_FALSE &&
-              GRN_STR_CTYPE(*ctypes_vgram) == GRN_CHAR_ALPHA) ||
-              (tokenizer->split_digit == GRN_FALSE &&
-              GRN_STR_CTYPE(*ctypes_vgram) == GRN_CHAR_DIGIT) ||
-              (tokenizer->split_symbol == GRN_FALSE &&
-              GRN_STR_CTYPE(*ctypes_vgram) == GRN_CHAR_SYMBOL)) {
-            is_vgram = GRN_FALSE;
+      if (tokenizer->is_vgram) {
+        if (token_tail < string_end) {
+          if (token_size >= tokenizer->ngram_unit ||
+              !is_next_token_group(ctx, tokenizer, ctypes, token_size)) {
+            token_top = tokenizer->previous;
+            token_next -= char_length;
+            tokenizer->ctypes_next -= 1;
           }
         }
-        if (is_vgram) {
-          if (token_tail < string_end) {
-            token_size++;
-            token_tail += char_length;
-          } else {
-            //Vgram対象なのに文末で伸ばせなかったら文中では3文字になっている可能性があるため強制前方一致
-            //GET時のみなのはADD時は1文字トークンとかを追加する必要があるから。
-            //とてもややこしい。Groongaにforce_prefixのためのステータスがあるとよさそう
-            if (tokenizer->query->token_mode == GRN_TOKEN_GET) {
-              status |= GRN_TOKENIZER_TOKEN_UNMATURED;
-              status |= GRN_TOKENIZER_TOKEN_LAST;
+        tokenizer->is_vgram = GRN_FALSE;
+      } else {
+        id = grn_table_get(ctx, tokenizer->vgram_table,
+                           (const char *)token_top, token_tail - token_top);
+        if (id != GRN_ID_NIL) {
+          tokenizer->is_vgram = GRN_TRUE;
+          if (token_tail < string_end &&
+              tokenizer->query->token_mode == GRN_TOKEN_GET) {
+            if (!is_next_token_group(ctx, tokenizer, ctypes, token_size)) {
+              status |= GRN_TOKENIZER_TOKEN_SKIP;
             }
           }
         }
       }
-
     }
   }
 
@@ -520,6 +508,7 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
     tokenizer->pushed_token_tail = token_tail;
   }
 
+  tokenizer->previous = tokenizer->next;
   tokenizer->next = token_next;
   tokenizer->rest_length = string_end - token_next;
   tokenizer->ctypes_next = tokenizer->ctypes_next + ctypes_skip_size;

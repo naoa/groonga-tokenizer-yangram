@@ -17,40 +17,48 @@ tokenize TokenYaVgramSplitSymbolAlpha "今日はaは雨だなb" NormalizerAuto -
   ],
   [
     {
-      "value": "今日は",
+      "value": "今日",
       "position": 0
     },
     {
-      "value": "日は",
+      "value": "今日は",
       "position": 1
     },
     {
-      "value": "はa",
+      "value": "日は",
       "position": 2
     },
     {
-      "value": "aは",
+      "value": "はa",
       "position": 3
     },
     {
-      "value": "は雨",
+      "value": "aは",
       "position": 4
     },
     {
-      "value": "雨だな",
+      "value": "は雨",
       "position": 5
     },
     {
-      "value": "だな",
+      "value": "雨だ",
       "position": 6
     },
     {
-      "value": "なb",
+      "value": "雨だな",
       "position": 7
     },
     {
-      "value": "b",
+      "value": "だな",
       "position": 8
+    },
+    {
+      "value": "なb",
+      "position": 9
+    },
+    {
+      "value": "b",
+      "position": 10
     }
   ]
 ]
@@ -64,19 +72,19 @@ tokenize TokenYaVgramSplitSymbolAlpha "今日はaは雨だなb" NormalizerAuto -
   [
     {
       "value": "今日は",
-      "position": 0
+      "position": 1
     },
     {
       "value": "aは",
-      "position": 3
+      "position": 4
     },
     {
       "value": "雨だな",
-      "position": 5
+      "position": 7
     },
     {
       "value": "なb",
-      "position": 7
+      "position": 9
     }
   ]
 ]

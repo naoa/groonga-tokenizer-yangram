@@ -3,8 +3,15 @@ register tokenizers/yangram
 table_create #vgram_words TABLE_HASH_KEY ShortText
 load --table #vgram_words
 [
-{"_key": "今日"}
+{"_key": "タベ"}
 ]
-tokenize TokenYaVgram "今日は雨だ" NormalizerAuto --mode ADD
-tokenize TokenYaVgram "今日" NormalizerAuto --mode GET
-tokenize TokenYaVgram "今日" NormalizerAuto --mode ADD
+tokenize TokenYaVgram "タベA" NormalizerAuto --mode ADD
+tokenize TokenYaVgram "タベA" NormalizerAuto --mode GET
+tokenize TokenYaVgram "タベ" NormalizerAuto --mode ADD
+tokenize TokenYaVgram "タベ" NormalizerAuto --mode GET
+tokenize TokenYaVgram "タベタベ" NormalizerAuto --mode ADD
+tokenize TokenYaVgram "タベタベ" NormalizerAuto --mode GET
+tokenize TokenYaVgram "データベ" NormalizerAuto --mode ADD
+tokenize TokenYaVgram "データベ" NormalizerAuto --mode GET
+tokenize TokenYaVgram "データベース" NormalizerAuto --mode ADD
+tokenize TokenYaVgram "データベース" NormalizerAuto --mode GET
