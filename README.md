@@ -325,11 +325,6 @@ Mroonga:
         -> PRIMARY KEY (id) USING HASH,
         -> FULLTEXT INDEX (body) COMMENT 'parser "TokenYaBigram"'
         -> ) ENGINE=mroonga DEFAULT CHARSET=utf8;
-    mysql> CREATE TABLE `@yangram_stopwords` (
-        -> stopword VARCHAR(64) NOT NULL,
-        -> PRIMARY KEY (stopword) USING HASH
-        -> ) ENGINE=mroonga DEFAULT CHARSET=utf8;
-    mysql> INSERT `@yangram_stopwords` VALUES("THAT");
 
 Rroonga:
 
