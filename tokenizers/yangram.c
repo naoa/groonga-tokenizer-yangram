@@ -40,16 +40,17 @@ typedef struct {
   const unsigned char *next;
   const unsigned char *start;
   const unsigned char *end;
+  const unsigned char *ctypes;
+  int rest_length;
+  int ctypes_next;
+  const unsigned char *pushed_token_tail;
   const unsigned char *token_top;
   const unsigned char *token_next;
   const unsigned char *token_tail;
+  const unsigned char *token_ctypes;
   int token_size;
   grn_bool is_token_grouped;
-  int rest_length;
-  const unsigned char *pushed_token_tail;
-  const unsigned char *ctypes;
-  const unsigned char *token_ctypes;
-  int ctypes_next;
+  grn_bool is_vgram;
   unsigned short ngram_unit;
   grn_bool ignore_blank;
   grn_bool split_symbol;
@@ -57,7 +58,6 @@ typedef struct {
   grn_bool split_digit;
   grn_bool skip_overlap;
   grn_bool use_vgram;
-  grn_bool is_vgram;
   grn_obj *vgram_table;
 } grn_yangram_tokenizer;
 
@@ -276,7 +276,10 @@ is_token_all_same(grn_ctx *ctx, grn_yangram_tokenizer *tokenizer,
 */
 
 static grn_obj *
-yangram_init(grn_ctx *ctx, int nargs, grn_obj **args, grn_user_data *user_data)
+yangram_init(grn_ctx *ctx, int nargs, grn_obj **args, grn_user_data *user_data,
+             unsigned short ngram_unit, grn_bool ignore_blank,
+             grn_bool split_symbol, grn_bool split_alpha, grn_bool split_digit,
+             grn_bool skip_overlap, grn_bool use_vgram)
 {
   grn_tokenizer_query *query;
   unsigned int normalize_flags =
@@ -286,18 +289,6 @@ yangram_init(grn_ctx *ctx, int nargs, grn_obj **args, grn_user_data *user_data)
   const char *normalized;
   unsigned int normalized_length_in_bytes;
   grn_yangram_tokenizer *tokenizer;
-  grn_obj *var;
-  grn_bool skip_overlap = GRN_FALSE;
-  grn_bool ignore_blank = GRN_FALSE;
-
-  var = grn_plugin_proc_get_var(ctx, user_data, "skip_overlap", -1);
-  if (GRN_TEXT_LEN(var) != 0) {
-    skip_overlap = GRN_INT32_VALUE(var);
-  }
-  var = grn_plugin_proc_get_var(ctx, user_data, "ignore_blank", -1);
-  if (GRN_TEXT_LEN(var) != 0) {
-    ignore_blank = GRN_INT32_VALUE(var);
-  }
 
   if (!skip_overlap || ignore_blank) {
     normalize_flags |= GRN_STRING_REMOVE_BLANK;
@@ -319,41 +310,25 @@ yangram_init(grn_ctx *ctx, int nargs, grn_obj **args, grn_user_data *user_data)
   tokenizer->query = query;
   tokenizer->skip_overlap = skip_overlap;
   tokenizer->ignore_blank = ignore_blank;
-
-  var = grn_plugin_proc_get_var(ctx, user_data, "ngram_unit", -1);
-  if (GRN_TEXT_LEN(var) != 0) {
-    tokenizer->ngram_unit = GRN_INT32_VALUE(var);
-  }
-  var = grn_plugin_proc_get_var(ctx, user_data, "split_symbol", -1);
-  if (GRN_TEXT_LEN(var) != 0) {
-    tokenizer->split_symbol = GRN_INT32_VALUE(var);
-  }
-  var = grn_plugin_proc_get_var(ctx, user_data, "split_alpha", -1);
-  if (GRN_TEXT_LEN(var) != 0) {
-    tokenizer->split_alpha = GRN_INT32_VALUE(var);
-  }
-  var = grn_plugin_proc_get_var(ctx, user_data, "split_digit", -1);
-  if (GRN_TEXT_LEN(var) != 0) {
-    tokenizer->split_digit = GRN_INT32_VALUE(var);
-  }
-  var = grn_plugin_proc_get_var(ctx, user_data, "use_vgram", -1);
-  if (GRN_TEXT_LEN(var) != 0) {
-    tokenizer->use_vgram = GRN_INT32_VALUE(var);
-    if (tokenizer->use_vgram) {
+  tokenizer->ngram_unit = ngram_unit;
+  tokenizer->split_symbol = split_symbol;
+  tokenizer->split_alpha = split_alpha;
+  tokenizer->split_digit = split_digit;
+  tokenizer->use_vgram = use_vgram;
+  if (tokenizer->use_vgram) {
+    tokenizer->vgram_table = grn_ctx_get(ctx,
+                                         VGRAM_WORD_TABLE_NAME,
+                                         strlen(VGRAM_WORD_TABLE_NAME));
+    if (!tokenizer->vgram_table) {
       tokenizer->vgram_table = grn_ctx_get(ctx,
-                                           VGRAM_WORD_TABLE_NAME,
-                                           strlen(VGRAM_WORD_TABLE_NAME));
-      if (!tokenizer->vgram_table) {
-        tokenizer->vgram_table = grn_ctx_get(ctx,
-                                             VGRAM_WORD_TABLE_NAME_MRN,
-                                             strlen(VGRAM_WORD_TABLE_NAME_MRN));
-      }
-      if (!tokenizer->vgram_table) {
-         GRN_PLUGIN_ERROR(ctx, GRN_NO_MEMORY_AVAILABLE,
-                          "[tokenizer][yangram] "
-                          "couldn't open a vgram table");
-         return NULL;
-      }
+                                           VGRAM_WORD_TABLE_NAME_MRN,
+                                           strlen(VGRAM_WORD_TABLE_NAME_MRN));
+    }
+    if (!tokenizer->vgram_table) {
+       GRN_PLUGIN_ERROR(ctx, GRN_NO_MEMORY_AVAILABLE,
+                        "[tokenizer][yangram] "
+                        "couldn't open a vgram table");
+       return NULL;
     }
   }
 
@@ -399,10 +374,12 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
     tokenizer->is_token_grouped = is_token_group(tokenizer, tokenizer->token_ctypes);
 
     if (tokenizer->is_token_grouped) {
-      tokenizer->token_size = forward_grouped_token_tail(ctx, tokenizer, tokenizer->token_ctypes, &(tokenizer->token_tail));
+      tokenizer->token_size =
+         forward_grouped_token_tail(ctx, tokenizer, tokenizer->token_ctypes, &(tokenizer->token_tail));
       tokenizer->token_next = tokenizer->token_tail;
     } else {
-      tokenizer->token_size = forward_ngram_token_tail(ctx, tokenizer, tokenizer->token_ctypes, &(tokenizer->token_tail));
+      tokenizer->token_size =
+        forward_ngram_token_tail(ctx, tokenizer, tokenizer->token_ctypes, &(tokenizer->token_tail));
       char_length = grn_plugin_charlen(ctx, (char *)(tokenizer->token_next),
                                        tokenizer->rest_length,
                                        tokenizer->query->encoding);
@@ -410,7 +387,8 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
       if (tokenizer->use_vgram) {
         grn_id id;
         id = grn_table_get(ctx, tokenizer->vgram_table,
-                           (const char *)tokenizer->token_top, tokenizer->token_tail - tokenizer->token_top);
+                           (const char *)tokenizer->token_top,
+                           tokenizer->token_tail - tokenizer->token_top);
         if (id != GRN_ID_NIL) {
           tokenizer->is_vgram = GRN_TRUE;
         }
@@ -578,6 +556,54 @@ yangram_fin(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
   return NULL;
 }
 
+static grn_obj *
+yabigram_init(grn_ctx * ctx, int nargs, grn_obj **args, grn_user_data *user_data)
+{
+  return yangram_init(ctx, nargs, args, user_data, 2, 0, 0, 0, 0, 1, 0);
+}
+
+static grn_obj *
+yabigram_ib_init(grn_ctx * ctx, int nargs, grn_obj **args, grn_user_data *user_data)
+{
+  return yangram_init(ctx, nargs, args, user_data, 2, 1, 0, 0, 0, 1, 0);
+}
+
+static grn_obj *
+yabigram_sa_init(grn_ctx * ctx, int nargs, grn_obj **args, grn_user_data *user_data)
+{
+  return yangram_init(ctx, nargs, args, user_data, 2, 0, 1, 1, 0, 1, 0);
+}
+
+static grn_obj *
+yatrigram_init(grn_ctx * ctx, int nargs, grn_obj **args, grn_user_data *user_data)
+{
+  return yangram_init(ctx, nargs, args, user_data, 3, 0, 0, 0, 0, 1, 0);
+}
+
+static grn_obj *
+yatrigram_ib_init(grn_ctx * ctx, int nargs, grn_obj **args, grn_user_data *user_data)
+{
+  return yangram_init(ctx, nargs, args, user_data, 3, 1, 0, 0, 0, 1, 0);
+}
+
+static grn_obj *
+yatrigram_sa_init(grn_ctx * ctx, int nargs, grn_obj **args, grn_user_data *user_data)
+{
+  return yangram_init(ctx, nargs, args, user_data, 3, 0, 1, 1, 0, 1, 0);
+}
+
+static grn_obj *
+yavgram_init(grn_ctx * ctx, int nargs, grn_obj **args, grn_user_data *user_data)
+{
+  return yangram_init(ctx, nargs, args, user_data, 2, 0, 0, 0, 0, 1, 1);
+}
+
+static grn_obj *
+yavgram_sa_init(grn_ctx * ctx, int nargs, grn_obj **args, grn_user_data *user_data)
+{
+  return yangram_init(ctx, nargs, args, user_data, 2, 0, 1, 1, 0, 1, 1);
+}
+
 grn_rc
 GRN_PLUGIN_INIT(grn_ctx *ctx)
 {
@@ -587,80 +613,31 @@ GRN_PLUGIN_INIT(grn_ctx *ctx)
 grn_rc
 GRN_PLUGIN_REGISTER(grn_ctx *ctx)
 {
-  grn_expr_var vars[10];
+  grn_rc rc;
 
-  grn_plugin_expr_var_init(ctx, &vars[0], NULL, -1);
-  grn_plugin_expr_var_init(ctx, &vars[1], NULL, -1);
-  grn_plugin_expr_var_init(ctx, &vars[2], NULL, -1);
-  grn_plugin_expr_var_init(ctx, &vars[3], "ngram_unit", -1);
-  grn_plugin_expr_var_init(ctx, &vars[4], "ignore_blank", -1);
-  grn_plugin_expr_var_init(ctx, &vars[5], "split_symbol", -1);
-  grn_plugin_expr_var_init(ctx, &vars[6], "split_alpha", -1);
-  grn_plugin_expr_var_init(ctx, &vars[7], "split_digit", -1);
-  grn_plugin_expr_var_init(ctx, &vars[8], "skip_overlap", -1);
-  grn_plugin_expr_var_init(ctx, &vars[9], "use_vgram", -1);
+  rc = grn_tokenizer_register(ctx, "TokenYaBigram", -1,
+                              yabigram_init, yangram_next, yangram_fin);
 
-  GRN_INT32_SET(ctx, &vars[3].value, 2);
-  GRN_INT32_SET(ctx, &vars[4].value, 0);
-  GRN_INT32_SET(ctx, &vars[5].value, 0);
-  GRN_INT32_SET(ctx, &vars[6].value, 0);
-  GRN_INT32_SET(ctx, &vars[7].value, 0);
-  GRN_INT32_SET(ctx, &vars[8].value, 1);
-  GRN_INT32_SET(ctx, &vars[9].value, 0);
+  rc = grn_tokenizer_register(ctx, "TokenYaBigramIgnoreBlank", -1,
+                              yabigram_ib_init, yangram_next, yangram_fin);
 
-  grn_proc_create(ctx, "TokenYaBigram", -1,
-                  GRN_PROC_TOKENIZER,
-                  yangram_init, yangram_next, yangram_fin, 10, vars);
+  rc = grn_tokenizer_register(ctx, "TokenYaBigramSplitSymbolAlpha", -1,
+                              yabigram_sa_init, yangram_next, yangram_fin);
 
-  GRN_INT32_SET(ctx, &vars[4].value, 1);
-  grn_proc_create(ctx, "TokenYaBigramIgnoreBlank", -1,
-                  GRN_PROC_TOKENIZER,
-                  yangram_init, yangram_next, yangram_fin, 10, vars);
+  rc = grn_tokenizer_register(ctx, "TokenYaTrigram", -1,
+                              yatrigram_init, yangram_next, yangram_fin);
 
-  GRN_INT32_SET(ctx, &vars[4].value, 0);
-  GRN_INT32_SET(ctx, &vars[5].value, 1);
-  GRN_INT32_SET(ctx, &vars[6].value, 1);
-  grn_proc_create(ctx, "TokenYaBigramSplitSymbolAlpha", -1,
-                  GRN_PROC_TOKENIZER,
-                  yangram_init, yangram_next, yangram_fin, 10, vars);
+  rc = grn_tokenizer_register(ctx, "TokenYaTrigramIgnoreBlank", -1,
+                              yatrigram_ib_init, yangram_next, yangram_fin);
 
-  GRN_INT32_SET(ctx, &vars[3].value, 3);
-  GRN_INT32_SET(ctx, &vars[4].value, 0);
-  GRN_INT32_SET(ctx, &vars[5].value, 0);
-  GRN_INT32_SET(ctx, &vars[6].value, 0);
-  grn_proc_create(ctx, "TokenYaTrigram", -1,
-                  GRN_PROC_TOKENIZER,
-                  yangram_init, yangram_next, yangram_fin, 10, vars);
+  rc = grn_tokenizer_register(ctx, "TokenYaTrigramSplitSymbolAlpha", -1,
+                              yatrigram_sa_init, yangram_next, yangram_fin);
 
-  GRN_INT32_SET(ctx, &vars[4].value, 1);
-  grn_proc_create(ctx, "TokenYaTrigramIgnoreBlank", -1,
-                  GRN_PROC_TOKENIZER,
-                  yangram_init, yangram_next, yangram_fin, 10, vars);
+  rc = grn_tokenizer_register(ctx, "TokenYaVgram", -1,
+                              yavgram_init, yangram_next, yangram_fin);
 
-  GRN_INT32_SET(ctx, &vars[4].value, 0);
-  GRN_INT32_SET(ctx, &vars[5].value, 1);
-  GRN_INT32_SET(ctx, &vars[6].value, 1);
-  grn_proc_create(ctx, "TokenYaTrigramSplitSymbolAlpha", -1,
-                  GRN_PROC_TOKENIZER,
-                  yangram_init, yangram_next, yangram_fin, 10, vars);
-
-  GRN_INT32_SET(ctx, &vars[3].value, 2);
-  GRN_INT32_SET(ctx, &vars[4].value, 0);
-  GRN_INT32_SET(ctx, &vars[5].value, 0);
-  GRN_INT32_SET(ctx, &vars[6].value, 0);
-  GRN_INT32_SET(ctx, &vars[7].value, 0);
-  GRN_INT32_SET(ctx, &vars[8].value, 1);
-  GRN_INT32_SET(ctx, &vars[9].value, 1);
-
-  grn_proc_create(ctx, "TokenYaVgram", -1,
-                  GRN_PROC_TOKENIZER,
-                  yangram_init, yangram_next, yangram_fin, 10, vars);
-
-  GRN_INT32_SET(ctx, &vars[5].value, 1);
-  GRN_INT32_SET(ctx, &vars[6].value, 1);
-  grn_proc_create(ctx, "TokenYaVgramSplitSymbolAlpha", -1,
-                  GRN_PROC_TOKENIZER,
-                  yangram_init, yangram_next, yangram_fin, 10, vars);
+  rc = grn_tokenizer_register(ctx, "TokenYaVgramSplitSymbolAlpha", -1,
+                              yavgram_sa_init, yangram_next, yangram_fin);
 
   return ctx->rc;
 }
