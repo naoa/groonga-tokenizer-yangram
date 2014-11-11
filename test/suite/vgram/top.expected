@@ -20,25 +20,21 @@ tokenize TokenYaVgram "画像処" NormalizerAuto --mode ADD
   ],
   [
     {
-      "value": "画像",
+      "value": "画像処",
       "position": 0
     },
     {
-      "value": "画像処",
+      "value": "像処",
       "position": 1
     },
     {
-      "value": "像処",
-      "position": 2
-    },
-    {
       "value": "処",
-      "position": 3
+      "position": 2
     }
   ]
 ]
 tokenize TokenYaVgram "画像処" NormalizerAuto --mode GET
-[[0,0.0,0.0],[{"value":"画像処","position":1}]]
+[[0,0.0,0.0],[{"value":"画像処","position":0}]]
 tokenize TokenYaVgram "画像処理" NormalizerAuto --mode ADD
 [
   [
@@ -48,24 +44,20 @@ tokenize TokenYaVgram "画像処理" NormalizerAuto --mode ADD
   ],
   [
     {
-      "value": "画像",
+      "value": "画像処",
       "position": 0
     },
     {
-      "value": "画像処",
+      "value": "像処",
       "position": 1
     },
     {
-      "value": "像処",
+      "value": "処理",
       "position": 2
     },
     {
-      "value": "処理",
-      "position": 3
-    },
-    {
       "value": "理",
-      "position": 4
+      "position": 3
     }
   ]
 ]
@@ -79,11 +71,11 @@ tokenize TokenYaVgram "画像処理" NormalizerAuto --mode GET
   [
     {
       "value": "画像処",
-      "position": 1
+      "position": 0
     },
     {
       "value": "処理",
-      "position": 3
+      "position": 2
     }
   ]
 ]

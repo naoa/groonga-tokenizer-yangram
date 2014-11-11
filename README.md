@@ -115,22 +115,26 @@ tokenize TokenYaBigram "今日は雨だな" NormalizerAuto --mode GET
 * ``TokenYaVgram``
 * ``TokenYaVgramSplitSymbolAlpha``
 
-検索時、更新時において``#vgram_words``テーブルのキーに含まれるBigramトークンを伸ばしてTrigramにしたトークンを追加します。文末や字種境界など伸ばせないケースがあるため、元のBigramトークンも残しておきます。 
-出現頻度が高いBigramトークンのみをあらかじめ``#vgram_words``テーブルに格納しておくことで、転置索引の増大を抑えつつ、検索速度向上に効果的なトークンのみをTrigramにすることができるかもしれません(検証中)。  
+検索時、更新時において``#vgram_words``テーブルのキーに含まれるBigramトークンを前後に伸ばしてTrigramにします。Trigramになるため、対象のBigramトークンを含む3文字以上での検索性能が大幅に向上するかもしれません(検証中)。
+出現頻度が高いBigramトークンのみをあらかじめ``#vgram_words``テーブルに格納しておくことで、転置索引の増大を抑えつつ、検索速度向上に効果的なトークンのみをTrigramにすることができるかもしれません(検証中)。   
+なお、Trigramにする対象のBigramトークン単体で検索される場合は自動的に前方一致検索になります。
 整合性を保つため、Vgram対象の語句を追加した場合は、インデックス再構築が必要です。  
-なお、これらのトークナイザーも上記同様に検索時のみNgramのオーバーラップをスキップしてトークナイズします。
+これらのトークナイザーも上記同様に検索時のみNgramのオーバーラップをできるだけスキップしてトークナイズします。
 
-後日、効果を検証予定
+検証中。かなり複雑な処理になっているので、まだ想定できていないケースがあるかもしれません。
 
 ```
+register tokenizers/yangram
+[[0,0.0,0.0],true]
 table_create #vgram_words TABLE_HASH_KEY ShortText
 [[0,0.0,0.0],true]
 load --table #vgram_words
 [
-{"_key": "タベ"}
+{"_key": "今日"},
+{"_key": "雨だ"}
 ]
 [[0,0.0,0.0],2]
-tokenize TokenYaVgram "データベース" NormalizerAuto --mode ADD
+tokenize TokenYaVgram "今日はaは雨だなb" NormalizerAuto --mode ADD
 [
   [
     0,
@@ -139,36 +143,44 @@ tokenize TokenYaVgram "データベース" NormalizerAuto --mode ADD
   ],
   [
     {
-      "value": "デー",
+      "value": "今日は",
       "position": 0
     },
     {
-      "value": "ータ",
+      "value": "日は",
       "position": 1
     },
     {
-      "value": "タベ",
+      "value": "は",
       "position": 2
     },
     {
-      "value": "タベー",
+      "value": "a",
       "position": 3
     },
     {
-      "value": "ベー",
+      "value": "は雨だ",
       "position": 4
     },
     {
-      "value": "ース",
+      "value": "雨だな",
       "position": 5
     },
     {
-      "value": "ス",
+      "value": "だな",
       "position": 6
+    },
+    {
+      "value": "な",
+      "position": 7
+    },
+    {
+      "value": "b",
+      "position": 8
     }
   ]
 ]
-tokenize TokenYaVgram "データベース" NormalizerAuto --mode GET
+tokenize TokenYaVgram "今日はaは雨だなb" NormalizerAuto --mode GET
 [
   [
     0,
@@ -177,16 +189,24 @@ tokenize TokenYaVgram "データベース" NormalizerAuto --mode GET
   ],
   [
     {
-      "value": "デー",
+      "value": "今日は",
       "position": 0
     },
     {
-      "value": "タベー",
+      "value": "a",
       "position": 3
     },
     {
-      "value": "ース",
+      "value": "は雨だ",
+      "position": 4
+    },
+    {
+      "value": "雨だな",
       "position": 5
+    },
+    {
+      "value": "b",
+      "position": 8
     }
   ]
 ]
