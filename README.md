@@ -124,8 +124,6 @@ tokenize TokenYaBigram "今日は雨だな" NormalizerAuto --mode GET
 検証中。かなり複雑な処理になっているので、まだ想定できていないケースがあるかもしれません。
 
 ```
-register tokenizers/yangram
-[[0,0.0,0.0],true]
 table_create #vgram_words TABLE_HASH_KEY ShortText
 [[0,0.0,0.0],true]
 load --table #vgram_words
@@ -134,7 +132,7 @@ load --table #vgram_words
 {"_key": "雨だ"}
 ]
 [[0,0.0,0.0],2]
-tokenize TokenYaVgram "今日はaは雨だなb" NormalizerAuto --mode ADD
+tokenize TokenYaVgram "今日は雨だな" NormalizerAuto --mode ADD
 [
   [
     0,
@@ -151,36 +149,24 @@ tokenize TokenYaVgram "今日はaは雨だなb" NormalizerAuto --mode ADD
       "position": 1
     },
     {
-      "value": "は",
+      "value": "は雨だ",
       "position": 2
     },
     {
-      "value": "a",
+      "value": "雨だな",
       "position": 3
     },
     {
-      "value": "は雨だ",
+      "value": "だな",
       "position": 4
     },
     {
-      "value": "雨だな",
-      "position": 5
-    },
-    {
-      "value": "だな",
-      "position": 6
-    },
-    {
       "value": "な",
-      "position": 7
-    },
-    {
-      "value": "b",
-      "position": 8
+      "position": 5
     }
   ]
 ]
-tokenize TokenYaVgram "今日はaは雨だなb" NormalizerAuto --mode GET
+tokenize TokenYaVgram "今日は雨だな" NormalizerAuto --mode GET
 [
   [
     0,
@@ -193,20 +179,8 @@ tokenize TokenYaVgram "今日はaは雨だなb" NormalizerAuto --mode GET
       "position": 0
     },
     {
-      "value": "a",
-      "position": 3
-    },
-    {
-      "value": "は雨だ",
-      "position": 4
-    },
-    {
       "value": "雨だな",
-      "position": 5
-    },
-    {
-      "value": "b",
-      "position": 8
+      "position": 3
     }
   ]
 ]
