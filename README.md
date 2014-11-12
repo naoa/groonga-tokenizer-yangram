@@ -115,18 +115,19 @@ tokenize TokenYaBigram "今日は雨だな" NormalizerAuto --mode GET
 * ``TokenYaVgram``
 * ``TokenYaVgramSplitSymbolAlpha``
 
-検索時、更新時において``#vgram_words``テーブルのキーに含まれるBigramトークンを前後に伸ばしてTrigramにします。Trigramになるため、対象のBigramトークンを含む3文字以上での検索性能が大幅に向上するかもしれません(検証中)。
-出現頻度が高いBigramトークンのみをあらかじめ``#vgram_words``テーブルに格納しておくことで、転置索引の増大を抑えつつ、検索速度向上に効果的なトークンのみをTrigramにすることができるかもしれません(検証中)。   
+検索時、更新時において``vgram_words``テーブルのキーに含まれるBigramトークンを前後に伸ばしてTrigramにします。Trigramになるため、対象のBigramトークンを含む3文字以上での検索性能の向上が見込めます。
+出現頻度が高いBigramトークンのみをあらかじめ``vgram_words``テーブルに格納しておくことで、キーサイズの増大を抑えつつ、検索速度向上に効果的なトークンのみをTrigramにすることができます。   
 なお、Trigramにする対象のBigramトークン単体で検索される場合は自動的に前方一致検索になります。
 整合性を保つため、Vgram対象の語句を追加した場合は、インデックス再構築が必要です。  
 これらのトークナイザーも上記同様に検索時のみNgramのオーバーラップをできるだけスキップしてトークナイズします。
 
+テーブルは環境変数``GRN_YANGRAM_VGRAM_WORD_TABLE_NAME``により変更することができます。
 検証中。かなり複雑な処理になっているので、まだ想定できていないケースがあるかもしれません。
 
 ```
-table_create #vgram_words TABLE_HASH_KEY ShortText
+table_create vgram_words TABLE_HASH_KEY ShortText
 [[0,0.0,0.0],true]
-load --table #vgram_words
+load --table vgram_words
 [
 {"_key": "今日"},
 {"_key": "雨だ"}

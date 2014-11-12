@@ -31,8 +31,7 @@
 #define GRN_STR_ISBLANK(c) (c & 0x80)
 #define GRN_STR_CTYPE(c) (c & 0x7f)
 
-#define VGRAM_WORD_TABLE_NAME "#vgram_words"
-#define VGRAM_WORD_TABLE_NAME_MRN "@0023vgram_words"
+#define VGRAM_WORD_TABLE_NAME "vgram_words"
 
 typedef struct {
   grn_tokenizer_token token;
@@ -316,13 +315,17 @@ yangram_init(grn_ctx *ctx, int nargs, grn_obj **args, grn_user_data *user_data,
   tokenizer->split_digit = split_digit;
   tokenizer->use_vgram = use_vgram;
   if (tokenizer->use_vgram) {
-    tokenizer->vgram_table = grn_ctx_get(ctx,
-                                         VGRAM_WORD_TABLE_NAME,
-                                         strlen(VGRAM_WORD_TABLE_NAME));
-    if (!tokenizer->vgram_table) {
+    const char *vgram_word_table_name_env;
+    vgram_word_table_name_env = getenv("GRN_YANGRAM_VGRAM_WORD_TABLE_NAME");
+
+    if (vgram_word_table_name_env) {
       tokenizer->vgram_table = grn_ctx_get(ctx,
-                                           VGRAM_WORD_TABLE_NAME_MRN,
-                                           strlen(VGRAM_WORD_TABLE_NAME_MRN));
+                                           vgram_word_table_name_env,
+                                           strlen(vgram_word_table_name_env));
+    } else {
+      tokenizer->vgram_table = grn_ctx_get(ctx,
+                                           VGRAM_WORD_TABLE_NAME,
+                                           strlen(VGRAM_WORD_TABLE_NAME));
     }
     if (!tokenizer->vgram_table) {
        GRN_PLUGIN_ERROR(ctx, GRN_NO_MEMORY_AVAILABLE,
