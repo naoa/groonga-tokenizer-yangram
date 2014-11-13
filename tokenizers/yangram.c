@@ -39,17 +39,10 @@ typedef struct {
   const unsigned char *next;
   const unsigned char *start;
   const unsigned char *end;
-  const unsigned char *ctypes;
   int rest_length;
-  int ctypes_next;
   const unsigned char *pushed_token_tail;
-  const unsigned char *token_top;
-  const unsigned char *token_next;
-  const unsigned char *token_tail;
-  const unsigned char *token_ctypes;
-  int token_size;
-  grn_bool is_token_grouped;
-  grn_bool is_vgram;
+  const unsigned char *ctypes;
+  int ctypes_next;
   unsigned short ngram_unit;
   grn_bool ignore_blank;
   grn_bool split_symbol;
@@ -331,8 +324,11 @@ yangram_init(grn_ctx *ctx, int nargs, grn_obj **args, grn_user_data *user_data,
        GRN_PLUGIN_ERROR(ctx, GRN_NO_MEMORY_AVAILABLE,
                         "[tokenizer][yangram] "
                         "couldn't open a vgram table");
+       tokenizer->vgram_table = NULL;
        return NULL;
     }
+  } else {
+    tokenizer->vgram_table = NULL;
   }
 
   grn_string_get_normalized(ctx, tokenizer->query->normalized_query,
@@ -348,13 +344,6 @@ yangram_init(grn_ctx *ctx, int nargs, grn_obj **args, grn_user_data *user_data,
   tokenizer->pushed_token_tail = NULL;
   tokenizer->ctypes_next = 0;
 
-  tokenizer->token_top = tokenizer->next;
-  tokenizer->token_next = tokenizer->token_top;
-  tokenizer->token_tail = tokenizer->token_top;
-  tokenizer->token_size = 0;
-  tokenizer->is_token_grouped = GRN_FALSE;
-  tokenizer->is_vgram = GRN_FALSE;
-
   return NULL;
 }
 
@@ -365,52 +354,7 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
   grn_yangram_tokenizer *tokenizer = user_data->ptr;
   const unsigned char *string_end = tokenizer->end;
 
-  if (tokenizer->next == tokenizer->start) {
-    unsigned int ctypes_skip_size;
-    int char_length = 0;
-
-    if (tokenizer->ctypes) {
-      tokenizer->token_ctypes = tokenizer->ctypes + tokenizer->ctypes_next;
-    } else {
-      tokenizer->token_ctypes = NULL;
-    }
-    tokenizer->is_token_grouped = is_token_group(tokenizer, tokenizer->token_ctypes);
-
-    if (tokenizer->is_token_grouped) {
-      tokenizer->token_size =
-         forward_grouped_token_tail(ctx, tokenizer, tokenizer->token_ctypes, &(tokenizer->token_tail));
-      tokenizer->token_next = tokenizer->token_tail;
-    } else {
-      tokenizer->token_size =
-        forward_ngram_token_tail(ctx, tokenizer, tokenizer->token_ctypes, &(tokenizer->token_tail));
-      char_length = grn_plugin_charlen(ctx, (char *)(tokenizer->token_next),
-                                       tokenizer->rest_length,
-                                       tokenizer->query->encoding);
-      tokenizer->token_next += char_length;
-      if (tokenizer->use_vgram) {
-        grn_id id;
-        id = grn_table_get(ctx, tokenizer->vgram_table,
-                           (const char *)tokenizer->token_top,
-                           tokenizer->token_tail - tokenizer->token_top);
-        if (id != GRN_ID_NIL) {
-          tokenizer->is_vgram = GRN_TRUE;
-        }
-      }
-    }
-    if (tokenizer->token_top == tokenizer->token_tail || tokenizer->token_next == string_end) {
-      ctypes_skip_size = 0;
-    } else {
-      if (tokenizer->is_token_grouped) {
-        ctypes_skip_size = tokenizer->token_size;
-      } else {
-        ctypes_skip_size = 1;
-      }
-    }
-    tokenizer->next = tokenizer->token_next;
-    tokenizer->ctypes_next = tokenizer->ctypes_next + ctypes_skip_size;
-  } 
-
-  const unsigned char *token_top = tokenizer->token_next;
+  const unsigned char *token_top = tokenizer->next;
   const unsigned char *token_next = token_top;
   const unsigned char *token_tail = token_top;
   int token_size = 0;
@@ -421,95 +365,121 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
   grn_bool is_vgram = GRN_FALSE;
   grn_tokenizer_status status = 0;
 
-  if (!(tokenizer->token_top == tokenizer->token_tail || tokenizer->token_next == string_end)) {
-    if (tokenizer->ctypes) {
-      token_ctypes = tokenizer->ctypes + tokenizer->ctypes_next;
-    } else {
-      token_ctypes = NULL;
-    }
-    is_token_grouped = is_token_group(tokenizer, token_ctypes);
+  if (tokenizer->ctypes) {
+    token_ctypes = tokenizer->ctypes + tokenizer->ctypes_next;
+  } else {
+    token_ctypes = NULL;
+  }
+  is_token_grouped = is_token_group(tokenizer, token_ctypes);
 
-    if (is_token_grouped) {
-      token_size = forward_grouped_token_tail(ctx, tokenizer, token_ctypes, &token_tail);
-      token_next = token_tail;
-    } else {
-      token_size = forward_ngram_token_tail(ctx, tokenizer, token_ctypes, &token_tail);
-      char_length = grn_plugin_charlen(ctx, (char *)token_next,
-                                       tokenizer->rest_length,
-                                       tokenizer->query->encoding);
-      token_next += char_length;
-      if (tokenizer->use_vgram) {
-        grn_id id;
-        id = grn_table_get(ctx, tokenizer->vgram_table,
-                           (const char *)token_top, token_tail - token_top);
-        if (id != GRN_ID_NIL) {
-          is_vgram = GRN_TRUE;
+  if (is_token_grouped) {
+    token_size = forward_grouped_token_tail(ctx, tokenizer, token_ctypes, &token_tail);
+    token_next = token_tail;
+  } else {
+    token_size = forward_ngram_token_tail(ctx, tokenizer, token_ctypes, &token_tail);
+    char_length = grn_plugin_charlen(ctx, (char *)token_next,
+                                     tokenizer->rest_length,
+                                     tokenizer->query->encoding);
+    token_next += char_length;
+    if (tokenizer->use_vgram) {
+      grn_id id;
+      id = grn_table_get(ctx, tokenizer->vgram_table,
+                         (const char *)token_top, token_tail - token_top);
+      if (id != GRN_ID_NIL) {
+        is_vgram = GRN_TRUE;
+      }
+      if (!is_vgram) {
+        if (token_tail - token_top >= tokenizer->ngram_unit) {
+          char_length = grn_plugin_charlen(ctx, (char *)token_top,
+                                           tokenizer->rest_length,
+                                           tokenizer->query->encoding);
+          if (token_top + char_length < string_end &&
+              !is_group_border(ctx, tokenizer,token_ctypes, token_size) &&
+              !is_token_grouped) {
+            id = grn_table_get(ctx, tokenizer->vgram_table,
+                               (const char *)token_top + char_length, token_tail - token_top);
+            if (id != GRN_ID_NIL) {
+              is_vgram = GRN_TRUE;
+            }
+          }
+        }
+      }
+      if (!is_vgram) {
+        if (token_tail < string_end &&
+           !is_group_border(ctx, tokenizer, token_ctypes, token_size) &&
+           !is_token_grouped) {
+          char_length = grn_plugin_charlen(ctx, (char *)token_tail,
+                                           tokenizer->rest_length,
+                                           tokenizer->query->encoding);
+          id = grn_table_get(ctx, tokenizer->vgram_table,
+                             (const char *)token_tail, char_length);
+          if (id != GRN_ID_NIL) {
+            is_vgram = GRN_TRUE;
+          }
         }
       }
     }
-
-    if (token_top == token_tail || token_next == string_end) {
-      ctypes_skip_size = 0;
-    } else {
-      if (is_token_grouped) {
-        ctypes_skip_size = token_size;
-      } else {
-        ctypes_skip_size = 1;
-      }
-    }
-    tokenizer->next = token_next;
-    tokenizer->ctypes_next = tokenizer->ctypes_next + ctypes_skip_size;
   }
 
-  if (tokenizer->is_vgram || is_vgram) {
-    if (tokenizer->token_tail < string_end &&
-        !is_group_border(ctx, tokenizer, tokenizer->token_ctypes, tokenizer->token_size) &&
-        !tokenizer->is_token_grouped) {
-      char_length = grn_plugin_charlen(ctx, (char *)tokenizer->token_tail,
+  if (token_top == token_tail || token_next == string_end) {
+    ctypes_skip_size = 0;
+  } else {
+    if (is_token_grouped) {
+      ctypes_skip_size = token_size;
+    } else {
+      ctypes_skip_size = 1;
+    }
+  }
+
+  if (is_vgram) {
+    if (token_tail < string_end &&
+        !is_group_border(ctx, tokenizer, token_ctypes, token_size) &&
+        !is_token_grouped) {
+      char_length = grn_plugin_charlen(ctx, (char *)token_tail,
                                        tokenizer->rest_length,
                                        tokenizer->query->encoding);
-      tokenizer->token_tail += char_length;
-      tokenizer->token_size++;
+      token_tail += char_length;
+      token_size++;
     } else {
       status |= GRN_TOKENIZER_TOKEN_UNMATURED;
       //2文字のみのクエリの場合で伸ばせない場合は強制的に前方一致検索にするためLAST
       //最後の1文字トークンが残っているがREACH_ENDの場合はもともとGET時のみSKIPされる仕様
-      if (tokenizer->token_tail == string_end && tokenizer->query->token_mode == GRN_TOKEN_GET) {
+      if (token_tail == string_end && tokenizer->query->token_mode == GRN_TOKEN_GET) {
         status |= GRN_TOKENIZER_TOKEN_LAST;
       }
     }
   }
 
-  if (tokenizer->token_top == tokenizer->token_tail || tokenizer->token_next == string_end) {
+  if (token_top == token_tail || token_next == string_end) {
     status |= GRN_TOKENIZER_TOKEN_LAST;
   }
 
-  if (tokenizer->token_tail == string_end) {
+  if (token_tail == string_end) {
     status |= GRN_TOKENIZER_TOKEN_REACH_END;
   }
 
-  if (!tokenizer->is_token_grouped && tokenizer->token_size < tokenizer->ngram_unit) {
+  if (is_token_grouped && token_size < tokenizer->ngram_unit) {
     status |= GRN_TOKENIZER_TOKEN_UNMATURED;
   }
 
-  if (tokenizer->token_size) {
+  if (token_size) {
     if (tokenizer->skip_overlap &&
-        is_token_all_blank(ctx, tokenizer, tokenizer->token_top, tokenizer->token_size)) {
+        is_token_all_blank(ctx, tokenizer, token_top, token_size)) {
       status |= GRN_TOKENIZER_TOKEN_SKIP_WITH_POSITION;
     }
   }
 
   if (tokenizer->pushed_token_tail &&
-      tokenizer->token_top < tokenizer->pushed_token_tail) {
+      token_top < tokenizer->pushed_token_tail) {
     status |= GRN_TOKENIZER_TOKEN_OVERLAP;
     if (tokenizer->skip_overlap &&
         !(status & GRN_TOKENIZER_TOKEN_REACH_END) &&
         !(status & GRN_TOKENIZER_TOKEN_SKIP_WITH_POSITION) &&
       tokenizer->query->token_mode == GRN_TOKEN_GET) {
-      if (tokenizer->token_tail <= tokenizer->pushed_token_tail) {
+      if (token_tail <= tokenizer->pushed_token_tail) {
         status |= GRN_TOKENIZER_TOKEN_SKIP;
       } else {
-        if (!is_group_border(ctx, tokenizer, tokenizer->token_ctypes, tokenizer->token_size)) {
+        if (!is_group_border(ctx, tokenizer, token_ctypes, token_size)) {
           status |= GRN_TOKENIZER_TOKEN_SKIP;
         }
       }
@@ -518,26 +488,21 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
 
   if (!(status & GRN_TOKENIZER_TOKEN_SKIP) &&
       !(status & GRN_TOKENIZER_TOKEN_SKIP_WITH_POSITION)) {
-    tokenizer->pushed_token_tail = tokenizer->token_tail;
+    tokenizer->pushed_token_tail = token_tail;
   }
 
   tokenizer->rest_length = string_end - token_next;
 
+  tokenizer->next = token_next;
+  tokenizer->rest_length = string_end - token_next;
+  tokenizer->ctypes_next = tokenizer->ctypes_next + ctypes_skip_size;
+
   grn_tokenizer_token_push(ctx,
                            &(tokenizer->token),
-                           (const char *)(tokenizer->token_top),
-                           tokenizer->token_tail - tokenizer->token_top,
+                           (const char *)token_top,
+                           token_tail - token_top,
                            status);
 
-  if (tokenizer->token_next != tokenizer->start) {
-    tokenizer->token_top = token_top;
-    tokenizer->token_next = token_next;
-    tokenizer->token_tail = token_tail;
-    tokenizer->token_size = token_size;
-    tokenizer->token_ctypes = token_ctypes;
-    tokenizer->is_vgram = is_vgram;
-    tokenizer->is_token_grouped = is_token_grouped;
-  }
   return NULL;
 }
 

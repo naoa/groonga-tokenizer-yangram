@@ -4,9 +4,10 @@ table_create vgram_words TABLE_HASH_KEY ShortText
 [[0,0.0,0.0],true]
 load --table vgram_words
 [
-{"_key": "情報"}
+{"_key": "情報"},
+{"_key": "情"}
 ]
-[[0,0.0,0.0],1]
+[[0,0.0,0.0],2]
 tokenize TokenYaVgram "のA情報処理" NormalizerAuto --mode ADD
 [
   [

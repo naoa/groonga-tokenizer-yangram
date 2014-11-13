@@ -3,7 +3,8 @@ register tokenizers/yangram
 table_create vgram_words TABLE_HASH_KEY ShortText
 load --table vgram_words
 [
-{"_key": "情報"}
+{"_key": "情報"},
+{"_key": "情"}
 ]
 tokenize TokenYaVgram "のA情報A処理" NormalizerAuto --mode ADD
 tokenize TokenYaVgram "情報" NormalizerAuto --mode GET

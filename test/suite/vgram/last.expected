@@ -4,10 +4,11 @@ table_create vgram_words TABLE_HASH_KEY ShortText
 [[0,0.0,0.0],true]
 load --table vgram_words
 [
-{"_key": "タベ"}
+{"_key": "雨だ"},
+{"_key": "雨"}
 ]
-[[0,0.0,0.0],1]
-tokenize TokenYaVgram "タベA" NormalizerAuto --mode ADD
+[[0,0.0,0.0],2]
+tokenize TokenYaVgram "今日は雨だ" NormalizerAuto --mode ADD
 [
   [
     0,
@@ -16,148 +17,28 @@ tokenize TokenYaVgram "タベA" NormalizerAuto --mode ADD
   ],
   [
     {
-      "value": "タベ",
+      "value": "今日",
       "position": 0
     },
     {
-      "value": "ベ",
+      "value": "日は雨",
       "position": 1
     },
     {
-      "value": "a",
-      "position": 2
-    }
-  ]
-]
-tokenize TokenYaVgram "タベA" NormalizerAuto --mode GET
-[[0,0.0,0.0],[{"value":"タベ","position":0},{"value":"a","position":2}]]
-tokenize TokenYaVgram "タベ" NormalizerAuto --mode ADD
-[[0,0.0,0.0],[{"value":"タベ","position":0},{"value":"ベ","position":1}]]
-tokenize TokenYaVgram "タベ" NormalizerAuto --mode GET
-[[0,0.0,0.0],[{"value":"タベ","position":0}]]
-tokenize TokenYaVgram "タベタベ" NormalizerAuto --mode ADD
-[
-  [
-    0,
-    0.0,
-    0.0
-  ],
-  [
-    {
-      "value": "タベタ",
-      "position": 0
-    },
-    {
-      "value": "ベタベ",
-      "position": 1
-    },
-    {
-      "value": "タベ",
+      "value": "は雨だ",
       "position": 2
     },
     {
-      "value": "ベ",
-      "position": 3
-    }
-  ]
-]
-tokenize TokenYaVgram "タベタベ" NormalizerAuto --mode GET
-[
-  [
-    0,
-    0.0,
-    0.0
-  ],
-  [
-    {
-      "value": "タベタ",
-      "position": 0
-    },
-    {
-      "value": "ベタベ",
-      "position": 1
-    }
-  ]
-]
-tokenize TokenYaVgram "データベ" NormalizerAuto --mode ADD
-[
-  [
-    0,
-    0.0,
-    0.0
-  ],
-  [
-    {
-      "value": "デー",
-      "position": 0
-    },
-    {
-      "value": "ータベ",
-      "position": 1
-    },
-    {
-      "value": "タベ",
-      "position": 2
-    },
-    {
-      "value": "ベ",
-      "position": 3
-    }
-  ]
-]
-tokenize TokenYaVgram "データベ" NormalizerAuto --mode GET
-[
-  [
-    0,
-    0.0,
-    0.0
-  ],
-  [
-    {
-      "value": "デー",
-      "position": 0
-    },
-    {
-      "value": "ータベ",
-      "position": 1
-    }
-  ]
-]
-tokenize TokenYaVgram "データベース" NormalizerAuto --mode ADD
-[
-  [
-    0,
-    0.0,
-    0.0
-  ],
-  [
-    {
-      "value": "デー",
-      "position": 0
-    },
-    {
-      "value": "ータベ",
-      "position": 1
-    },
-    {
-      "value": "タベー",
-      "position": 2
-    },
-    {
-      "value": "ベー",
+      "value": "雨だ",
       "position": 3
     },
     {
-      "value": "ース",
+      "value": "だ",
       "position": 4
-    },
-    {
-      "value": "ス",
-      "position": 5
     }
   ]
 ]
-tokenize TokenYaVgram "データベース" NormalizerAuto --mode GET
+tokenize TokenYaVgram "今日は雨だ" NormalizerAuto --mode GET
 [
   [
     0,
@@ -166,16 +47,30 @@ tokenize TokenYaVgram "データベース" NormalizerAuto --mode GET
   ],
   [
     {
-      "value": "デー",
+      "value": "今日",
       "position": 0
     },
     {
-      "value": "タベー",
+      "value": "は雨だ",
       "position": 2
+    }
+  ]
+]
+tokenize TokenYaVgram "今日は雨" NormalizerAuto --mode GET
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  [
+    {
+      "value": "今日",
+      "position": 0
     },
     {
-      "value": "ース",
-      "position": 4
+      "value": "日は雨",
+      "position": 1
     }
   ]
 ]
