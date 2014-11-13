@@ -208,7 +208,7 @@ tokenize TokenYaVgram "今日は雨" NormalizerAuto --mode GET
 https://github.com/naoa/groonga-command-token-count
 
 ```
-token_count Terms document_index --token_size 2 --ctype ja --threshold 10000000
+token_count Terms document_index --token_size 2 --ctype ja --threshold 10000000 --output_prefix 1
 ```
 
 ## Install
