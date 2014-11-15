@@ -454,11 +454,11 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
   tokenizer->rest_length = string_end - token_next;
   tokenizer->ctypes_next = tokenizer->ctypes_next + ctypes_skip_size;
 
-    grn_tokenizer_token_push(ctx,
-                             &(tokenizer->token),
-                             (const char *)token_top,
-                             token_tail - token_top,
-                             status);
+  grn_tokenizer_token_push(ctx,
+                           &(tokenizer->token),
+                           (const char *)token_top,
+                           token_tail - token_top,
+                           status);
 
   return NULL;
 }
