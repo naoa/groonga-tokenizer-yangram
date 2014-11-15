@@ -51,6 +51,7 @@ typedef struct {
   grn_bool skip_overlap;
   grn_bool use_vgram;
   grn_obj *vgram_table;
+  grn_obj value;
 } grn_yangram_tokenizer;
 
 static grn_bool
@@ -344,6 +345,8 @@ yangram_init(grn_ctx *ctx, int nargs, grn_obj **args, grn_user_data *user_data,
   tokenizer->pushed_token_tail = NULL;
   tokenizer->ctypes_next = 0;
 
+  GRN_TEXT_INIT(&(tokenizer->value), 0);
+
   return NULL;
 }
 
@@ -385,38 +388,8 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
       grn_id id;
       id = grn_table_get(ctx, tokenizer->vgram_table,
                          (const char *)token_top, token_tail - token_top);
-      if (id != GRN_ID_NIL) {
+      if (id) {
         is_vgram = GRN_TRUE;
-      }
-      if (!is_vgram) {
-        if (token_tail - token_top >= tokenizer->ngram_unit) {
-          char_length = grn_plugin_charlen(ctx, (char *)token_top,
-                                           tokenizer->rest_length,
-                                           tokenizer->query->encoding);
-          if (token_top + char_length < string_end &&
-              !is_group_border(ctx, tokenizer,token_ctypes, token_size) &&
-              !is_token_grouped) {
-            id = grn_table_get(ctx, tokenizer->vgram_table,
-                               (const char *)token_top + char_length, token_tail - token_top);
-            if (id != GRN_ID_NIL) {
-              is_vgram = GRN_TRUE;
-            }
-          }
-        }
-      }
-      if (!is_vgram) {
-        if (token_tail < string_end &&
-           !is_group_border(ctx, tokenizer, token_ctypes, token_size) &&
-           !is_token_grouped) {
-          char_length = grn_plugin_charlen(ctx, (char *)token_tail,
-                                           tokenizer->rest_length,
-                                           tokenizer->query->encoding);
-          id = grn_table_get(ctx, tokenizer->vgram_table,
-                             (const char *)token_tail, char_length);
-          if (id != GRN_ID_NIL) {
-            is_vgram = GRN_TRUE;
-          }
-        }
       }
     }
   }
@@ -431,21 +404,22 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
     }
   }
 
-  if (is_vgram) {
-    if (token_tail < string_end &&
-        !is_group_border(ctx, tokenizer, token_ctypes, token_size) &&
-        !is_token_grouped) {
-      char_length = grn_plugin_charlen(ctx, (char *)token_tail,
-                                       tokenizer->rest_length,
-                                       tokenizer->query->encoding);
-      token_tail += char_length;
-      token_size++;
-    } else {
-      status |= GRN_TOKENIZER_TOKEN_UNMATURED;
-      //2文字のみのクエリの場合で伸ばせない場合は強制的に前方一致検索にするためLAST
-      //最後の1文字トークンが残っているがREACH_ENDの場合はもともとGET時のみSKIPされる仕様
-      if (token_tail == string_end && tokenizer->query->token_mode == GRN_TOKEN_GET) {
-        status |= GRN_TOKENIZER_TOKEN_LAST;
+  if (tokenizer->use_vgram){
+    if (is_vgram) {
+      if (token_tail < string_end && !is_group_border(ctx, tokenizer,token_ctypes, token_size)) {
+        char_length = grn_plugin_charlen(ctx, (char *)token_tail,
+                                         tokenizer->rest_length,
+                                         tokenizer->query->encoding);
+        token_size++;
+        token_tail += char_length;
+      } else {
+       //2文字のみのクエリの場合で伸ばせない場合は強制的に前方一致検索にするためLAST
+       //最後の1文字トークンが残っているがREACH_ENDの場合はもともとGET時のみSKIPされる仕様
+        if (token_tail == string_end && tokenizer->query->token_mode == GRN_TOKEN_GET) {
+          //status |= GRN_TOKENIZER_TOKEN_UNMATURED;
+          //status |= GRN_TOKENIZER_TOKEN_LAST;
+          status |= GRN_TOKENIZER_TOKEN_FORCE_PREFIX;
+        }
       }
     }
   }
@@ -458,7 +432,7 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
     status |= GRN_TOKENIZER_TOKEN_REACH_END;
   }
 
-  if (is_token_grouped && token_size < tokenizer->ngram_unit) {
+  if (!is_token_grouped && token_size < tokenizer->ngram_unit) {
     status |= GRN_TOKENIZER_TOKEN_UNMATURED;
   }
 
@@ -491,17 +465,15 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
     tokenizer->pushed_token_tail = token_tail;
   }
 
-  tokenizer->rest_length = string_end - token_next;
-
   tokenizer->next = token_next;
   tokenizer->rest_length = string_end - token_next;
   tokenizer->ctypes_next = tokenizer->ctypes_next + ctypes_skip_size;
 
-  grn_tokenizer_token_push(ctx,
-                           &(tokenizer->token),
-                           (const char *)token_top,
-                           token_tail - token_top,
-                           status);
+    grn_tokenizer_token_push(ctx,
+                             &(tokenizer->token),
+                             (const char *)token_top,
+                             token_tail - token_top,
+                             status);
 
   return NULL;
 }
@@ -518,6 +490,7 @@ yangram_fin(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
   if (tokenizer->vgram_table) {
     grn_obj_unlink(ctx, tokenizer->vgram_table);
   }
+  grn_obj_unlink(ctx, &(tokenizer->value));
   grn_tokenizer_query_close(ctx, tokenizer->query);
   grn_tokenizer_token_fin(ctx, &(tokenizer->token));
   GRN_PLUGIN_FREE(ctx,tokenizer);

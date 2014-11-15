@@ -7,34 +7,6 @@ load --table vgram_words
 {"_key": "画像"}
 ]
 [[0,0.0,0.0],1]
-tokenize TokenYaVgram "画像" NormalizerAuto --mode ADD
-[[0,0.0,0.0],[{"value":"画像","position":0},{"value":"像","position":1}]]
-tokenize TokenYaVgram "画像" NormalizerAuto --mode GET
-[[0,0.0,0.0],[{"value":"画像","position":0}]]
-tokenize TokenYaVgram "画像処" NormalizerAuto --mode ADD
-[
-  [
-    0,
-    0.0,
-    0.0
-  ],
-  [
-    {
-      "value": "画像処",
-      "position": 0
-    },
-    {
-      "value": "像処",
-      "position": 1
-    },
-    {
-      "value": "処",
-      "position": 2
-    }
-  ]
-]
-tokenize TokenYaVgram "画像処" NormalizerAuto --mode GET
-[[0,0.0,0.0],[{"value":"画像処","position":0}]]
 tokenize TokenYaVgram "画像処理" NormalizerAuto --mode ADD
 [
   [

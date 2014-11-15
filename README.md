@@ -5,7 +5,7 @@
 原則、ビルトインのTokenBigramトークナイザー等と同様のルールで文字列をトークナイズします。
 それに加え、以下の機能をカスタマイズしています。
 
-### 検索時のオーバラップスキップ
+### Overlap Skip
 
 * ``TokenYaBigram``
 * ``TokenYaBigramIgnoreBlank``
@@ -110,32 +110,42 @@ tokenize TokenYaBigram "今日は雨だな" NormalizerAuto --mode GET
 ]
 ```
 
-### 可変Ngram
+### Variable Ngram
 
 * ``TokenYaVgram``
 * ``TokenYaVgramSplitSymbolAlpha``
 
-検索時、更新時において``vgram_words``テーブルのキーに含まれるBigramトークンを後に伸ばしてTrigramにします。Trigramになるため、対象のBigramトークンを含む3文字以上での検索性能の向上が見込めます。
-出現頻度が高いBigramトークンのみをあらかじめ``vgram_words``テーブルに格納しておくことで、キーサイズの増大を抑えつつ、検索速度向上に効果的なトークンのみをTrigramにすることができます。   
-``vgram_words``テーブルには、原則、Trigramにしたい2文字のトークンを格納します。ただし、格納した2文字のトークンのうち、検索クエリの末尾に来ることがあるトークンについては、先頭の1文字のトークンも格納する必要があります。これは、検索クエリで末尾に来るものは、文中では必ずTrigramに伸ばせるとは限らないためです。  
-なお、Trigramにする対象のBigramトークン単体で検索される場合は自動的に前方一致検索になります。
+検索時、更新時において``vgram_words``テーブルのキーに含まれるBigramトークンを後に伸ばしてTrigramにします。
+出現頻度が高いBigramトークンのみをあらかじめ``vgram_words``テーブルに格納しておくことで、キーの種類、キーサイズの増大を抑えつつ、検索速度向上に効果的なトークンのみをTrigramにすることができます。   
+なお、検索クエリの末尾で後ろに伸ばすことができず、Trigramにする対象のBigramトークン単体で検索される場合は強制的に前方一致検索になります。  
+Groonga4.0.7時点では、この強制前方一致検索を有効にするには、Groonga本体にパッチを当てる必要があります。  
 整合性を保つため、Vgram対象の語句を追加した場合は、インデックス再構築が必要です。  
 これらのトークナイザーも上記同様に検索時のみNgramのオーバーラップをできるだけスキップしてトークナイズします。
 
 テーブルは環境変数``GRN_YANGRAM_VGRAM_WORD_TABLE_NAME``により変更することができます。
 
-検証中。かなり複雑な処理になっているので、まだ想定できていないケースがあるかもしれません。
+* Wikipedia(ja)で出現頻度上位2000個のbigramトークンを登録して1000回検索
+
+|                       | TokenYaVgram | TokenTrigram | TokenBigram |
+|:----------------------|-------------:|-------------:|------------:|
+| Hits                  | 112378       | 112378       | 112378      |
+| Searching time (Avg)  | 0.0166 sec   | 0.0126 sec   | 0.0444 sec  |
+| Offline Indexing time | 1592 sec     | 2150 sec     | 1449 sec    |
+| Index size            | 8.474GiB     | 9.009GiB     | 7.580GiB    |
+| Key sum               | 7425198      | 28691883     | 5767474     |
+| Key size              | 172.047MiB   | 684.047MiB   | 136.047MiB  |
 
 ```
+register tokenizers/yangram
+[[0,0.0,0.0],true]
 table_create vgram_words TABLE_HASH_KEY ShortText
 [[0,0.0,0.0],true]
 load --table vgram_words
 [
-{"_key": "雨だ"},
-{"_key": "雨"}
+{"_key": "画像"}
 ]
-[[0,0.0,0.0],2]
-tokenize TokenYaVgram "今日は雨だ" NormalizerAuto --mode ADD
+[[0,0.0,0.0],1]
+tokenize TokenYaVgram "画像処理" NormalizerAuto --mode ADD
 [
   [
     0,
@@ -144,28 +154,24 @@ tokenize TokenYaVgram "今日は雨だ" NormalizerAuto --mode ADD
   ],
   [
     {
-      "value": "今日",
+      "value": "画像処",
       "position": 0
     },
     {
-      "value": "日は雨",
+      "value": "像処",
       "position": 1
     },
     {
-      "value": "は雨だ",
+      "value": "処理",
       "position": 2
     },
     {
-      "value": "雨だ",
+      "value": "理",
       "position": 3
-    },
-    {
-      "value": "だ",
-      "position": 4
     }
   ]
 ]
-tokenize TokenYaVgram "今日は雨だ" NormalizerAuto --mode GET
+tokenize TokenYaVgram "画像処理" NormalizerAuto --mode GET
 [
   [
     0,
@@ -174,30 +180,12 @@ tokenize TokenYaVgram "今日は雨だ" NormalizerAuto --mode GET
   ],
   [
     {
-      "value": "今日",
+      "value": "画像処",
       "position": 0
     },
     {
-      "value": "は雨だ",
+      "value": "処理",
       "position": 2
-    }
-  ]
-]
-tokenize TokenYaVgram "今日は雨" NormalizerAuto --mode GET
-[
-  [
-    0,
-    0.0,
-    0.0
-  ],
-  [
-    {
-      "value": "今日",
-      "position": 0
-    },
-    {
-      "value": "日は雨",
-      "position": 1
     }
   ]
 ]
@@ -208,7 +196,55 @@ tokenize TokenYaVgram "今日は雨" NormalizerAuto --mode GET
 https://github.com/naoa/groonga-command-token-count
 
 ```
-token_count Terms document_index --token_size 2 --ctype ja --threshold 10000000 --output_prefix 1
+token_count Terms document_index --token_size 2 --ctype ja --threshold 10000000
+```
+
+* Groongaへのパッチ
+
+```diff
+diff --git a/lib/ii.c b/lib/ii.c
+index e342c73..c8bd83d 100644
+--- a/lib/ii.c
++++ b/lib/ii.c
+@@ -5431,6 +5431,7 @@ token_info_build(grn_ctx *ctx, grn_obj *lexicon, grn_ii *ii, const char *string,
+     tis[(*n)++] = ti;
+     while (token_cursor->status == GRN_TOKEN_DOING) {
+       tid = grn_token_cursor_next(ctx, token_cursor);
++      if (token_cursor->force_prefix) { ef |= EX_PREFIX; }
+       switch (token_cursor->status) {
+       case GRN_TOKEN_DONE_SKIP :
+         continue;
+```
+
+```diff
+diff --git a/include/groonga/tokenizer.h b/include/groonga/tokenizer.h
+index 400166d..7908af6 100644
+--- a/include/groonga/tokenizer.h
++++ b/include/groonga/tokenizer.h
+@@ -183,6 +183,8 @@ typedef unsigned int grn_tokenizer_status;
+ #define GRN_TOKENIZER_TOKEN_SKIP               (0x01L<<4)
+ /* GRN_TOKENIZER_TOKEN_SKIP_WITH_POSITION means that the token and postion is skipped */
+ #define GRN_TOKENIZER_TOKEN_SKIP_WITH_POSITION (0x01L<<5)
++/* GRN_TOKENIZER_TOKEN_FORCE_PREIX that the token is used common prefix search */
++#define GRN_TOKENIZER_TOKEN_FORCE_PREFIX       (0x01L<<6)
+
+ /*
+  * GRN_TOKENIZER_CONTINUE and GRN_TOKENIZER_LAST are deprecated. They
+```
+
+```diff
+diff --git a/lib/token_cursor.c b/lib/token_cursor.c
+index b12217d..1ffa726 100644
+--- a/lib/token_cursor.c
++++ b/lib/token_cursor.c
+@@ -212,6 +212,7 @@ grn_token_cursor_next(grn_ctx *ctx, grn_token_cursor *token_cursor)
+         }
+       }
+ #undef SKIP_FLAGS
++      if (status & GRN_TOKENIZER_TOKEN_FORCE_PREFIX) { token_cursor->force_prefix = 1; }
+       if (token_cursor->curr_size == 0) {
+         char tokenizer_name[GRN_TABLE_MAX_KEY_SIZE];
+         int tokenizer_name_length;
 ```
 
 ## Install

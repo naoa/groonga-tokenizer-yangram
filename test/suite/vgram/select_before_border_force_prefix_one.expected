@@ -20,7 +20,7 @@ load --table Memos
 {"content": "パソコン、ＰＤＡ等の情報A処理端末"}
 ]
 [[0,0.0,0.0],1]
-select Memos --match_columns content --query "情報A" --match_escalation_threshold -1
+select Memos --match_columns content --query "情報" --match_escalation_threshold -1
 [
   [
     0,

@@ -3,7 +3,10 @@ register tokenizers/yangram
 table_create vgram_words TABLE_HASH_KEY ShortText
 load --table vgram_words
 [
-{"_key": "情報"}
+{"_key": "今日"},
+{"_key": "日は"},
+{"_key": "は雨"},
+{"_key": "雨だ"}
 ]
 
 table_create Memos TABLE_NO_KEY
@@ -16,7 +19,7 @@ column_create Terms memos_content COLUMN_INDEX|WITH_POSITION Memos content
 
 load --table Memos
 [
-{"content": "パソコン、ＰＤＡ等の情報A処理端末"}
+{"content": "今日は雨だ"}
 ]
 
-select Memos --match_columns content --query "情報A" --match_escalation_threshold -1
+select Memos --match_columns content --query "今日は雨" --match_escalation_threshold -1

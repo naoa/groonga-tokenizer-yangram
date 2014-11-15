@@ -1,0 +1,22 @@
+register tokenizers/yangram
+
+table_create vgram_words TABLE_HASH_KEY ShortText
+load --table vgram_words
+[
+{"_key": "情報"}
+]
+
+table_create Memos TABLE_NO_KEY
+column_create Memos content COLUMN_SCALAR ShortText
+
+table_create Terms TABLE_PAT_KEY ShortText \
+  --default_tokenizer TokenYaVgram \
+  --normalizer NormalizerAuto
+column_create Terms memos_content COLUMN_INDEX|WITH_POSITION Memos content
+
+load --table Memos
+[
+{"content": "パソコン、ＰＤＡ等の情報A処理端末"}
+]
+
+select Memos --match_columns content --query "情報" --match_escalation_threshold -1

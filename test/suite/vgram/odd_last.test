@@ -1,0 +1,9 @@
+register tokenizers/yangram
+
+table_create vgram_words TABLE_HASH_KEY ShortText
+load --table vgram_words
+[
+{"_key": "機関"}
+]
+tokenize TokenYaVgram "た政府機関" NormalizerAuto --mode ADD
+tokenize TokenYaVgram "た政府機関" NormalizerAuto --mode GET

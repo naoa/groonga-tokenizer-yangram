@@ -4,10 +4,10 @@ table_create vgram_words TABLE_HASH_KEY ShortText
 [[0,0.0,0.0],true]
 load --table vgram_words
 [
-{"_key": "雨だ"}
+{"_key": "機関"}
 ]
 [[0,0.0,0.0],1]
-tokenize TokenYaVgram "今日は雨だ" NormalizerAuto --mode ADD
+tokenize TokenYaVgram "た政府機関" NormalizerAuto --mode ADD
 [
   [
     0,
@@ -16,28 +16,28 @@ tokenize TokenYaVgram "今日は雨だ" NormalizerAuto --mode ADD
   ],
   [
     {
-      "value": "今日",
+      "value": "た政",
       "position": 0
     },
     {
-      "value": "日は",
+      "value": "政府",
       "position": 1
     },
     {
-      "value": "は雨",
+      "value": "府機",
       "position": 2
     },
     {
-      "value": "雨だ",
+      "value": "機関",
       "position": 3
     },
     {
-      "value": "だ",
+      "value": "関",
       "position": 4
     }
   ]
 ]
-tokenize TokenYaVgram "今日は雨だ" NormalizerAuto --mode GET
+tokenize TokenYaVgram "た政府機関" NormalizerAuto --mode GET
 [
   [
     0,
@@ -46,18 +46,16 @@ tokenize TokenYaVgram "今日は雨だ" NormalizerAuto --mode GET
   ],
   [
     {
-      "value": "今日",
+      "value": "た政",
       "position": 0
     },
     {
-      "value": "は雨",
+      "value": "府機",
       "position": 2
     },
     {
-      "value": "雨だ",
+      "value": "機関",
       "position": 3
     }
   ]
 ]
-tokenize TokenYaVgram "今日は雨" NormalizerAuto --mode GET
-[[0,0.0,0.0],[{"value":"今日","position":0},{"value":"は雨","position":2}]]
