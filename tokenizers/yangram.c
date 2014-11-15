@@ -413,11 +413,7 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
         token_size++;
         token_tail += char_length;
       } else {
-       //2文字のみのクエリの場合で伸ばせない場合は強制的に前方一致検索にするためLAST
-       //最後の1文字トークンが残っているがREACH_ENDの場合はもともとGET時のみSKIPされる仕様
         if (token_tail == string_end && tokenizer->query->token_mode == GRN_TOKEN_GET) {
-          //status |= GRN_TOKENIZER_TOKEN_UNMATURED;
-          //status |= GRN_TOKENIZER_TOKEN_LAST;
           status |= GRN_TOKENIZER_TOKEN_FORCE_PREFIX;
         }
       }
