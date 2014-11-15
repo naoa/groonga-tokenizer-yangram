@@ -351,7 +351,6 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
 {
   grn_yangram_tokenizer *tokenizer = user_data->ptr;
   const unsigned char *string_end = tokenizer->end;
-
   const unsigned char *token_top = tokenizer->next;
   const unsigned char *token_next = token_top;
   const unsigned char *token_tail = token_top;
