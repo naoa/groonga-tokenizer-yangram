@@ -51,7 +51,6 @@ typedef struct {
   grn_bool skip_overlap;
   grn_bool use_vgram;
   grn_obj *vgram_table;
-  grn_obj value;
 } grn_yangram_tokenizer;
 
 static grn_bool
@@ -345,8 +344,6 @@ yangram_init(grn_ctx *ctx, int nargs, grn_obj **args, grn_user_data *user_data,
   tokenizer->pushed_token_tail = NULL;
   tokenizer->ctypes_next = 0;
 
-  GRN_TEXT_INIT(&(tokenizer->value), 0);
-
   return NULL;
 }
 
@@ -486,7 +483,6 @@ yangram_fin(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
   if (tokenizer->vgram_table) {
     grn_obj_unlink(ctx, tokenizer->vgram_table);
   }
-  grn_obj_unlink(ctx, &(tokenizer->value));
   grn_tokenizer_query_close(ctx, tokenizer->query);
   grn_tokenizer_token_fin(ctx, &(tokenizer->token));
   GRN_PLUGIN_FREE(ctx,tokenizer);
