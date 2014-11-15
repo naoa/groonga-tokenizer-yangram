@@ -1,0 +1,97 @@
+register tokenizers/yangram
+[[0,0.0,0.0],true]
+table_create known_phrases TABLE_PAT_KEY ShortText
+[[0,0.0,0.0],true]
+load --table known_phrases
+[
+{"_key": "【請求項2】"}
+]
+[[0,0.0,0.0],1]
+tokenize TokenYaBigram "検索装置【請求項２】検索システム" NormalizerAuto --mode ADD
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  [
+    {
+      "value": "検索",
+      "position": 0
+    },
+    {
+      "value": "索装",
+      "position": 1
+    },
+    {
+      "value": "装置",
+      "position": 2
+    },
+    {
+      "value": "置",
+      "position": 3
+    },
+    {
+      "value": "【請求項2】",
+      "position": 4
+    },
+    {
+      "value": "検索",
+      "position": 5
+    },
+    {
+      "value": "索シ",
+      "position": 6
+    },
+    {
+      "value": "シス",
+      "position": 7
+    },
+    {
+      "value": "ステ",
+      "position": 8
+    },
+    {
+      "value": "テム",
+      "position": 9
+    },
+    {
+      "value": "ム",
+      "position": 10
+    }
+  ]
+]
+tokenize TokenYaBigram "検索装置【請求項２】検索システム" NormalizerAuto --mode GET
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  [
+    {
+      "value": "検索",
+      "position": 0
+    },
+    {
+      "value": "装置",
+      "position": 2
+    },
+    {
+      "value": "【請求項2】",
+      "position": 4
+    },
+    {
+      "value": "検索",
+      "position": 5
+    },
+    {
+      "value": "シス",
+      "position": 7
+    },
+    {
+      "value": "テム",
+      "position": 9
+    }
+  ]
+]

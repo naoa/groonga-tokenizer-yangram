@@ -1,0 +1,59 @@
+register tokenizers/yangram
+[[0,0.0,0.0],true]
+table_create known_phrases TABLE_PAT_KEY ShortText
+[[0,0.0,0.0],true]
+load --table known_phrases
+[
+{"_key": "cde"}
+]
+[[0,0.0,0.0],1]
+tokenize TokenYaBigram "cdef bcdef あいcdefうえ" NormalizerAuto --mode ADD
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  [
+    {
+      "value": "cde",
+      "position": 0
+    },
+    {
+      "value": "f",
+      "position": 1
+    },
+    {
+      "value": "bcdef",
+      "position": 2
+    },
+    {
+      "value": " あ",
+      "position": 3
+    },
+    {
+      "value": "あい",
+      "position": 4
+    },
+    {
+      "value": "い",
+      "position": 5
+    },
+    {
+      "value": "cde",
+      "position": 6
+    },
+    {
+      "value": "f",
+      "position": 7
+    },
+    {
+      "value": "うえ",
+      "position": 8
+    },
+    {
+      "value": "え",
+      "position": 9
+    }
+  ]
+]

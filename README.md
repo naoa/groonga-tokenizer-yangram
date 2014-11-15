@@ -245,6 +245,57 @@ index b12217d..1ffa726 100644
          int tokenizer_name_length;
 ```
 
+### Known phrase
+
+検索時、更新時において``known_phrases``テーブルのキーはひとまとまりにしてトークナイズします。上記のトークナイザーすべてで``known_phrases``テーブルがあるときのみ有効になります。  
+見出しタグや必ず切り出したい既知のフレーズを登録しておくことにより、検索ノイズの低減や頻出トークン数の低減を図ることができます。
+パトリシアトライのLCPサーチを利用しているため、``known_phrases``テーブルのキーの種類は``TABLE_PAT_KEY``である必要があります。  
+整合性を保つため、フレーズ対象の語句を追加した場合は、インデックス再構築が必要です。
+
+テーブルは環境変数``GRN_KNOWN_PHRASE_TABLE_NAME``により変更することができます。
+
+インデックス構築速度や有用性を検証中です。
+
+```bash
+table_create known_phrases TABLE_PAT_KEY ShortText
+[[0,0.0,0.0],true]
+load --table known_phrases
+[
+{"_key": "【請求項1】"}
+]
+[[0,0.0,0.0],1]
+tokenize TokenYaBigram "【請求項１】検索装置" NormalizerAuto --mode ADD
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  [
+    {
+      "value": "【請求項1】",
+      "position": 0
+    },
+    {
+      "value": "検索",
+      "position": 1
+    },
+    {
+      "value": "索装",
+      "position": 2
+    },
+    {
+      "value": "装置",
+      "position": 3
+    },
+    {
+      "value": "置",
+      "position": 4
+    }
+  ]
+]
+```
+
 ## Install
 
 Install ``groonga-tokenizer-yangram`` package:

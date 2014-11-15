@@ -1,0 +1,39 @@
+register tokenizers/yangram
+[[0,0.0,0.0],true]
+table_create known_phrases TABLE_PAT_KEY ShortText
+[[0,0.0,0.0],true]
+load --table known_phrases
+[
+{"_key": "cde"}
+]
+[[0,0.0,0.0],1]
+tokenize TokenYaBigramSplitSymbolAlpha "ABCDEFG" NormalizerAuto --mode ADD
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  [
+    {
+      "value": "ab",
+      "position": 0
+    },
+    {
+      "value": "bc",
+      "position": 1
+    },
+    {
+      "value": "cde",
+      "position": 2
+    },
+    {
+      "value": "fg",
+      "position": 3
+    },
+    {
+      "value": "g",
+      "position": 4
+    }
+  ]
+]

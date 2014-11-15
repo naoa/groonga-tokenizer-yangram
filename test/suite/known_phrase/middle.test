@@ -1,0 +1,9 @@
+register tokenizers/yangram
+
+table_create known_phrases TABLE_PAT_KEY ShortText
+load --table known_phrases
+[
+{"_key": "【請求項2】"}
+]
+tokenize TokenYaBigram "検索装置【請求項２】検索システム" NormalizerAuto --mode ADD
+tokenize TokenYaBigram "検索装置【請求項２】検索システム" NormalizerAuto --mode GET

@@ -32,6 +32,9 @@
 #define GRN_STR_CTYPE(c) (c & 0x7f)
 
 #define VGRAM_WORD_TABLE_NAME "vgram_words"
+#define KNOWN_PHRASE_TABLE_NAME "known_phrases"
+
+#define MAX_N_HITS 1024
 
 typedef struct {
   grn_tokenizer_token token;
@@ -50,6 +53,12 @@ typedef struct {
   grn_bool skip_overlap;
   grn_bool use_vgram;
   grn_obj *vgram_table;
+  grn_obj *phrase_table;
+  grn_pat_scan_hit *hits;
+  const char *scan_start;
+  const char *scan_rest;
+  unsigned int nhits;
+  unsigned int current_hit;
 } grn_yangram_tokenizer;
 
 static grn_bool
@@ -96,6 +105,28 @@ is_token_group(grn_yangram_tokenizer *tokenizer, const unsigned char *ctypes)
   } else {
     return GRN_FALSE;
   }
+}
+
+static int
+forward_scan_hit_token_tail(grn_ctx *ctx, grn_yangram_tokenizer *tokenizer,
+                            const unsigned char **token_tail,
+                            unsigned int scan_length)
+{
+  int token_size = 0;
+  unsigned int char_length;
+  unsigned int rest_length = tokenizer->rest_length;
+  const unsigned char *token_top = *token_tail;
+
+  while ((char_length = grn_plugin_charlen(ctx, (char *)*token_tail, rest_length,
+                                           tokenizer->query->encoding))) {
+    token_size++;
+    *token_tail += char_length;
+    rest_length -= char_length;
+    if (*token_tail - token_top >= scan_length) {
+      break;
+    }
+  }
+  return token_size;
 }
 
 static int
@@ -289,7 +320,7 @@ yangram_init(grn_ctx *ctx, int nargs, grn_obj **args, grn_user_data *user_data,
   if (!query) {
     return NULL;
   }
-  if (!(tokenizer = GRN_PLUGIN_MALLOC(ctx,sizeof(grn_yangram_tokenizer)))) {
+  if (!(tokenizer = GRN_PLUGIN_MALLOC(ctx, sizeof(grn_yangram_tokenizer)))) {
     GRN_PLUGIN_ERROR(ctx,GRN_NO_MEMORY_AVAILABLE,
                      "[tokenizer][yangram] "
                      "memory allocation to grn_yangram_tokenizer failed");
@@ -333,6 +364,35 @@ yangram_init(grn_ctx *ctx, int nargs, grn_obj **args, grn_user_data *user_data,
   grn_string_get_normalized(ctx, tokenizer->query->normalized_query,
                             &normalized, &normalized_length_in_bytes,
                             NULL);
+  {
+    const char *phrase_table_name_env;
+    phrase_table_name_env = getenv("GRN_KNOWN_PHRASE_TABLE_NAME");
+
+    if (phrase_table_name_env) {
+      tokenizer->phrase_table = grn_ctx_get(ctx,
+                                            phrase_table_name_env,
+                                            strlen(phrase_table_name_env));
+    } else {
+      tokenizer->phrase_table = grn_ctx_get(ctx,
+                                            KNOWN_PHRASE_TABLE_NAME,
+                                            strlen(KNOWN_PHRASE_TABLE_NAME));
+    }
+    if (tokenizer->phrase_table) {
+      if (!(tokenizer->hits =
+          GRN_PLUGIN_MALLOC(ctx, sizeof(grn_pat_scan_hit) * MAX_N_HITS))) {
+        GRN_PLUGIN_ERROR(ctx,GRN_NO_MEMORY_AVAILABLE,
+                        "[tokenizer][yangram] "
+                        "memory allocation to grn_yangram_tokenizer failed");
+        grn_tokenizer_query_close(ctx, query);
+        return NULL;
+      } else {
+        tokenizer->scan_rest = normalized;
+      }
+    } else {
+     tokenizer->phrase_table = NULL;
+    }
+  }
+
   tokenizer->next = (const unsigned char *)normalized;
   tokenizer->end = tokenizer->next + normalized_length_in_bytes;
   tokenizer->rest_length = tokenizer->end - tokenizer->next;
@@ -360,29 +420,58 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
   unsigned int ctypes_skip_size;
   int char_length = 0;
   grn_tokenizer_status status = 0;
+  grn_bool is_token_hit = GRN_FALSE;
+
+  if (tokenizer->phrase_table) {
+    if (token_top - (const unsigned char *)tokenizer->scan_start > tokenizer->hits[tokenizer->current_hit].offset) {
+      tokenizer->current_hit++;
+    }
+    if (tokenizer->current_hit >= tokenizer->nhits) {
+      tokenizer->scan_start = tokenizer->scan_rest;
+      unsigned int scan_rest_length = tokenizer->end - (const unsigned char *)tokenizer->scan_rest;
+      if (scan_rest_length > 0) {
+        tokenizer->nhits = grn_pat_scan(ctx, (grn_pat *)tokenizer->phrase_table,
+                                        tokenizer->scan_rest,
+                                        scan_rest_length,
+                                        tokenizer->hits, MAX_N_HITS, &(tokenizer->scan_rest));
+        tokenizer->current_hit = 0;
+      }
+    }
+    if (tokenizer->nhits > 0 && tokenizer->current_hit < tokenizer->nhits &&
+        token_top - (const unsigned char *)tokenizer->scan_start == tokenizer->hits[tokenizer->current_hit].offset) {
+      is_token_hit = GRN_TRUE;
+    }
+  }
 
   if (tokenizer->ctypes) {
     token_ctypes = tokenizer->ctypes + tokenizer->ctypes_next;
   } else {
     token_ctypes = NULL;
   }
-  is_token_grouped = is_token_group(tokenizer, token_ctypes);
 
-  if (is_token_grouped) {
-    token_size = forward_grouped_token_tail(ctx, tokenizer, token_ctypes, &token_tail);
-    token_next = token_tail;
+  if (is_token_hit) {
+   token_size = forward_scan_hit_token_tail(ctx, tokenizer, &token_tail,
+                                            tokenizer->hits[tokenizer->current_hit].length);
+   token_next = token_tail;
+   tokenizer->current_hit++;
   } else {
-    token_size = forward_ngram_token_tail(ctx, tokenizer, token_ctypes, &token_tail);
-    char_length = grn_plugin_charlen(ctx, (char *)token_next,
-                                     tokenizer->rest_length,
-                                     tokenizer->query->encoding);
-    token_next += char_length;
+    is_token_grouped = is_token_group(tokenizer, token_ctypes);
+    if (is_token_grouped) {
+      token_size = forward_grouped_token_tail(ctx, tokenizer, token_ctypes, &token_tail);
+      token_next = token_tail;
+    } else {
+      token_size = forward_ngram_token_tail(ctx, tokenizer, token_ctypes, &token_tail);
+      char_length = grn_plugin_charlen(ctx, (char *)token_next,
+                                       tokenizer->rest_length,
+                                       tokenizer->query->encoding);
+      token_next += char_length;
+    }
   }
 
   if (token_top == token_tail || token_next == string_end) {
     ctypes_skip_size = 0;
   } else {
-    if (is_token_grouped) {
+    if (is_token_grouped || is_token_hit) {
       ctypes_skip_size = token_size;
     } else {
       ctypes_skip_size = 1;
@@ -416,7 +505,7 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
     status |= GRN_TOKENIZER_TOKEN_REACH_END;
   }
 
-  if (!is_token_grouped && token_size < tokenizer->ngram_unit) {
+  if (!is_token_grouped && !is_token_hit && token_size < tokenizer->ngram_unit) {
     status |= GRN_TOKENIZER_TOKEN_UNMATURED;
   }
 
@@ -474,9 +563,13 @@ yangram_fin(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
   if (tokenizer->vgram_table) {
     grn_obj_unlink(ctx, tokenizer->vgram_table);
   }
+  if (tokenizer->phrase_table) {
+    grn_obj_unlink(ctx, tokenizer->phrase_table);
+    GRN_PLUGIN_FREE(ctx, tokenizer->hits);
+  }
   grn_tokenizer_query_close(ctx, tokenizer->query);
   grn_tokenizer_token_fin(ctx, &(tokenizer->token));
-  GRN_PLUGIN_FREE(ctx,tokenizer);
+  GRN_PLUGIN_FREE(ctx, tokenizer);
   return NULL;
 }
 
