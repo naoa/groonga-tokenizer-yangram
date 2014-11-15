@@ -37,7 +37,6 @@ typedef struct {
   grn_tokenizer_token token;
   grn_tokenizer_query *query;
   const unsigned char *next;
-  const unsigned char *start;
   const unsigned char *end;
   int rest_length;
   const unsigned char *pushed_token_tail;
@@ -335,7 +334,6 @@ yangram_init(grn_ctx *ctx, int nargs, grn_obj **args, grn_user_data *user_data,
                             &normalized, &normalized_length_in_bytes,
                             NULL);
   tokenizer->next = (const unsigned char *)normalized;
-  tokenizer->start = tokenizer->next;
   tokenizer->end = tokenizer->next + normalized_length_in_bytes;
   tokenizer->rest_length = tokenizer->end - tokenizer->next;
   tokenizer->ctypes =
