@@ -45,7 +45,7 @@
 
 * ADD mode
 
-```
+```bash
 tokenize TokenYaBigram "今日は雨だな" NormalizerAuto --mode ADD
 [
   [
@@ -85,7 +85,7 @@ tokenize TokenYaBigram "今日は雨だな" NormalizerAuto --mode ADD
 
 * GET mode
 
-```
+```bash
 tokenize TokenYaBigram "今日は雨だな" NormalizerAuto --mode GET
 [
   [
@@ -135,7 +135,7 @@ Groonga4.0.7時点では、この強制前方一致検索を有効にするに�
 | Key sum               | 7425198      | 28691883     | 5767474     |
 | Key size              | 172.047MiB   | 684.047MiB   | 136.047MiB  |
 
-```
+```bash
 table_create vgram_words TABLE_HASH_KEY ShortText
 [[0,0.0,0.0],true]
 load --table vgram_words
