@@ -362,7 +362,6 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
   const unsigned char *token_ctypes = NULL;
   unsigned int ctypes_skip_size;
   int char_length = 0;
-  grn_bool is_vgram = GRN_FALSE;
   grn_tokenizer_status status = 0;
 
   if (tokenizer->ctypes) {
@@ -381,14 +380,6 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
                                      tokenizer->rest_length,
                                      tokenizer->query->encoding);
     token_next += char_length;
-    if (tokenizer->use_vgram) {
-      grn_id id;
-      id = grn_table_get(ctx, tokenizer->vgram_table,
-                         (const char *)token_top, token_tail - token_top);
-      if (id) {
-        is_vgram = GRN_TRUE;
-      }
-    }
   }
 
   if (token_top == token_tail || token_next == string_end) {
@@ -402,7 +393,10 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
   }
 
   if (tokenizer->use_vgram){
-    if (is_vgram) {
+    grn_id id;
+    id = grn_table_get(ctx, tokenizer->vgram_table,
+                       (const char *)token_top, token_tail - token_top);
+    if (id) {
       if (token_tail < string_end && !is_group_border(ctx, tokenizer,token_ctypes, token_size)) {
         char_length = grn_plugin_charlen(ctx, (char *)token_tail,
                                          tokenizer->rest_length,
