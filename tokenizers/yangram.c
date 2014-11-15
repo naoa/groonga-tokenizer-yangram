@@ -310,7 +310,7 @@ yangram_init(grn_ctx *ctx, int nargs, grn_obj **args, grn_user_data *user_data,
   tokenizer->use_vgram = use_vgram;
   if (tokenizer->use_vgram) {
     const char *vgram_word_table_name_env;
-    vgram_word_table_name_env = getenv("GRN_YANGRAM_VGRAM_WORD_TABLE_NAME");
+    vgram_word_table_name_env = getenv("GRN_VGRAM_WORD_TABLE_NAME");
 
     if (vgram_word_table_name_env) {
       tokenizer->vgram_table = grn_ctx_get(ctx,
