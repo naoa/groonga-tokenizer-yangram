@@ -387,6 +387,8 @@ yangram_init(grn_ctx *ctx, int nargs, grn_obj **args, grn_user_data *user_data,
         return NULL;
       } else {
         tokenizer->scan_rest = normalized;
+        tokenizer->nhits = 0;
+        tokenizer->current_hit = 0;
       }
     } else {
      tokenizer->phrase_table = NULL;
@@ -423,7 +425,9 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
   grn_bool is_token_hit = GRN_FALSE;
 
   if (tokenizer->phrase_table) {
-    if (token_top - (const unsigned char *)tokenizer->scan_start > tokenizer->hits[tokenizer->current_hit].offset) {
+    if (tokenizer->nhits > 0 &&
+        token_top - (const unsigned char *)tokenizer->scan_start >
+        tokenizer->hits[tokenizer->current_hit].offset) {
       tokenizer->current_hit++;
     }
     if (tokenizer->current_hit >= tokenizer->nhits) {
