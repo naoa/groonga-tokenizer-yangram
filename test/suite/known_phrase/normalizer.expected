@@ -1,0 +1,61 @@
+register tokenizers/yangram
+[[0,0.0,0.0],true]
+table_create known_phrases TABLE_PAT_KEY ShortText --normalizer NormalizerAuto
+[[0,0.0,0.0],true]
+load --table known_phrases
+[
+{"_key": "【請求項１】"}
+]
+[[0,0.0,0.0],1]
+tokenize TokenYaBigram "【請求項１】検索装置" NormalizerAuto --mode ADD
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  [
+    {
+      "value": "【請求項1】",
+      "position": 0
+    },
+    {
+      "value": "検索",
+      "position": 1
+    },
+    {
+      "value": "索装",
+      "position": 2
+    },
+    {
+      "value": "装置",
+      "position": 3
+    },
+    {
+      "value": "置",
+      "position": 4
+    }
+  ]
+]
+tokenize TokenYaBigram "【請求項１】検索装置" NormalizerAuto --mode GET
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  [
+    {
+      "value": "【請求項1】",
+      "position": 0
+    },
+    {
+      "value": "検索",
+      "position": 1
+    },
+    {
+      "value": "装置",
+      "position": 3
+    }
+  ]
+]
