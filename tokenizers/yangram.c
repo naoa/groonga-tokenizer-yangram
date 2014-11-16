@@ -382,7 +382,7 @@ yangram_init(grn_ctx *ctx, int nargs, grn_obj **args, grn_user_data *user_data,
           GRN_PLUGIN_MALLOC(ctx, sizeof(grn_pat_scan_hit) * MAX_N_HITS))) {
         GRN_PLUGIN_ERROR(ctx,GRN_NO_MEMORY_AVAILABLE,
                         "[tokenizer][yangram] "
-                        "memory allocation to grn_yangram_tokenizer failed");
+                        "memory allocation to grn_pat_scan_hit failed");
         grn_tokenizer_query_close(ctx, query);
         return NULL;
       } else {
