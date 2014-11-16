@@ -6,3 +6,4 @@ load --table known_phrases
 {"_key": "cde"}
 ]
 tokenize TokenYaBigramSplitSymbolAlpha "ABCDEFG" NormalizerAuto --mode ADD
+tokenize TokenYaBigramSplitSymbolAlpha "ABCDEFG" NormalizerAuto --mode GET

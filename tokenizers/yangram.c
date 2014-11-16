@@ -203,10 +203,18 @@ forward_ngram_token_tail(grn_ctx *ctx, grn_yangram_tokenizer *tokenizer,
     while (token_size < tokenizer->ngram_unit &&
            (char_length = grn_plugin_charlen(ctx, (char *)*token_tail, rest_length,
                                              tokenizer->query->encoding))) {
+      if (tokenizer->phrase_table) {
+        if (tokenizer->nhits > 0 && tokenizer->current_hit < tokenizer->nhits &&
+            *token_tail - (const unsigned char *)tokenizer->scan_start == tokenizer->hits[tokenizer->current_hit].offset) {
+          break;
+        }
+      }
+
       if (ctypes) {
         if (!tokenizer->ignore_blank && GRN_STR_ISBLANK(*ctypes)) {
           break;
         }
+       
         ctypes++;
         if ((tokenizer->split_alpha == GRN_FALSE &&
             GRN_STR_CTYPE(*ctypes) == GRN_CHAR_ALPHA) ||
@@ -227,13 +235,19 @@ forward_ngram_token_tail(grn_ctx *ctx, grn_yangram_tokenizer *tokenizer,
 
 static grn_bool
 is_group_border(GNUC_UNUSED grn_ctx *ctx, grn_yangram_tokenizer *tokenizer,
-                    const unsigned char *ctypes, int token_size)
+                const unsigned char *token_tail, const unsigned char *ctypes, int token_size)
 {
   if (ctypes) {
     ctypes = ctypes + token_size;
   }
   if (ctypes) {
     if (is_token_group(tokenizer, ctypes)) {
+      return GRN_TRUE;
+    }
+  }
+  if (tokenizer->phrase_table) {
+    if (tokenizer->nhits > 0 && tokenizer->current_hit < tokenizer->nhits &&
+        token_tail - (const unsigned char *)tokenizer->scan_start == tokenizer->hits[tokenizer->current_hit].offset) {
       return GRN_TRUE;
     }
   }
@@ -487,7 +501,8 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
     id = grn_table_get(ctx, tokenizer->vgram_table,
                        (const char *)token_top, token_tail - token_top);
     if (id) {
-      if (token_tail < string_end && !is_group_border(ctx, tokenizer,token_ctypes, token_size)) {
+      if (token_tail < string_end &&
+          !is_group_border(ctx, tokenizer, token_tail, token_ctypes, token_size)) {
         char_length = grn_plugin_charlen(ctx, (char *)token_tail,
                                          tokenizer->rest_length,
                                          tokenizer->query->encoding);
@@ -530,7 +545,7 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
       if (token_tail <= tokenizer->pushed_token_tail) {
         status |= GRN_TOKENIZER_TOKEN_SKIP;
       } else {
-        if (!is_group_border(ctx, tokenizer, token_ctypes, token_size)) {
+        if (!is_group_border(ctx, tokenizer, token_tail, token_ctypes, token_size)) {
           status |= GRN_TOKENIZER_TOKEN_SKIP;
         }
       }

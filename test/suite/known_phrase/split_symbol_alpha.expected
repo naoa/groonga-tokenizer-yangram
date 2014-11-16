@@ -20,7 +20,7 @@ tokenize TokenYaBigramSplitSymbolAlpha "ABCDEFG" NormalizerAuto --mode ADD
       "position": 0
     },
     {
-      "value": "bc",
+      "value": "b",
       "position": 1
     },
     {
@@ -34,6 +34,28 @@ tokenize TokenYaBigramSplitSymbolAlpha "ABCDEFG" NormalizerAuto --mode ADD
     {
       "value": "g",
       "position": 4
+    }
+  ]
+]
+tokenize TokenYaBigramSplitSymbolAlpha "ABCDEFG" NormalizerAuto --mode GET
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  [
+    {
+      "value": "ab",
+      "position": 0
+    },
+    {
+      "value": "cde",
+      "position": 2
+    },
+    {
+      "value": "fg",
+      "position": 3
     }
   ]
 ]

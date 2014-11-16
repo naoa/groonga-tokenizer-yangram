@@ -1,0 +1,69 @@
+register tokenizers/yangram
+[[0,0.0,0.0],true]
+table_create known_phrases TABLE_PAT_KEY ShortText
+[[0,0.0,0.0],true]
+load --table known_phrases
+[
+{"_key": "def"}
+]
+[[0,0.0,0.0],1]
+tokenize TokenYaTrigramSplitSymbolAlpha "AABCDEFG" NormalizerAuto --mode ADD
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  [
+    {
+      "value": "aab",
+      "position": 0
+    },
+    {
+      "value": "abc",
+      "position": 1
+    },
+    {
+      "value": "bc",
+      "position": 2
+    },
+    {
+      "value": "c",
+      "position": 3
+    },
+    {
+      "value": "def",
+      "position": 4
+    },
+    {
+      "value": "g",
+      "position": 5
+    }
+  ]
+]
+tokenize TokenYaTrigramSplitSymbolAlpha "AABCDEFG" NormalizerAuto --mode GET
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  [
+    {
+      "value": "aab",
+      "position": 0
+    },
+    {
+      "value": "abc",
+      "position": 1
+    },
+    {
+      "value": "def",
+      "position": 4
+    },
+    {
+      "value": "g",
+      "position": 5
+    }
+  ]
+]

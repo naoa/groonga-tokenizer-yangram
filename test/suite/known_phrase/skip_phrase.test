@@ -1,0 +1,9 @@
+register tokenizers/yangram
+
+table_create known_phrases TABLE_PAT_KEY ShortText
+load --table known_phrases
+[
+{"_key": "def"}
+]
+tokenize TokenYaTrigramSplitSymbolAlpha "AABCDEFG" NormalizerAuto --mode ADD
+tokenize TokenYaTrigramSplitSymbolAlpha "AABCDEFG" NormalizerAuto --mode GET
