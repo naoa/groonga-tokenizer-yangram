@@ -254,63 +254,6 @@ is_group_border(GNUC_UNUSED grn_ctx *ctx, grn_yangram_tokenizer *tokenizer,
   return GRN_FALSE;
 }
 
-/*
-static grn_bool
-is_next_token_blank(GNUC_UNUSED grn_ctx *ctx, GNUC_UNUSED grn_yangram_tokenizer *tokenizer,
-                    const unsigned char *ctypes,
-                    int token_size)
-{
-  if (ctypes) {
-    ctypes = ctypes + token_size;
-  }
-  if (ctypes) {
-    if (GRN_STR_ISBLANK(*--ctypes)) {
-      return GRN_TRUE;
-    }
-  }
-  return GRN_FALSE;
-}
-*/
-
-/*
-static grn_bool
-is_token_all_same(grn_ctx *ctx, grn_yangram_tokenizer *tokenizer,
-                  const unsigned char *token_top,
-                  int token_size)
-{
-  unsigned int char_length;
-  unsidned int rest_length;
-  const unsigned char *token_before = token_top;
-
-  int i = 0;
-
-  if ((char_length = grn_plugin_charlen(ctx, (char *)token_top, rest_length,
-                                       tokenizer->query->encoding))) {
-    token_top += char_length;
-    rest_length -= char_length;
-    i = 1;
-    while (i < token_size &&
-      (char_length = grn_plugin_charlen(ctx, (char *)token_top, rest_length,
-                                        tokenizer->query->encoding))) {
-      if (token_top + char_length &&
-          !memcmp(token_before, token_top, char_length)){
-        break;
-      }
-      token_before = token_top;
-      token_top += char_length;
-      rest_length -= char_length;
-      i++;
-    }
-  }
-
-  if (i == token_size) {
-    return GRN_TRUE;
-  }
-
-  return GRN_FALSE;
-}
-*/
-
 static grn_obj *
 yangram_init(grn_ctx *ctx, int nargs, grn_obj **args, grn_user_data *user_data,
              unsigned short ngram_unit, grn_bool ignore_blank,
