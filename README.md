@@ -5,7 +5,7 @@
 原則、ビルトインのTokenBigramトークナイザー等と同様のルールで文字列をトークナイズします。
 それに加え、以下の機能をカスタマイズしています。
 
-### Overlap Skip
+### ``Skip Overlap``
 
 * ``TokenYaBigram``
 * ``TokenYaBigramIgnoreBlank``
@@ -110,12 +110,12 @@ tokenize TokenYaBigram "今日は雨だな" NormalizerAuto --mode GET
 ]
 ```
 
-### Variable Ngram
+### ``Variable Ngram``
 
 * ``TokenYaVgram``
 * ``TokenYaVgramSplitSymbolAlpha``
 
-検索時、更新時において``vgram_words``テーブルのキーに含まれるBigramトークンを前に伸ばしてTrigramにします。
+``vgram_words``テーブルのキーに含まれるBigramトークンを前に伸ばしてTrigramにします。
 出現頻度が高いBigramトークンのみをあらかじめ``vgram_words``テーブルに格納しておくことで、キーの種類、キーサイズの増大を抑えつつ、検索速度向上に効果的なトークンのみをTrigramにすることができます。   
 なお、検索クエリの末尾で後ろに伸ばすことができず、Trigramにする対象のBigramトークン単体で検索される場合は強制的に前方一致検索になります。  
 Groonga4.0.7時点では、この強制前方一致検索を有効にするには、Groonga本体にパッチを当てる必要があります。  
@@ -245,23 +245,31 @@ index b12217d..1ffa726 100644
          int tokenizer_name_length;
 ```
 
-### Known phrase
+### ``Known phrase``
 
-検索時、更新時において``known_phrases``テーブルのキーはひとまとまりにしてトークナイズします。上記のトークナイザーすべてで``known_phrases``テーブルがあるときのみ有効になります。  
+``known_phrases``テーブルのキーはひとまとまりにしてトークナイズします。上記のトークナイザーすべてで``known_phrases``テーブルがあるときのみ有効になります。  
 見出しタグや必ず切り出したい既知のフレーズを登録しておくことにより、検索ノイズの低減や頻出トークン数の低減を図ることができます。
 パトリシアトライのLCPサーチを利用しているため、``known_phrases``テーブルのキーの種類は``TABLE_PAT_KEY``である必要があります。  
 整合性を保つため、フレーズ対象の語句を追加した場合は、インデックス再構築が必要です。
 
 テーブルは環境変数``GRN_KNOWN_PHRASE_TABLE_NAME``により変更することができます。
 
-インデックス構築速度や有用性を検証中です。
+* Wikipedia(ja)で検索対象のカテゴリ1000件をフレーズ登録して検索
+
+|                       | TokenYaBigram (Phraseあり) | TokenYaBigram (Phraseなし) |
+|:----------------------|---------------------------:|---------------------------:|
+| Hits                  | 112265                     | 112378                     |
+| Searching time (Avg)  | 0.0014 sec                 | 0.0325 sec                 |
+| Offline Indexing time | 2180 sec                   | 1378 sec                   |
+
+登録したフレーズはBigramトークンに比べて出現頻度が極端に小さいので、そのフレーズで検索するときは非常に高速になっています。少しずれている理由は、"日本のコーラスグループ"と"コーラスグループ"など、包含関係にあるフレーズが一方のフレーズで切り出されており他方のフレーズではヒットしないからです。
 
 ```bash
-table_create known_phrases TABLE_PAT_KEY ShortText
+table_create known_phrases TABLE_PAT_KEY ShortText --normalizer NormalizerAuto
 [[0,0.0,0.0],true]
 load --table known_phrases
 [
-{"_key": "【請求項1】"}
+{"_key": "【請求項１】"}
 ]
 [[0,0.0,0.0],1]
 tokenize TokenYaBigram "【請求項１】検索装置" NormalizerAuto --mode ADD
@@ -300,7 +308,7 @@ tokenize TokenYaBigram "【請求項１】検索装置" NormalizerAuto --mode AD
 
 Install ``groonga-tokenizer-yangram`` package:
 
-以下のパッケージにはまだTokenYaVgramは含まれていません。検証後、問題なければ作ります。
+以下のパッケージにはまだTokenYaVgramとKnown Phraseは含まれていません。Groongaにパッチが取り入れられればリリース後に作ります。
 
 ### CentOS
 
