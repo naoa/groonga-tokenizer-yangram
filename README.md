@@ -18,8 +18,7 @@
 検索時のトークン数を減らすことができ、検索処理の速度向上が見込めます。  
 
 トークンの末尾が最終まで到達した場合(``GRN_TOKENIZER_TOKEN_REACH_END``)、
-アルファベットや記号などトークンがグループ化される字種境界および次のトークンが
-フィルターされる場合ではスキップされません。
+アルファベットや記号などトークンがグループ化される字種境界ではスキップされません。
 すなわち、検索クエリ末尾や字種境界では、オーバーラップしているトークンが含まれます。
 これはNgramのNに満たないトークンを含めてしまうと検索性能が劣化するため、
 あえてスキップしないようにしています。
@@ -115,10 +114,10 @@ tokenize TokenYaBigram "今日は雨だな" NormalizerAuto --mode GET
 * ``TokenYaVgram``
 * ``TokenYaVgramSplitSymbolAlpha``
 
-``vgram_words``テーブルのキーに含まれるBigramトークンを前に伸ばしてTrigramにします。
+``vgram_words``テーブルのキーに含まれるBigramトークンを後ろに伸ばしてTrigramにします。
 出現頻度が高いBigramトークンのみをあらかじめ``vgram_words``テーブルに格納しておくことで、キーの種類、キーサイズの増大を抑えつつ、検索速度向上に効果的なトークンのみをTrigramにすることができます。   
 なお、検索クエリの末尾で後ろに伸ばすことができず、Trigramにする対象のBigramトークン単体で検索される場合は強制的に前方一致検索になります。  
-Groonga4.0.7時点では、この強制前方一致検索を有効にするには、Groonga本体にパッチを当てる必要があります。  
+この強制前方一致検索を有効にするためには、Groonga4.0.8以降が必要です。  
 整合性を保つため、Vgram対象の語句を追加した場合は、インデックス再構築が必要です。  
 これらのトークナイザーも上記同様に検索時のみNgramのオーバーラップをできるだけスキップしてトークナイズします。
 
@@ -195,54 +194,6 @@ https://github.com/naoa/groonga-command-token-count
 
 ```
 token_count Terms document_index --token_size 2 --ctype ja --threshold 10000000
-```
-
-* Groongaへのパッチ
-
-```diff
-diff --git a/lib/ii.c b/lib/ii.c
-index e342c73..c8bd83d 100644
---- a/lib/ii.c
-+++ b/lib/ii.c
-@@ -5431,6 +5431,7 @@ token_info_build(grn_ctx *ctx, grn_obj *lexicon, grn_ii *ii, const char *string,
-     tis[(*n)++] = ti;
-     while (token_cursor->status == GRN_TOKEN_DOING) {
-       tid = grn_token_cursor_next(ctx, token_cursor);
-+      if (token_cursor->force_prefix) { ef |= EX_PREFIX; }
-       switch (token_cursor->status) {
-       case GRN_TOKEN_DONE_SKIP :
-         continue;
-```
-
-```diff
-diff --git a/include/groonga/tokenizer.h b/include/groonga/tokenizer.h
-index 400166d..7908af6 100644
---- a/include/groonga/tokenizer.h
-+++ b/include/groonga/tokenizer.h
-@@ -183,6 +183,8 @@ typedef unsigned int grn_tokenizer_status;
- #define GRN_TOKENIZER_TOKEN_SKIP               (0x01L<<4)
- /* GRN_TOKENIZER_TOKEN_SKIP_WITH_POSITION means that the token and postion is skipped */
- #define GRN_TOKENIZER_TOKEN_SKIP_WITH_POSITION (0x01L<<5)
-+/* GRN_TOKENIZER_TOKEN_FORCE_PREIX that the token is used common prefix search */
-+#define GRN_TOKENIZER_TOKEN_FORCE_PREFIX       (0x01L<<6)
-
- /*
-  * GRN_TOKENIZER_CONTINUE and GRN_TOKENIZER_LAST are deprecated. They
-```
-
-```diff
-diff --git a/lib/token_cursor.c b/lib/token_cursor.c
-index b12217d..1ffa726 100644
---- a/lib/token_cursor.c
-+++ b/lib/token_cursor.c
-@@ -212,6 +212,7 @@ grn_token_cursor_next(grn_ctx *ctx, grn_token_cursor *token_cursor)
-         }
-       }
- #undef SKIP_FLAGS
-+      if (status & GRN_TOKENIZER_TOKEN_FORCE_PREFIX) { token_cursor->force_prefix = 1; }
-       if (token_cursor->curr_size == 0) {
-         char tokenizer_name[GRN_TABLE_MAX_KEY_SIZE];
-         int tokenizer_name_length;
 ```
 
 ### ``Known phrase``
@@ -381,7 +332,7 @@ Build this tokenizer.
 
 ## Dependencies
 
-* Groonga >= 4.0.7
+* Groonga >= 4.0.8
 
 Install ``groonga-devel`` in CentOS/Fedora. Install ``libgroonga-dev`` in Debian/Ubuntu.
 
