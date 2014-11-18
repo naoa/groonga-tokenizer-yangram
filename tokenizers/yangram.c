@@ -467,7 +467,7 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
         if (id) {
           maybe_vgram = GRN_TRUE;
         }
-      } else if (token_tail == string_end && tokenizer->query->token_mode == GRN_TOKEN_GET) {
+      } else if (token_tail == string_end && tokenizer->query->tokenize_mode == GRN_TOKENIZE_GET) {
         maybe_vgram = GRN_TRUE;
       }
     }
@@ -481,51 +481,51 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
         token_size++;
         token_tail += char_length;
       } else {
-        if (token_tail == string_end && tokenizer->query->token_mode == GRN_TOKEN_GET) {
-          status |= GRN_TOKENIZER_TOKEN_FORCE_PREFIX;
+        if (token_tail == string_end && tokenizer->query->tokenize_mode == GRN_TOKENIZE_GET) {
+          status |= GRN_TOKEN_FORCE_PREFIX;
         }
       }
     }
   }
 
   if (token_top == token_tail || token_next == string_end) {
-    status |= GRN_TOKENIZER_TOKEN_LAST;
+    status |= GRN_TOKEN_LAST;
   }
 
   if (token_tail == string_end) {
-    status |= GRN_TOKENIZER_TOKEN_REACH_END;
+    status |= GRN_TOKEN_REACH_END;
   }
 
   if (!is_token_grouped && !is_token_hit && token_size < tokenizer->ngram_unit) {
-    status |= GRN_TOKENIZER_TOKEN_UNMATURED;
+    status |= GRN_TOKEN_UNMATURED;
   }
 
   if (token_size) {
     if (tokenizer->skip_overlap &&
         is_token_all_blank(ctx, tokenizer, token_top, token_size)) {
-      status |= GRN_TOKENIZER_TOKEN_SKIP_WITH_POSITION;
+      status |= GRN_TOKEN_SKIP_WITH_POSITION;
     }
   }
 
   if (tokenizer->pushed_token_tail &&
       token_top < tokenizer->pushed_token_tail) {
-    status |= GRN_TOKENIZER_TOKEN_OVERLAP;
+    status |= GRN_TOKEN_OVERLAP;
     if (tokenizer->skip_overlap &&
-        !(status & GRN_TOKENIZER_TOKEN_REACH_END) &&
-        !(status & GRN_TOKENIZER_TOKEN_SKIP_WITH_POSITION) &&
-      tokenizer->query->token_mode == GRN_TOKEN_GET) {
+        !(status & GRN_TOKEN_REACH_END) &&
+        !(status & GRN_TOKEN_SKIP_WITH_POSITION) &&
+      tokenizer->query->tokenize_mode == GRN_TOKENIZE_GET) {
       if (token_tail <= tokenizer->pushed_token_tail) {
-        status |= GRN_TOKENIZER_TOKEN_SKIP;
+        status |= GRN_TOKEN_SKIP;
       } else {
         if (!is_group_border(ctx, tokenizer, token_tail, token_ctypes, token_size)) {
-          status |= GRN_TOKENIZER_TOKEN_SKIP;
+          status |= GRN_TOKEN_SKIP;
         }
       }
     }
   }
 
-  if (!(status & GRN_TOKENIZER_TOKEN_SKIP) &&
-      !(status & GRN_TOKENIZER_TOKEN_SKIP_WITH_POSITION)) {
+  if (!(status & GRN_TOKEN_SKIP) &&
+      !(status & GRN_TOKEN_SKIP_WITH_POSITION)) {
     tokenizer->pushed_token_tail = token_tail;
   }
 
