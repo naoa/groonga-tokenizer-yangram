@@ -208,8 +208,10 @@ forward_ngram_token_tail(grn_ctx *ctx, grn_yangram_tokenizer *tokenizer,
            (char_length = grn_plugin_charlen(ctx, (char *)*token_tail, rest_length,
                                              tokenizer->query->encoding))) {
       if (tokenizer->phrase_table) {
-        if (tokenizer->nhits > 0 && tokenizer->current_hit < tokenizer->nhits &&
-            *token_tail - (const unsigned char *)tokenizer->scan_start == tokenizer->hits[tokenizer->current_hit].offset) {
+        if (tokenizer->nhits > 0 &&
+            tokenizer->current_hit < tokenizer->nhits &&
+            *token_tail - (const unsigned char *)tokenizer->scan_start ==
+            tokenizer->hits[tokenizer->current_hit].offset) {
           break;
         }
       }
@@ -250,8 +252,10 @@ is_group_border(GNUC_UNUSED grn_ctx *ctx, grn_yangram_tokenizer *tokenizer,
     }
   }
   if (tokenizer->phrase_table) {
-    if (tokenizer->nhits > 0 && tokenizer->current_hit < tokenizer->nhits &&
-        token_tail - (const unsigned char *)tokenizer->scan_start == tokenizer->hits[tokenizer->current_hit].offset) {
+    if (tokenizer->nhits > 0 &&
+        tokenizer->current_hit < tokenizer->nhits &&
+        token_tail - (const unsigned char *)tokenizer->scan_start ==
+        tokenizer->hits[tokenizer->current_hit].offset) {
       return GRN_TRUE;
     }
   }
@@ -402,8 +406,10 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
         tokenizer->current_hit = 0;
       }
     }
-    if (tokenizer->nhits > 0 && tokenizer->current_hit < tokenizer->nhits &&
-        token_top - (const unsigned char *)tokenizer->scan_start == tokenizer->hits[tokenizer->current_hit].offset) {
+    if (tokenizer->nhits > 0 &&
+        tokenizer->current_hit < tokenizer->nhits &&
+        token_top - (const unsigned char *)tokenizer->scan_start ==
+        tokenizer->hits[tokenizer->current_hit].offset) {
       is_token_hit = GRN_TRUE;
     }
   }
@@ -467,7 +473,8 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
         if (id) {
           maybe_vgram = GRN_TRUE;
         }
-      } else if (token_tail == string_end && tokenizer->query->tokenize_mode == GRN_TOKENIZE_GET) {
+      } else if (token_tail == string_end &&
+                 tokenizer->query->tokenize_mode == GRN_TOKENIZE_GET) {
         maybe_vgram = GRN_TRUE;
       }
     }
@@ -481,7 +488,8 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
         token_size++;
         token_tail += char_length;
       } else {
-        if (token_tail == string_end && tokenizer->query->tokenize_mode == GRN_TOKENIZE_GET) {
+        if (token_tail == string_end &&
+            tokenizer->query->tokenize_mode == GRN_TOKENIZE_GET) {
           status |= GRN_TOKEN_FORCE_PREFIX;
         }
       }
