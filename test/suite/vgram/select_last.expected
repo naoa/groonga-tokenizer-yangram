@@ -4,10 +4,9 @@ table_create vgram_words TABLE_HASH_KEY ShortText
 [[0,0.0,0.0],true]
 load --table vgram_words
 [
-{"_key": "雨だ"},
-{"_key": "雨"}
+{"_key": "雨だ"}
 ]
-[[0,0.0,0.0],2]
+[[0,0.0,0.0],1]
 table_create Memos TABLE_NO_KEY
 [[0,0.0,0.0],true]
 column_create Memos content COLUMN_SCALAR ShortText

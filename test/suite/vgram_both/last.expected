@@ -8,7 +8,7 @@ load --table vgram_words
 {"_key": "雨"}
 ]
 [[0,0.0,0.0],2]
-tokenize TokenYaVgram "今日は雨だ" NormalizerAuto --mode ADD
+tokenize TokenYaVgramBoth "今日は雨だ" NormalizerAuto --mode ADD
 [
   [
     0,
@@ -25,7 +25,7 @@ tokenize TokenYaVgram "今日は雨だ" NormalizerAuto --mode ADD
       "position": 1
     },
     {
-      "value": "は雨",
+      "value": "は雨だ",
       "position": 2
     },
     {
@@ -38,7 +38,7 @@ tokenize TokenYaVgram "今日は雨だ" NormalizerAuto --mode ADD
     }
   ]
 ]
-tokenize TokenYaVgram "今日は雨だ" NormalizerAuto --mode GET
+tokenize TokenYaVgramBoth "今日は雨だ" NormalizerAuto --mode GET
 [
   [
     0,
@@ -51,16 +51,12 @@ tokenize TokenYaVgram "今日は雨だ" NormalizerAuto --mode GET
       "position": 0
     },
     {
-      "value": "は雨",
+      "value": "は雨だ",
       "position": 2
-    },
-    {
-      "value": "雨だ",
-      "position": 3
     }
   ]
 ]
-tokenize TokenYaVgram "今日は雨" NormalizerAuto --mode ADD
+tokenize TokenYaVgramBoth "今日は雨" NormalizerAuto --mode ADD
 [
   [
     0,
@@ -86,5 +82,5 @@ tokenize TokenYaVgram "今日は雨" NormalizerAuto --mode ADD
     }
   ]
 ]
-tokenize TokenYaVgram "今日は雨" NormalizerAuto --mode GET
+tokenize TokenYaVgramBoth "今日は雨" NormalizerAuto --mode GET
 [[0,0.0,0.0],[{"value":"今日","position":0},{"value":"は雨","position":2}]]

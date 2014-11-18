@@ -3,8 +3,7 @@ register tokenizers/yangram
 table_create vgram_words TABLE_HASH_KEY ShortText
 load --table vgram_words
 [
-{"_key": "雨だ"},
-{"_key": "雨"}
+{"_key": "雨だ"}
 ]
 
 table_create Memos TABLE_NO_KEY

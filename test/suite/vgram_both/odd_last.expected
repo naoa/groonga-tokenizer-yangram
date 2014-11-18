@@ -1,0 +1,57 @@
+register tokenizers/yangram
+[[0,0.0,0.0],true]
+table_create vgram_words TABLE_HASH_KEY ShortText
+[[0,0.0,0.0],true]
+load --table vgram_words
+[
+{"_key": "機関"}
+]
+[[0,0.0,0.0],1]
+tokenize TokenYaVgramBoth "た政府機関" NormalizerAuto --mode ADD
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  [
+    {
+      "value": "た政",
+      "position": 0
+    },
+    {
+      "value": "政府",
+      "position": 1
+    },
+    {
+      "value": "府機関",
+      "position": 2
+    },
+    {
+      "value": "機関",
+      "position": 3
+    },
+    {
+      "value": "関",
+      "position": 4
+    }
+  ]
+]
+tokenize TokenYaVgramBoth "た政府機関" NormalizerAuto --mode GET
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  [
+    {
+      "value": "た政",
+      "position": 0
+    },
+    {
+      "value": "府機関",
+      "position": 2
+    }
+  ]
+]

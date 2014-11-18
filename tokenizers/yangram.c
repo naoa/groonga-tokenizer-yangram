@@ -36,6 +36,10 @@
 
 #define MAX_N_HITS 1024
 
+#define NGRAM 0
+#define VGRAM 1
+#define VGRAM_BOTH 2
+
 typedef struct {
   grn_tokenizer_token token;
   grn_tokenizer_query *query;
@@ -51,7 +55,7 @@ typedef struct {
   grn_bool split_alpha;
   grn_bool split_digit;
   grn_bool skip_overlap;
-  grn_bool use_vgram;
+  unsigned short use_vgram;
   grn_obj *vgram_table;
   grn_obj *phrase_table;
   grn_pat_scan_hit *hits;
@@ -258,7 +262,7 @@ static grn_obj *
 yangram_init(grn_ctx *ctx, int nargs, grn_obj **args, grn_user_data *user_data,
              unsigned short ngram_unit, grn_bool ignore_blank,
              grn_bool split_symbol, grn_bool split_alpha, grn_bool split_digit,
-             grn_bool skip_overlap, grn_bool use_vgram)
+             grn_bool skip_overlap, unsigned short use_vgram)
 {
   grn_tokenizer_query *query;
   unsigned int normalize_flags =
@@ -294,7 +298,7 @@ yangram_init(grn_ctx *ctx, int nargs, grn_obj **args, grn_user_data *user_data,
   tokenizer->split_alpha = split_alpha;
   tokenizer->split_digit = split_digit;
   tokenizer->use_vgram = use_vgram;
-  if (tokenizer->use_vgram) {
+  if (tokenizer->use_vgram > 0) {
     const char *vgram_word_table_name_env;
     vgram_word_table_name_env = getenv("GRN_VGRAM_WORD_TABLE_NAME");
 
@@ -439,11 +443,36 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
     }
   }
 
-  if (tokenizer->use_vgram){
+  if (tokenizer->use_vgram > 0 && !is_token_grouped) {
+    grn_bool maybe_vgram = GRN_FALSE;
+
     grn_id id;
     id = grn_table_get(ctx, tokenizer->vgram_table,
                        (const char *)token_top, token_tail - token_top);
     if (id) {
+      maybe_vgram = GRN_TRUE;
+    }
+
+    if (tokenizer->use_vgram == VGRAM_BOTH && !maybe_vgram) {
+      if (token_tail < string_end &&
+          !is_group_border(ctx, tokenizer, token_tail, token_ctypes, token_size)) {
+        grn_id id;
+        const unsigned char *token_next_tail;
+        char_length = grn_plugin_charlen(ctx, (char *)token_tail,
+                                         tokenizer->rest_length,
+                                         tokenizer->query->encoding);
+        token_next_tail = token_tail + char_length;
+        id = grn_table_get(ctx, tokenizer->vgram_table,
+                           (const char *)token_next, token_next_tail - token_next);
+        if (id) {
+          maybe_vgram = GRN_TRUE;
+        }
+      } else if (token_tail == string_end && tokenizer->query->token_mode == GRN_TOKEN_GET) {
+        maybe_vgram = GRN_TRUE;
+      }
+    }
+
+    if (maybe_vgram) {
       if (token_tail < string_end &&
           !is_group_border(ctx, tokenizer, token_tail, token_ctypes, token_size)) {
         char_length = grn_plugin_charlen(ctx, (char *)token_tail,
@@ -538,49 +567,61 @@ yangram_fin(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
 static grn_obj *
 yabigram_init(grn_ctx * ctx, int nargs, grn_obj **args, grn_user_data *user_data)
 {
-  return yangram_init(ctx, nargs, args, user_data, 2, 0, 0, 0, 0, 1, 0);
+  return yangram_init(ctx, nargs, args, user_data, 2, 0, 0, 0, 0, 1, NGRAM);
 }
 
 static grn_obj *
 yabigram_ib_init(grn_ctx * ctx, int nargs, grn_obj **args, grn_user_data *user_data)
 {
-  return yangram_init(ctx, nargs, args, user_data, 2, 1, 0, 0, 0, 1, 0);
+  return yangram_init(ctx, nargs, args, user_data, 2, 1, 0, 0, 0, 1, NGRAM);
 }
 
 static grn_obj *
 yabigram_sa_init(grn_ctx * ctx, int nargs, grn_obj **args, grn_user_data *user_data)
 {
-  return yangram_init(ctx, nargs, args, user_data, 2, 0, 1, 1, 0, 1, 0);
+  return yangram_init(ctx, nargs, args, user_data, 2, 0, 1, 1, 0, 1, NGRAM);
 }
 
 static grn_obj *
 yatrigram_init(grn_ctx * ctx, int nargs, grn_obj **args, grn_user_data *user_data)
 {
-  return yangram_init(ctx, nargs, args, user_data, 3, 0, 0, 0, 0, 1, 0);
+  return yangram_init(ctx, nargs, args, user_data, 3, 0, 0, 0, 0, 1, NGRAM);
 }
 
 static grn_obj *
 yatrigram_ib_init(grn_ctx * ctx, int nargs, grn_obj **args, grn_user_data *user_data)
 {
-  return yangram_init(ctx, nargs, args, user_data, 3, 1, 0, 0, 0, 1, 0);
+  return yangram_init(ctx, nargs, args, user_data, 3, 1, 0, 0, 0, 1, NGRAM);
 }
 
 static grn_obj *
 yatrigram_sa_init(grn_ctx * ctx, int nargs, grn_obj **args, grn_user_data *user_data)
 {
-  return yangram_init(ctx, nargs, args, user_data, 3, 0, 1, 1, 0, 1, 0);
+  return yangram_init(ctx, nargs, args, user_data, 3, 0, 1, 1, 0, 1, NGRAM);
 }
 
 static grn_obj *
 yavgram_init(grn_ctx * ctx, int nargs, grn_obj **args, grn_user_data *user_data)
 {
-  return yangram_init(ctx, nargs, args, user_data, 2, 0, 0, 0, 0, 1, 1);
+  return yangram_init(ctx, nargs, args, user_data, 2, 0, 0, 0, 0, 1, VGRAM);
 }
 
 static grn_obj *
 yavgram_sa_init(grn_ctx * ctx, int nargs, grn_obj **args, grn_user_data *user_data)
 {
-  return yangram_init(ctx, nargs, args, user_data, 2, 0, 1, 1, 0, 1, 1);
+  return yangram_init(ctx, nargs, args, user_data, 2, 0, 1, 1, 0, 1, VGRAM);
+}
+
+static grn_obj *
+yavgramb_init(grn_ctx * ctx, int nargs, grn_obj **args, grn_user_data *user_data)
+{
+  return yangram_init(ctx, nargs, args, user_data, 2, 0, 0, 0, 0, 1, VGRAM_BOTH);
+}
+
+static grn_obj *
+yavgramb_sa_init(grn_ctx * ctx, int nargs, grn_obj **args, grn_user_data *user_data)
+{
+  return yangram_init(ctx, nargs, args, user_data, 2, 0, 1, 1, 0, 1, VGRAM_BOTH);
 }
 
 grn_rc
@@ -617,6 +658,12 @@ GRN_PLUGIN_REGISTER(grn_ctx *ctx)
 
   rc = grn_tokenizer_register(ctx, "TokenYaVgramSplitSymbolAlpha", -1,
                               yavgram_sa_init, yangram_next, yangram_fin);
+
+  rc = grn_tokenizer_register(ctx, "TokenYaVgramBoth", -1,
+                              yavgramb_init, yangram_next, yangram_fin);
+
+  rc = grn_tokenizer_register(ctx, "TokenYaVgramBothSplitSymbolAlpha", -1,
+                              yavgramb_sa_init, yangram_next, yangram_fin);
 
   return ctx->rc;
 }

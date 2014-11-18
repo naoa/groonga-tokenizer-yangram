@@ -17,11 +17,9 @@
 検索時のみNgramのオーバーラップをスキップしてトークナイズします。  
 検索時のトークン数を減らすことができ、検索処理の速度向上が見込めます。  
 
-トークンの末尾が最終まで到達した場合(``GRN_TOKENIZER_TOKEN_REACH_END``)、
-アルファベットや記号などトークンがグループ化される字種境界ではスキップされません。
+トークンの末尾が最終まで到達した場合、アルファベットや記号などトークンがグループ化される字種境界ではスキップされません。
 すなわち、検索クエリ末尾や字種境界では、オーバーラップしているトークンが含まれます。
-これはNgramのNに満たないトークンを含めてしまうと検索性能が劣化するため、
-あえてスキップしないようにしています。
+これはNgramのNに満たないトークンを含めてしまうと検索性能が劣化するため、あえてスキップしないようにしています。
 
 オーバーラップスキップを有効にし、且つ、``IgnoreBlank``が有効でない場合、通常のTokenBigram等と異なり空白が含まれた状態でトークナイズされます。これはオーバーラップをスキップすると空白の有無をうまく区別することができないためです。このため、通常のTokenBigram等よりも若干インデックスサイズが増えます。なお、空白のみのトークンは除去されます。
 
@@ -123,26 +121,35 @@ tokenize TokenYaBigram "今日は雨だな" NormalizerAuto --mode GET
 
 テーブルは環境変数``GRN_VGRAM_WORD_TABLE_NAME``により変更することができます。
 
+* ``TokenYaVgramBoth``
+* ``TokenYaVgramBothSplitSymbolAlpha``
+
+１つ後のBigramトークンが``vgram_words``テーブルのキーに含まれるBigramトークンであった場合もBigramトークンを後ろに伸ばしてTrigramにします。こうすると、検索クエリ末尾の場合も末尾から1つ前に伸ばしたトークンが採用されるため、検索速度のさらなる高速化が望めます。なお、このトークナイザーでは、検索クエリ末尾の場合に次のBigramトークンを判定することができないため、``vgram_words``テーブルのキーに含まれないトークンであっても全て強制前方一致検索になります。ただ、前方一致検索になったとしても、トライのキー探索にかかる時間 << ポスティングリスト探索にかかる時間のため、こちらのほうが速度的メリットが大きいことがあります。
+
+なお、Vgramトークナイザーは、文書サイズが大きくBigramトークンのポスティングリストが非常に長くなっている場合に、検索クエリが3文字以上の場合に高速化できるということであって、検索クエリが2文字以下の場合の高速化には繋がりません。キーがばらけたとしても、2文字で前方一致検索して全部のリストを辿るのであれば結局同じかむしろ若干遅くなります。
+
 * Wikipedia(ja)で出現頻度上位2000個のbigramトークンを登録して1000回検索
 
-|                       | TokenYaVgram | TokenTrigram | TokenBigram |
-|:----------------------|-------------:|-------------:|------------:|
-| Hits                  | 112378       | 112378       | 112378      |
-| Searching time (Avg)  | 0.0166 sec   | 0.0126 sec   | 0.0444 sec  |
-| Offline Indexing time | 1592 sec     | 2150 sec     | 1449 sec    |
-| Index size            | 8.474GiB     | 9.009GiB     | 7.580GiB    |
-| Key sum               | 7425198      | 28691883     | 5767474     |
-| Key size              | 172.047MiB   | 684.047MiB   | 136.047MiB  |
+|                       | TokenYaVgramBoth | TokenYaVgram | TokenTrigram | TokenBigram |
+|:----------------------|-----------------:|-------------:|-------------:|------------:|
+| Hits                  | 112378           | 112378       | 112378       | 112378      |
+| Searching time (Avg)  | 0.0065 sec       | 0.0166 sec   | 0.0126 sec   | 0.0444 sec  |
+| Offline Indexing time | 1818 sec         | 1592 sec     | 2150 sec     | 1449 sec    |
+| Index size            | 8.566GiB         | 8.474GiB     | 9.009GiB     | 7.580GiB    |
+| Key sum               | 8560779          | 7425198      | 28691883     | 5767474     |
+| Key size              | 200.047MiB       | 172.047MiB   | 684.047MiB   | 136.047MiB  |
 
 ```bash
+register tokenizers/yangram
+[[0,0.0,0.0],true]
 table_create vgram_words TABLE_HASH_KEY ShortText
 [[0,0.0,0.0],true]
 load --table vgram_words
 [
-{"_key": "画像"}
+{"_key": "処理"}
 ]
 [[0,0.0,0.0],1]
-tokenize TokenYaVgram "画像処理" NormalizerAuto --mode ADD
+tokenize TokenYaVgramBoth "画像処理装置" NormalizerAuto --mode ADD
 [
   [
     0,
@@ -151,24 +158,32 @@ tokenize TokenYaVgram "画像処理" NormalizerAuto --mode ADD
   ],
   [
     {
-      "value": "画像処",
+      "value": "画像",
       "position": 0
     },
     {
-      "value": "像処",
+      "value": "像処理",
       "position": 1
     },
     {
-      "value": "処理",
+      "value": "処理装",
       "position": 2
     },
     {
-      "value": "理",
+      "value": "理装",
       "position": 3
+    },
+    {
+      "value": "装置",
+      "position": 4
+    },
+    {
+      "value": "置",
+      "position": 5
     }
   ]
 ]
-tokenize TokenYaVgram "画像処理" NormalizerAuto --mode GET
+tokenize TokenYaVgramBoth "画像処理装置" NormalizerAuto --mode GET
 [
   [
     0,
@@ -177,12 +192,16 @@ tokenize TokenYaVgram "画像処理" NormalizerAuto --mode GET
   ],
   [
     {
-      "value": "画像処",
+      "value": "画像",
       "position": 0
     },
     {
-      "value": "処理",
+      "value": "処理装",
       "position": 2
+    },
+    {
+      "value": "装置",
+      "position": 4
     }
   ]
 ]

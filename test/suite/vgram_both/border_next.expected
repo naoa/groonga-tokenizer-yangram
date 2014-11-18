@@ -1,0 +1,45 @@
+register tokenizers/yangram
+[[0,0.0,0.0],true]
+table_create vgram_words TABLE_HASH_KEY ShortText
+[[0,0.0,0.0],true]
+load --table vgram_words
+[
+{"_key": "情報"}
+]
+[[0,0.0,0.0],1]
+tokenize TokenYaVgramBoth "の情報A処理" NormalizerAuto --mode ADD
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  [
+    {
+      "value": "の情報",
+      "position": 0
+    },
+    {
+      "value": "情報",
+      "position": 1
+    },
+    {
+      "value": "報",
+      "position": 2
+    },
+    {
+      "value": "a",
+      "position": 3
+    },
+    {
+      "value": "処理",
+      "position": 4
+    },
+    {
+      "value": "理",
+      "position": 5
+    }
+  ]
+]
+tokenize TokenYaVgramBoth "情報" NormalizerAuto --mode GET
+[[0,0.0,0.0],[{"value":"情報","position":0}]]
