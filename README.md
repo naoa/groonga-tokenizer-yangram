@@ -278,8 +278,6 @@ tokenize TokenYaBigram "【請求項１】検索装置" NormalizerAuto --mode AD
 
 Install ``groonga-tokenizer-yangram`` package:
 
-以下のパッケージにはまだTokenYaVgramとKnown Phraseは含まれていません。Groongaにパッチが取り入れられればリリース後に作ります。
-
 ### CentOS
 
 * CentOS6
