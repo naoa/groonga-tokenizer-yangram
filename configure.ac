@@ -1,5 +1,5 @@
 AC_PREREQ(2.59)
-AC_INIT([groonga], 1.0.1, [naoya@createfield.com])
+AC_INIT([groonga], 1.0.2, [naoya@createfield.com])
 
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_SRCDIR([tokenizers/yangram.c])

@@ -52,6 +52,8 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/groonga/plugins/*/*.a
 %{_libdir}/pkgconfig/groonga-tokenizer-yangram.pc
 
 %changelog
+* Mon Dec 15 2014 Naoya Murakami <naoya@createfield.com> - 1.0.2-1
+- Add TokenYaVgram etc
 * Sun Sep 21 2014 Naoya Murakami <naoya@createfield.com> - 1.0.1-1
 - Simplify
 * Sun Aug 17 2014 Naoya Murakami <naoya@createfield.com> - 1.0.0-1
