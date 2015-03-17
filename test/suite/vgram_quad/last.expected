@@ -1,0 +1,154 @@
+register tokenizers/yangram
+[[0,0.0,0.0],true]
+table_create vgram_words TABLE_HASH_KEY ShortText
+[[0,0.0,0.0],true]
+load --table vgram_words
+[
+{"_key": "は雨だ"},
+{"_key": "は雨"}
+]
+[[0,0.0,0.0],2]
+tokenize TokenYaVgramQuad "今日は雨だな" NormalizerAuto --mode ADD
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  [
+    {
+      "value": "今日",
+      "position": 0
+    },
+    {
+      "value": "日は雨",
+      "position": 1
+    },
+    {
+      "value": "は雨だな",
+      "position": 2
+    },
+    {
+      "value": "雨だ",
+      "position": 3
+    },
+    {
+      "value": "だな",
+      "position": 4
+    },
+    {
+      "value": "な",
+      "position": 5
+    }
+  ]
+]
+tokenize TokenYaVgramQuad "今日は雨だな" NormalizerAuto --mode GET
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  [
+    {
+      "value": "今日",
+      "position": 0
+    },
+    {
+      "value": "は雨だな",
+      "position": 2
+    }
+  ]
+]
+tokenize TokenYaVgramQuad "今日は雨だ" NormalizerAuto --mode ADD
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  [
+    {
+      "value": "今日",
+      "position": 0
+    },
+    {
+      "value": "日は雨",
+      "position": 1
+    },
+    {
+      "value": "は雨だ",
+      "position": 2
+    },
+    {
+      "value": "雨だ",
+      "position": 3
+    },
+    {
+      "value": "だ",
+      "position": 4
+    }
+  ]
+]
+tokenize TokenYaVgramQuad "今日は雨だ" NormalizerAuto --mode GET
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  [
+    {
+      "value": "今日",
+      "position": 0
+    },
+    {
+      "value": "は雨だ",
+      "position": 2
+    }
+  ]
+]
+tokenize TokenYaVgramQuad "今日は雨" NormalizerAuto --mode ADD
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  [
+    {
+      "value": "今日",
+      "position": 0
+    },
+    {
+      "value": "日は雨",
+      "position": 1
+    },
+    {
+      "value": "は雨",
+      "position": 2
+    },
+    {
+      "value": "雨",
+      "position": 3
+    }
+  ]
+]
+tokenize TokenYaVgramQuad "今日は雨" NormalizerAuto --mode GET
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  [
+    {
+      "value": "今日",
+      "position": 0
+    },
+    {
+      "value": "日は雨",
+      "position": 1
+    }
+  ]
+]

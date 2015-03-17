@@ -1,0 +1,10 @@
+register tokenizers/yangram
+
+table_create vgram_words TABLE_HASH_KEY ShortText
+load --table vgram_words
+[
+{"_key": "デー"},
+{"_key": "データ"}
+]
+tokenize TokenYaVgramQuad "データベA処理" NormalizerAuto --mode ADD
+tokenize TokenYaVgramQuad "データ" NormalizerAuto --mode GET

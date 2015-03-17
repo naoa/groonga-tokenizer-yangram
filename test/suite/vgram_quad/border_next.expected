@@ -1,0 +1,50 @@
+register tokenizers/yangram
+[[0,0.0,0.0],true]
+table_create vgram_words TABLE_HASH_KEY ShortText
+[[0,0.0,0.0],true]
+load --table vgram_words
+[
+{"_key": "デー"},
+{"_key": "データ"}
+]
+[[0,0.0,0.0],2]
+tokenize TokenYaVgramQuad "データベA処理" NormalizerAuto --mode ADD
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  [
+    {
+      "value": "データベ",
+      "position": 0
+    },
+    {
+      "value": "ータ",
+      "position": 1
+    },
+    {
+      "value": "タベ",
+      "position": 2
+    },
+    {
+      "value": "ベ",
+      "position": 3
+    },
+    {
+      "value": "a",
+      "position": 4
+    },
+    {
+      "value": "処理",
+      "position": 5
+    },
+    {
+      "value": "理",
+      "position": 6
+    }
+  ]
+]
+tokenize TokenYaVgramQuad "データ" NormalizerAuto --mode GET
+[[0,0.0,0.0],[{"value":"データ","position":0}]]

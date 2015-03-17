@@ -1,0 +1,14 @@
+register tokenizers/yangram
+
+table_create vgram_words TABLE_HASH_KEY ShortText
+load --table vgram_words
+[
+{"_key": "は雨だ"},
+{"_key": "は雨"}
+]
+tokenize TokenYaVgramQuad "今日は雨だな" NormalizerAuto --mode ADD
+tokenize TokenYaVgramQuad "今日は雨だな" NormalizerAuto --mode GET
+tokenize TokenYaVgramQuad "今日は雨だ" NormalizerAuto --mode ADD
+tokenize TokenYaVgramQuad "今日は雨だ" NormalizerAuto --mode GET
+tokenize TokenYaVgramQuad "今日は雨" NormalizerAuto --mode ADD
+tokenize TokenYaVgramQuad "今日は雨" NormalizerAuto --mode GET

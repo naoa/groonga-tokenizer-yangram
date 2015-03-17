@@ -1,0 +1,42 @@
+register tokenizers/yangram
+[[0,0.0,0.0],true]
+table_create vgram_words TABLE_HASH_KEY ShortText
+[[0,0.0,0.0],true]
+load --table vgram_words
+[
+{"_key": "置は高"},
+{"_key": "置は"}
+]
+[[0,0.0,0.0],2]
+tokenize TokenYaVgramQuad "装置は高速" NormalizerAuto --mode ADD
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  [
+    {
+      "value": "装置は",
+      "position": 0
+    },
+    {
+      "value": "置は高速",
+      "position": 1
+    },
+    {
+      "value": "は高",
+      "position": 2
+    },
+    {
+      "value": "高速",
+      "position": 3
+    },
+    {
+      "value": "速",
+      "position": 4
+    }
+  ]
+]
+tokenize TokenYaVgramQuad "置は高速" NormalizerAuto --mode GET
+[[0,0.0,0.0],[{"value":"置は高速","position":0}]]
