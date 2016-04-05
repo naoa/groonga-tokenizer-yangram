@@ -592,9 +592,9 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
                                token_top, token_tail - token_top, (void **)&pvalue, &added);
                   if (added) {
                     *pvalue = EXPANDED_TOKEN;
-                   } else if (*pvalue != USED_TOKEN) {
-                     *pvalue = EXPANDED_TOKEN;
-                   }
+                  } else if (*pvalue != USED_TOKEN) {
+                    *pvalue = EXPANDED_TOKEN;
+                  }
                 }
               }
 
