@@ -1,0 +1,95 @@
+config_set tokenizer_yangram.append_occured_vgram_token 1
+[[0,0.0,0.0],true]
+config_get tokenizer_yangram.append_occured_vgram_token
+[[0,0.0,0.0],"1"]
+register tokenizers/yangram
+[[0,0.0,0.0],true]
+table_create vgram_words TABLE_HASH_KEY ShortText
+[[0,0.0,0.0],true]
+load --table vgram_words
+[
+{"_key": "機関"}
+]
+[[0,0.0,0.0],1]
+tokenize TokenYaVgramBoth "政府機関の政府が機関" NormalizerAuto --mode ADD
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  [
+    {
+      "value": "政府",
+      "position": 0,
+      "force_prefix": false
+    },
+    {
+      "value": "府機関",
+      "position": 1,
+      "force_prefix": false
+    },
+    {
+      "value": "機関の",
+      "position": 2,
+      "force_prefix": false
+    },
+    {
+      "value": "関の",
+      "position": 3,
+      "force_prefix": false
+    },
+    {
+      "value": "の政",
+      "position": 4,
+      "force_prefix": false
+    },
+    {
+      "value": "政府",
+      "position": 5,
+      "force_prefix": false
+    },
+    {
+      "value": "府が",
+      "position": 6,
+      "force_prefix": false
+    },
+    {
+      "value": "が機関",
+      "position": 7,
+      "force_prefix": false
+    },
+    {
+      "value": "機関",
+      "position": 8,
+      "force_prefix": false
+    },
+    {
+      "value": "関",
+      "position": 9,
+      "force_prefix": false
+    },
+    {
+      "value": "￰",
+      "position": 10,
+      "force_prefix": false
+    },
+    {
+      "value": "府機",
+      "position": 11,
+      "force_prefix": false
+    },
+    {
+      "value": "機関",
+      "position": 12,
+      "force_prefix": false
+    },
+    {
+      "value": "が機",
+      "position": 13,
+      "force_prefix": false
+    }
+  ]
+]
+tokenize TokenYaVgramBoth "府機" NormalizerAuto --mode GET
+[[0,0.0,0.0],[{"value":"府機","position":0,"force_prefix":false}]]

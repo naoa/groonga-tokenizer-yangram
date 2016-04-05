@@ -41,6 +41,14 @@
 #define VGRAM_BOTH 2
 #define VGRAM_QUAD 3
 
+#define GRN_TOKENIZER_END_MARK_UTF8       "\xEF\xBF\xB0"
+#define GRN_TOKENIZER_END_MARK_UTF8_LEN   3
+
+static grn_hash *occur_hash = NULL;
+
+#define EXPANDED_TOKEN 1
+#define USED_TOKEN 2
+
 typedef struct {
   grn_tokenizer_token token;
   grn_tokenizer_query *query;
@@ -64,6 +72,10 @@ typedef struct {
   const char *scan_rest;
   unsigned int nhits;
   unsigned int current_hit;
+  unsigned int n_tokens;
+  grn_bool is_end;
+  grn_bool is_additional_tokens;
+  grn_hash_cursor *cur;
 } grn_yangram_tokenizer;
 
 static grn_bool
@@ -368,6 +380,10 @@ yangram_init(grn_ctx *ctx, int nargs, grn_obj **args, grn_user_data *user_data,
 
   tokenizer->pushed_token_tail = NULL;
   tokenizer->ctypes_next = 0;
+  tokenizer->n_tokens = 0;
+
+  tokenizer->is_end = GRN_FALSE;
+  tokenizer->is_additional_tokens = GRN_FALSE;
 
   return NULL;
 }
@@ -388,6 +404,55 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
   int char_length = 0;
   grn_tokenizer_status status = 0;
   grn_bool is_token_hit = GRN_FALSE;
+
+  /* append occurrence vgram tokens to be able to exact match */
+  if (occur_hash &&
+      (tokenizer->query->tokenize_mode == GRN_TOKENIZE_ADD ||
+       tokenizer->query->tokenize_mode == GRN_TOKENIZE_DELETE)) {
+    if (tokenizer->is_end) {
+      grn_tokenizer_token_push(ctx,
+                               &(tokenizer->token),
+                               GRN_TOKENIZER_END_MARK_UTF8,
+                               GRN_TOKENIZER_END_MARK_UTF8_LEN,
+                               status);
+      tokenizer->is_end = GRN_FALSE;
+      tokenizer->is_additional_tokens = GRN_TRUE;
+      tokenizer->cur = grn_hash_cursor_open(ctx, occur_hash,
+                                           NULL, 0, NULL, 0, 0, -1, 0);
+      return NULL;
+    } else if (tokenizer->is_additional_tokens) {
+      void *key;
+      unsigned int key_size = 0;
+      unsigned int token_size = 0;
+      grn_id tid;
+      int *value;
+      while ((tid = grn_hash_cursor_next(ctx, tokenizer->cur))) {
+        grn_hash_cursor_get_key_value(ctx, tokenizer->cur,
+                                      &key, &key_size,
+                                      (void **)&value);
+        grn_hash_delete(ctx, occur_hash, key, key_size, NULL);
+        if (*value == EXPANDED_TOKEN) {
+          token_size = key_size;
+          *value = 0;
+          break;
+        } else {
+          token_size = 0;
+          *value = 0;
+        }
+      }
+
+      if (!tid) {
+        grn_hash_cursor_close(ctx, tokenizer->cur);
+        status |= GRN_TOKEN_LAST;
+      }
+      grn_tokenizer_token_push(ctx,
+                               &(tokenizer->token),
+                               (const char *)key,
+                               token_size,
+                               status);
+      return NULL;
+    }
+  }
 
   if (tokenizer->phrase_table) {
     if (tokenizer->nhits > 0 &&
@@ -459,6 +524,7 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
       maybe_vgram = GRN_TRUE;
     }
 
+    /* check next token is vgram or not */
     if (tokenizer->use_vgram >= VGRAM_BOTH && !maybe_vgram) {
       if (token_tail < string_end &&
           !is_group_border(ctx, tokenizer, token_tail, token_ctypes, token_size)) {
@@ -479,7 +545,26 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
       }
     }
 
+    /* expand token */
     if (maybe_vgram) {
+
+      /* append occurrence vgram original token */
+      if (occur_hash&&
+          (tokenizer->query->tokenize_mode == GRN_TOKENIZE_ADD ||
+           tokenizer->query->tokenize_mode == GRN_TOKENIZE_DELETE)) {
+        if (token_size >= tokenizer->ngram_unit) {
+          int *pvalue;
+          int added;
+          grn_hash_add(ctx, occur_hash,
+                       token_top, token_tail - token_top, (void **)&pvalue, &added);
+          if (added) {
+            *pvalue = EXPANDED_TOKEN;
+          } else if (*pvalue != USED_TOKEN) {
+            *pvalue = EXPANDED_TOKEN;
+          }
+        }
+      }
+
       if (token_tail < string_end &&
           !is_group_border(ctx, tokenizer, token_tail, token_ctypes, token_size)) {
         char_length = grn_plugin_charlen(ctx, (char *)token_tail,
@@ -495,6 +580,24 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
             id = grn_table_get(ctx, tokenizer->vgram_table,
                                (const char *)token_top, token_tail - token_top);
             if (id) {
+
+              /* append occurrence vgram original token */
+              if (occur_hash &&
+                  (tokenizer->query->tokenize_mode == GRN_TOKENIZE_ADD ||
+                   tokenizer->query->tokenize_mode == GRN_TOKENIZE_DELETE)) {
+                if (token_size >= tokenizer->ngram_unit) {
+                  int *pvalue;
+                  int added;
+                  grn_hash_add(ctx, occur_hash,
+                               token_top, token_tail - token_top, (void **)&pvalue, &added);
+                  if (added) {
+                    *pvalue = EXPANDED_TOKEN;
+                  } else if (*pvalue != USED_TOKEN) {
+                    *pvalue = EXPANDED_TOKEN;
+                  }
+                }
+              }
+
               char_length = grn_plugin_charlen(ctx, (char *)token_tail,
                                                tokenizer->rest_length,
                                                tokenizer->query->encoding);
@@ -502,18 +605,50 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
               token_tail += char_length;
             }
           } else {
+            /* add failed expand token flag */
+            if (occur_hash &&
+                (tokenizer->query->tokenize_mode == GRN_TOKENIZE_ADD ||
+                 tokenizer->query->tokenize_mode == GRN_TOKENIZE_DELETE)) {
+              int *pvalue;
+              int added;
+              grn_hash_add(ctx, occur_hash,
+                           token_top, token_tail - token_top, (void **)&pvalue, &added);
+              *pvalue = USED_TOKEN;
+            }
+
             if (token_tail == string_end &&
               tokenizer->query->tokenize_mode == GRN_TOKENIZE_GET) {
-              status |= GRN_TOKEN_FORCE_PREFIX;
+              if (occur_hash && tokenizer->n_tokens == 0 &&
+                  token_size >= tokenizer->ngram_unit) {
+                /* can exact match by added occurrence vgram tokens */
+              } else {
+                status |= GRN_TOKEN_FORCE_PREFIX;
+              }
             }
           }
         }
 
 
       } else {
+        /* add failed expand token flag */
+        if (occur_hash &&
+            (tokenizer->query->tokenize_mode == GRN_TOKENIZE_ADD ||
+             tokenizer->query->tokenize_mode == GRN_TOKENIZE_DELETE)) {
+          int *pvalue;
+          int added;
+          grn_hash_add(ctx, occur_hash,
+                       token_top, token_tail - token_top, (void **)&pvalue, &added);
+          *pvalue = EXPANDED_TOKEN;
+        }
+
         if (token_tail == string_end &&
             tokenizer->query->tokenize_mode == GRN_TOKENIZE_GET) {
-          status |= GRN_TOKEN_FORCE_PREFIX;
+          if (occur_hash && tokenizer->n_tokens == 0 &&
+              token_size >= tokenizer->ngram_unit) {
+            /* can exact match by added occurrence vgram tokens */
+          } else {
+            status |= GRN_TOKEN_FORCE_PREFIX;
+          }
         }
       }
     }
@@ -558,11 +693,24 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
   if (!(status & GRN_TOKEN_SKIP) &&
       !(status & GRN_TOKEN_SKIP_WITH_POSITION)) {
     tokenizer->pushed_token_tail = token_tail;
+    tokenizer->n_tokens++;
   }
 
   tokenizer->next = token_next;
   tokenizer->rest_length = string_end - token_next;
   tokenizer->ctypes_next = tokenizer->ctypes_next + ctypes_skip_size;
+
+  /* pending to add occurrence vgram tokens */
+  if (occur_hash &&
+      (tokenizer->query->tokenize_mode == GRN_TOKENIZE_ADD ||
+       tokenizer->query->tokenize_mode == GRN_TOKENIZE_DELETE)) {
+    if (status & GRN_TOKEN_LAST) {
+      if (grn_hash_size(ctx, occur_hash)) {
+        tokenizer->is_end = GRN_TRUE;
+        status &= ~GRN_TOKEN_LAST;
+      }
+    }
+  }
 
   grn_tokenizer_token_push(ctx,
                            &(tokenizer->token),
@@ -670,6 +818,29 @@ yavgramq_d_init(grn_ctx * ctx, int nargs, grn_obj **args, grn_user_data *user_da
 grn_rc
 GRN_PLUGIN_INIT(grn_ctx *ctx)
 {
+  const char *value;
+  uint32_t value_size;
+  grn_config_get(ctx,
+                 "tokenizer_yangram.append_occured_vgram_token",
+                 strlen("tokenizer_yangram.append_occured_vgram_token"),
+                 &value, &value_size);
+  if (ctx->rc) {
+    return ctx->rc;
+  }
+
+  if (value) {
+    occur_hash = grn_hash_create(ctx, NULL,
+                                 GRN_TABLE_MAX_KEY_SIZE,
+                                 0,
+                                 GRN_OBJ_TABLE_HASH_KEY|GRN_OBJ_KEY_VAR_SIZE);
+    if (!occur_hash) {
+      GRN_PLUGIN_ERROR(ctx, GRN_NO_MEMORY_AVAILABLE,
+                       "[tokenizer][yangram] "
+                       "couldn't create temp table");
+      return ctx->rc;
+    }
+  }
+
   return ctx->rc;
 }
 
@@ -720,6 +891,9 @@ GRN_PLUGIN_REGISTER(grn_ctx *ctx)
 grn_rc
 GRN_PLUGIN_FIN(GNUC_UNUSED grn_ctx *ctx)
 {
-
+  if (occur_hash) {
+    grn_hash_close(ctx, occur_hash);
+    occur_hash = NULL;
+  }
   return GRN_SUCCESS;
 }
