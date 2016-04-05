@@ -613,7 +613,7 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
               int added;
               grn_hash_add(ctx, occur_hash,
                            token_top, token_tail - token_top, (void **)&pvalue, &added);
-              *pvalue = 2;
+              *pvalue = USED_TOKEN;
             }
 
             if (token_tail == string_end &&
