@@ -1,0 +1,12 @@
+config_set tokenizer_yangram.append_occured_vgram_token 1
+config_get tokenizer_yangram.append_occured_vgram_token
+
+register tokenizers/yangram
+
+table_create vgram_words TABLE_HASH_KEY ShortText
+load --table vgram_words
+[
+{"_key": "機関"}
+]
+tokenize TokenYaVgramBoth "政府機関の政府が機関" NormalizerAuto --mode ADD
+tokenize TokenYaVgramBoth "府機" NormalizerAuto --mode GET
