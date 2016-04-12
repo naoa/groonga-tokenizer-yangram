@@ -10,15 +10,18 @@ tokenize TokenYaBigram "今日は雨だ" NormalizerAuto --mode GET
   [
     {
       "value": "今日",
-      "position": 0
+      "position": 0,
+      "force_prefix": false
     },
     {
       "value": "は雨",
-      "position": 2
+      "position": 2,
+      "force_prefix": false
     },
     {
       "value": "雨だ",
-      "position": 3
+      "position": 3,
+      "force_prefix": false
     }
   ]
 ]

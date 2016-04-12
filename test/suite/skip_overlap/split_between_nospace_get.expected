@@ -10,15 +10,18 @@ tokenize TokenYaBigramSplitSymbolAlpha "Thisis" NormalizerAuto --mode GET
   [
     {
       "value": "th",
-      "position": 0
+      "position": 0,
+      "force_prefix": false
     },
     {
       "value": "is",
-      "position": 2
+      "position": 2,
+      "force_prefix": false
     },
     {
       "value": "is",
-      "position": 4
+      "position": 4,
+      "force_prefix": false
     }
   ]
 ]

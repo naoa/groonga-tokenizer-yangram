@@ -1,0 +1,13 @@
+#@omit "ommited."
+#export GRN_VGRAM_ADD_ALL_EXPAND_TOKEN=1
+
+register tokenizers/yangram
+
+table_create vgram_words TABLE_HASH_KEY ShortText
+load --table vgram_words
+[
+{"_key": "データ"},
+{"_key": "デー"}
+]
+tokenize TokenYaVgramQuad "動画データス" NormalizerAuto --mode ADD
+tokenize TokenYaVgramQuad "動画データス" NormalizerAuto --mode GET

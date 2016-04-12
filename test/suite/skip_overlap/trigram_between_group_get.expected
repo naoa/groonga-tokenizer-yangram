@@ -10,15 +10,18 @@ tokenize TokenYaTrigram "つつきAきつつ" NormalizerAuto --mode GET
   [
     {
       "value": "つつき",
-      "position": 0
+      "position": 0,
+      "force_prefix": false
     },
     {
       "value": "a",
-      "position": 3
+      "position": 3,
+      "force_prefix": false
     },
     {
       "value": "きつつ",
-      "position": 4
+      "position": 4,
+      "force_prefix": false
     }
   ]
 ]

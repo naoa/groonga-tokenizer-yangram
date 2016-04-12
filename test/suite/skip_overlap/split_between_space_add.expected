@@ -10,31 +10,38 @@ tokenize TokenYaBigramSplitSymbolAlpha "This is" NormalizerAuto --mode ADD
   [
     {
       "value": "th",
-      "position": 0
+      "position": 0,
+      "force_prefix": false
     },
     {
       "value": "hi",
-      "position": 1
+      "position": 1,
+      "force_prefix": false
     },
     {
       "value": "is",
-      "position": 2
+      "position": 2,
+      "force_prefix": false
     },
     {
       "value": "s ",
-      "position": 3
+      "position": 3,
+      "force_prefix": false
     },
     {
       "value": " i",
-      "position": 4
+      "position": 4,
+      "force_prefix": false
     },
     {
       "value": "is",
-      "position": 5
+      "position": 5,
+      "force_prefix": false
     },
     {
       "value": "s",
-      "position": 6
+      "position": 6,
+      "force_prefix": false
     }
   ]
 ]

@@ -10,19 +10,23 @@ tokenize TokenYaTrigram "今日は、雨だな。" NormalizerAuto --mode GET
   [
     {
       "value": "今日は",
-      "position": 0
+      "position": 0,
+      "force_prefix": false
     },
     {
       "value": "、",
-      "position": 3
+      "position": 3,
+      "force_prefix": false
     },
     {
       "value": "雨だな",
-      "position": 4
+      "position": 4,
+      "force_prefix": false
     },
     {
       "value": "。",
-      "position": 7
+      "position": 7,
+      "force_prefix": false
     }
   ]
 ]

@@ -10,19 +10,23 @@ tokenize TokenYaBigram "This is a pen" NormalizerAuto --mode GET
   [
     {
       "value": "this",
-      "position": 0
+      "position": 0,
+      "force_prefix": false
     },
     {
       "value": "is",
-      "position": 1
+      "position": 1,
+      "force_prefix": false
     },
     {
       "value": "a",
-      "position": 2
+      "position": 2,
+      "force_prefix": false
     },
     {
       "value": "pen",
-      "position": 3
+      "position": 3,
+      "force_prefix": false
     }
   ]
 ]

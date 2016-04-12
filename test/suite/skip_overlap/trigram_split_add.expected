@@ -10,71 +10,88 @@ tokenize TokenYaTrigramSplitSymbolAlpha "Tommorow is rainy" NormalizerAuto --mod
   [
     {
       "value": "tom",
-      "position": 0
+      "position": 0,
+      "force_prefix": false
     },
     {
       "value": "omm",
-      "position": 1
+      "position": 1,
+      "force_prefix": false
     },
     {
       "value": "mmo",
-      "position": 2
+      "position": 2,
+      "force_prefix": false
     },
     {
       "value": "mor",
-      "position": 3
+      "position": 3,
+      "force_prefix": false
     },
     {
       "value": "oro",
-      "position": 4
+      "position": 4,
+      "force_prefix": false
     },
     {
       "value": "row",
-      "position": 5
+      "position": 5,
+      "force_prefix": false
     },
     {
       "value": "ow ",
-      "position": 6
+      "position": 6,
+      "force_prefix": false
     },
     {
       "value": "w i",
-      "position": 7
+      "position": 7,
+      "force_prefix": false
     },
     {
       "value": " is",
-      "position": 8
+      "position": 8,
+      "force_prefix": false
     },
     {
       "value": "is ",
-      "position": 9
+      "position": 9,
+      "force_prefix": false
     },
     {
       "value": "s r",
-      "position": 10
+      "position": 10,
+      "force_prefix": false
     },
     {
       "value": " ra",
-      "position": 11
+      "position": 11,
+      "force_prefix": false
     },
     {
       "value": "rai",
-      "position": 12
+      "position": 12,
+      "force_prefix": false
     },
     {
       "value": "ain",
-      "position": 13
+      "position": 13,
+      "force_prefix": false
     },
     {
       "value": "iny",
-      "position": 14
+      "position": 14,
+      "force_prefix": false
     },
     {
       "value": "ny",
-      "position": 15
+      "position": 15,
+      "force_prefix": false
     },
     {
       "value": "y",
-      "position": 16
+      "position": 16,
+      "force_prefix": false
     }
   ]
 ]

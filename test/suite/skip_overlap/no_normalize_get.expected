@@ -10,19 +10,23 @@ tokenize TokenYaBigram "今日は、雨だな。" --mode GET
   [
     {
       "value": "今日",
-      "position": 0
+      "position": 0,
+      "force_prefix": false
     },
     {
       "value": "は、",
-      "position": 2
+      "position": 2,
+      "force_prefix": false
     },
     {
       "value": "雨だ",
-      "position": 4
+      "position": 4,
+      "force_prefix": false
     },
     {
       "value": "な。",
-      "position": 6
+      "position": 6,
+      "force_prefix": false
     }
   ]
 ]
