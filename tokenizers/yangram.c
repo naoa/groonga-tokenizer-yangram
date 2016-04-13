@@ -66,13 +66,13 @@ typedef struct {
   unsigned int nhits;
   unsigned int current_hit;
   grn_obj *lexicon;
-  grn_ii *ii;
+  grn_obj *ii;
   unsigned int n_documents;
   double skip_overlap_ratio;
 } grn_yangram_tokenizer;
 
 static grn_bool
-find_ii(grn_ctx *ctx, grn_obj *lexicon, grn_ii **ii)
+find_ii(grn_ctx *ctx, grn_obj *lexicon, grn_obj **ii)
 {
   grn_obj **columns;
   grn_obj column_buf;
@@ -85,7 +85,7 @@ find_ii(grn_ctx *ctx, grn_obj *lexicon, grn_ii **ii)
   n_columns = GRN_BULK_VSIZE(&column_buf)/sizeof(grn_obj *);
   for (i = 0; i < n_columns; i++) {
     if (columns[i]->header.type == GRN_COLUMN_INDEX) {
-      *ii = (grn_ii *)columns[i];
+      *ii = columns[i];
       is_found = GRN_TRUE;
       break;
     }
@@ -418,10 +418,10 @@ yangram_init(grn_ctx *ctx, int nargs, grn_obj **args, grn_user_data *user_data,
           {
             char index_name[GRN_TABLE_MAX_KEY_SIZE];
             int index_name_size;
-            index_name_size = grn_obj_name(ctx, (grn_obj *)tokenizer->ii, index_name, GRN_TABLE_MAX_KEY_SIZE);
+            index_name_size = grn_obj_name(ctx, tokenizer->ii, index_name, GRN_TABLE_MAX_KEY_SIZE);
             GRN_LOG(ctx, GRN_LOG_DEBUG, "[tokenizer][yangram] skip_overlap using %.*s", index_name_size, index_name);
           }
-          grn_obj *data_table = grn_ctx_at(ctx, grn_obj_get_range(ctx, (grn_obj *)tokenizer->ii));
+          grn_obj *data_table = grn_ctx_at(ctx, grn_obj_get_range(ctx, tokenizer->ii));
           tokenizer->n_documents = grn_table_size(ctx, data_table);
           grn_obj_unlink(ctx, data_table);
         }
@@ -613,7 +613,7 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
       if (tokenizer->n_documents > 0 && (status & GRN_TOKEN_SKIP)) {
         grn_id tid = grn_table_get(ctx, tokenizer->lexicon, token_top, token_tail - token_top);
         if (tid) {
-          unsigned int estimated_size = grn_ii_estimate_size(ctx, tokenizer->ii, tid);
+          unsigned int estimated_size = grn_ii_estimate_size(ctx, (grn_ii *)tokenizer->ii, tid);
           if ((double) estimated_size / tokenizer->n_documents <= tokenizer->skip_overlap_ratio) {
             status &= ~GRN_TOKEN_SKIP;
           }
