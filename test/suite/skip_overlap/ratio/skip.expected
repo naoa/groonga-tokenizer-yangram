@@ -1,0 +1,47 @@
+register tokenizers/yangram
+[[0,0.0,0.0],true]
+config_set tokenizer.yangram.Terms.skip_overlap_ratio 0.1
+[[0,0.0,0.0],true]
+table_create Terms TABLE_HASH_KEY ShortText   --default_tokenizer TokenYaBigram   --normalizer NormalizerAuto
+[[0,0.0,0.0],true]
+table_create Memos TABLE_NO_KEY
+[[0,0.0,0.0],true]
+column_create Memos content COLUMN_SCALAR ShortText
+[[0,0.0,0.0],true]
+load --table Memos
+[
+{"content": "今日は雨だな"},
+{"content": "明日が雨だな"},
+{"content": "明日が雨だな"},
+{"content": "明日が雨だな"},
+{"content": "明日が雨だな"},
+{"content": "明日が雨だな"}
+]
+[[0,0.0,0.0],6]
+column_create Terms memos_content COLUMN_INDEX|WITH_POSITION Memos content
+[[0,0.0,0.0],true]
+table_tokenize Terms "今日は雨だな" --mode GET
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  [
+    {
+      "value": "今日",
+      "position": 0,
+      "force_prefix": false
+    },
+    {
+      "value": "は雨",
+      "position": 2,
+      "force_prefix": false
+    },
+    {
+      "value": "だな",
+      "position": 4,
+      "force_prefix": false
+    }
+  ]
+]
