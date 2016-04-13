@@ -87,6 +87,7 @@ find_ii(grn_ctx *ctx, grn_obj *lexicon, grn_ii **ii)
     if (columns[i]->header.type == GRN_COLUMN_INDEX) {
       *ii = (grn_ii *)columns[i];
       is_found = GRN_TRUE;
+      break;
     }
   }
   for (i = 0; i < n_columns; i++) {
@@ -414,6 +415,12 @@ yangram_init(grn_ctx *ctx, int nargs, grn_obj **args, grn_user_data *user_data,
       if (value_size) {
         tokenizer->skip_overlap_ratio = atof(value);
         if (find_ii(ctx, tokenizer->lexicon, &(tokenizer->ii))) {
+          {
+            char index_name[GRN_TABLE_MAX_KEY_SIZE];
+            int index_name_size;
+            index_name_size = grn_obj_name(ctx, (grn_obj *)tokenizer->ii, index_name, GRN_TABLE_MAX_KEY_SIZE);
+            GRN_LOG(ctx, GRN_LOG_DEBUG, "[tokenizer][yangram] skip_overlap using %.*s", index_name_size, index_name);
+          }
           grn_obj *data_table = grn_ctx_at(ctx, grn_obj_get_range(ctx, (grn_obj *)tokenizer->ii));
           tokenizer->n_documents = grn_table_size(ctx, data_table);
           grn_obj_unlink(ctx, data_table);
