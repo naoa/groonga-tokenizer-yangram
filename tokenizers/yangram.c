@@ -603,8 +603,7 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
         !(status & GRN_TOKEN_REACH_END) &&
         !(status & GRN_TOKEN_SKIP_WITH_POSITION) &&
       tokenizer->query->tokenize_mode == GRN_TOKENIZE_GET) {
-      /* when before token is longer than equal to current token by vgram */
-      if (token_tail <= tokenizer->pushed_token_tail) {
+      if (token_tail <= tokenizer->pushed_token_tail) { /* need? */
         status |= GRN_TOKEN_SKIP;
       } else {
         if (!is_group_border(ctx, tokenizer, token_tail, token_ctypes, token_size)) {
