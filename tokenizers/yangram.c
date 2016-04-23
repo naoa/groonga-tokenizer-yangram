@@ -1,4 +1,4 @@
-/* Copyright(C) 2014-2016 Naoya Murakami <naoya@createfield.com>
+/* Copyright(C) 2014 Naoya Murakami <naoya@createfield.com>
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -17,7 +17,6 @@
 
 #include <groonga/tokenizer.h>
 
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
@@ -65,37 +64,7 @@ typedef struct {
   const char *scan_rest;
   unsigned int nhits;
   unsigned int current_hit;
-  grn_obj *lexicon;
-  grn_ii *ii;
-  unsigned int n_documents;
-  double skip_overlap_ratio;
 } grn_yangram_tokenizer;
-
-static grn_bool
-find_ii(grn_ctx *ctx, grn_obj *lexicon, grn_ii **ii)
-{
-  grn_obj **columns;
-  grn_obj column_buf;
-  int i, n_columns;
-  grn_bool is_found = GRN_FALSE;
-
-  GRN_PTR_INIT(&column_buf, GRN_OBJ_VECTOR, GRN_ID_NIL);
-  grn_obj_columns(ctx, lexicon, "*", strlen("*"), &column_buf);
-  columns = (grn_obj **)GRN_BULK_HEAD(&column_buf);
-  n_columns = GRN_BULK_VSIZE(&column_buf)/sizeof(grn_obj *);
-  for (i = 0; i < n_columns; i++) {
-    if (columns[i]->header.type == GRN_COLUMN_INDEX) {
-      *ii = (grn_ii *)columns[i];
-      is_found = GRN_TRUE;
-    }
-  }
-  for (i = 0; i < n_columns; i++) {
-    grn_obj_unlink(ctx, columns[i]);
-  }
-  grn_obj_unlink(ctx, &column_buf);
-
-  return is_found;
-}
 
 static grn_bool
 is_token_all_blank(grn_ctx *ctx, grn_yangram_tokenizer *tokenizer,
@@ -105,19 +74,25 @@ is_token_all_blank(grn_ctx *ctx, grn_yangram_tokenizer *tokenizer,
   unsigned int char_length;
   unsigned int rest_length = tokenizer->rest_length;
   int i = 0;
-  grn_bool is_all_blank = GRN_FALSE;
-  while (i < token_size &&
-         (char_length = grn_plugin_isspace(ctx, (char *)token_top,
-                                           rest_length,
-                                           tokenizer->query->encoding))) {
+  if ((char_length = grn_plugin_isspace(ctx, (char *)token_top,
+                                        rest_length,
+                                        tokenizer->query->encoding))) {
+    i = 1;
     token_top += char_length;
     rest_length -= char_length;
-    i++;
+    while (i < token_size &&
+           (char_length = grn_plugin_isspace(ctx, (char *)token_top,
+                                             rest_length,
+                                             tokenizer->query->encoding))) {
+      token_top += char_length;
+      rest_length -= char_length;
+      i++;
+    }
   }
   if (i == token_size) {
-    is_all_blank = GRN_TRUE;
+    return GRN_TRUE;
   }
-  return is_all_blank;
+  return GRN_FALSE;
 }
 
 static grn_bool
@@ -292,7 +267,7 @@ static grn_obj *
 yangram_init(grn_ctx *ctx, int nargs, grn_obj **args, grn_user_data *user_data,
              unsigned short ngram_unit, grn_bool ignore_blank,
              grn_bool split_symbol, grn_bool split_alpha, grn_bool split_digit,
-             unsigned short use_vgram)
+             grn_bool skip_overlap, unsigned short use_vgram)
 {
   grn_tokenizer_query *query;
   unsigned int normalize_flags =
@@ -303,7 +278,7 @@ yangram_init(grn_ctx *ctx, int nargs, grn_obj **args, grn_user_data *user_data,
   unsigned int normalized_length_in_bytes;
   grn_yangram_tokenizer *tokenizer;
 
-  if (ignore_blank) {
+  if (!skip_overlap || ignore_blank) {
     normalize_flags |= GRN_STRING_REMOVE_BLANK;
   }
 
@@ -321,6 +296,7 @@ yangram_init(grn_ctx *ctx, int nargs, grn_obj **args, grn_user_data *user_data,
   user_data->ptr = tokenizer;
   grn_tokenizer_token_init(ctx, &(tokenizer->token));
   tokenizer->query = query;
+  tokenizer->skip_overlap = skip_overlap;
   tokenizer->ignore_blank = ignore_blank;
   tokenizer->ngram_unit = ngram_unit;
   tokenizer->split_symbol = split_symbol;
@@ -390,37 +366,8 @@ yangram_init(grn_ctx *ctx, int nargs, grn_obj **args, grn_user_data *user_data,
   tokenizer->ctypes =
     grn_string_get_types(ctx, tokenizer->query->normalized_query);
 
-  tokenizer->pushed_token_tail = tokenizer->next;
+  tokenizer->pushed_token_tail = NULL;
   tokenizer->ctypes_next = 0;
-
-  tokenizer->skip_overlap = GRN_TRUE;
-  tokenizer->lexicon = args[0];
-  tokenizer->ii = NULL;
-  tokenizer->n_documents = 0;
-  tokenizer->skip_overlap_ratio = 0.0;
-
-  if (tokenizer->query->tokenize_mode == GRN_TOKENIZE_GET) {
-    char name[GRN_TABLE_MAX_KEY_SIZE];
-    int name_size;
-    name_size = grn_obj_name(ctx, tokenizer->lexicon, name, GRN_TABLE_MAX_KEY_SIZE);
-    if (name_size > 0) { 
-      char config_name[GRN_CONFIG_MAX_KEY_SIZE];
-      const char *value;
-      unsigned int value_size;
-      grn_snprintf(config_name, GRN_TABLE_MAX_KEY_SIZE, GRN_TABLE_MAX_KEY_SIZE,
-                   "tokenizer.yangram.%.*s.skip_overlap_ratio",
-                   name_size, name);
-      grn_config_get(ctx, config_name, strlen(config_name), &value, &value_size);
-      if (value_size) {
-        tokenizer->skip_overlap_ratio = atof(value);
-        if (find_ii(ctx, tokenizer->lexicon, &(tokenizer->ii))) {
-          grn_obj *data_table = grn_ctx_at(ctx, grn_obj_get_range(ctx, (grn_obj *)tokenizer->ii));
-          tokenizer->n_documents = grn_table_size(ctx, data_table);
-          grn_obj_unlink(ctx, data_table);
-        }
-      }
-    }
-  }
 
   return NULL;
 }
@@ -585,31 +532,24 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
   }
 
   if (token_size) {
-    if (is_token_all_blank(ctx, tokenizer, token_top, token_size)) {
+    if (tokenizer->skip_overlap &&
+        is_token_all_blank(ctx, tokenizer, token_top, token_size)) {
       status |= GRN_TOKEN_SKIP_WITH_POSITION;
     }
   }
 
-  if (token_top < tokenizer->pushed_token_tail) {
+  if (tokenizer->pushed_token_tail &&
+      token_top < tokenizer->pushed_token_tail) {
     status |= GRN_TOKEN_OVERLAP;
     if (tokenizer->skip_overlap &&
         !(status & GRN_TOKEN_REACH_END) &&
         !(status & GRN_TOKEN_SKIP_WITH_POSITION) &&
       tokenizer->query->tokenize_mode == GRN_TOKENIZE_GET) {
-      if (token_tail <= tokenizer->pushed_token_tail) { /* need? */
+      if (token_tail <= tokenizer->pushed_token_tail) {
         status |= GRN_TOKEN_SKIP;
       } else {
         if (!is_group_border(ctx, tokenizer, token_tail, token_ctypes, token_size)) {
           status |= GRN_TOKEN_SKIP;
-        }
-      }
-      if (tokenizer->n_documents > 0 && (status & GRN_TOKEN_SKIP)) {
-        grn_id tid = grn_table_get(ctx, tokenizer->lexicon, token_top, token_tail - token_top);
-        if (tid) {
-          unsigned int estimated_size = grn_ii_estimate_size(ctx, tokenizer->ii, tid);
-          if ((double) estimated_size / tokenizer->n_documents <= tokenizer->skip_overlap_ratio) {
-            status &= ~GRN_TOKEN_SKIP;
-          }
         }
       }
     }
@@ -658,73 +598,73 @@ yangram_fin(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
 static grn_obj *
 yabigram_init(grn_ctx * ctx, int nargs, grn_obj **args, grn_user_data *user_data)
 {
-  return yangram_init(ctx, nargs, args, user_data, 2, 0, 0, 0, 0, NGRAM);
+  return yangram_init(ctx, nargs, args, user_data, 2, 0, 0, 0, 0, 1, NGRAM);
 }
 
 static grn_obj *
 yabigram_ib_init(grn_ctx * ctx, int nargs, grn_obj **args, grn_user_data *user_data)
 {
-  return yangram_init(ctx, nargs, args, user_data, 2, 1, 0, 0, 0, NGRAM);
+  return yangram_init(ctx, nargs, args, user_data, 2, 1, 0, 0, 0, 1, NGRAM);
 }
 
 static grn_obj *
 yabigram_sa_init(grn_ctx * ctx, int nargs, grn_obj **args, grn_user_data *user_data)
 {
-  return yangram_init(ctx, nargs, args, user_data, 2, 0, 1, 1, 0, NGRAM);
+  return yangram_init(ctx, nargs, args, user_data, 2, 0, 1, 1, 0, 1, NGRAM);
 }
 
 static grn_obj *
 yatrigram_init(grn_ctx * ctx, int nargs, grn_obj **args, grn_user_data *user_data)
 {
-  return yangram_init(ctx, nargs, args, user_data, 3, 0, 0, 0, 0, NGRAM);
+  return yangram_init(ctx, nargs, args, user_data, 3, 0, 0, 0, 0, 1, NGRAM);
 }
 
 static grn_obj *
 yatrigram_ib_init(grn_ctx * ctx, int nargs, grn_obj **args, grn_user_data *user_data)
 {
-  return yangram_init(ctx, nargs, args, user_data, 3, 1, 0, 0, 0, NGRAM);
+  return yangram_init(ctx, nargs, args, user_data, 3, 1, 0, 0, 0, 1, NGRAM);
 }
 
 static grn_obj *
 yatrigram_sa_init(grn_ctx * ctx, int nargs, grn_obj **args, grn_user_data *user_data)
 {
-  return yangram_init(ctx, nargs, args, user_data, 3, 0, 1, 1, 0, NGRAM);
+  return yangram_init(ctx, nargs, args, user_data, 3, 0, 1, 1, 0, 1, NGRAM);
 }
 
 static grn_obj *
 yavgram_init(grn_ctx * ctx, int nargs, grn_obj **args, grn_user_data *user_data)
 {
-  return yangram_init(ctx, nargs, args, user_data, 2, 0, 0, 0, 0, VGRAM);
+  return yangram_init(ctx, nargs, args, user_data, 2, 0, 0, 0, 0, 1, VGRAM);
 }
 
 static grn_obj *
 yavgram_sa_init(grn_ctx * ctx, int nargs, grn_obj **args, grn_user_data *user_data)
 {
-  return yangram_init(ctx, nargs, args, user_data, 2, 0, 1, 1, 0, VGRAM);
+  return yangram_init(ctx, nargs, args, user_data, 2, 0, 1, 1, 0, 1, VGRAM);
 }
 
 static grn_obj *
 yavgramb_init(grn_ctx * ctx, int nargs, grn_obj **args, grn_user_data *user_data)
 {
-  return yangram_init(ctx, nargs, args, user_data, 2, 0, 0, 0, 0, VGRAM_BOTH);
+  return yangram_init(ctx, nargs, args, user_data, 2, 0, 0, 0, 0, 1, VGRAM_BOTH);
 }
 
 static grn_obj *
 yavgramb_sa_init(grn_ctx * ctx, int nargs, grn_obj **args, grn_user_data *user_data)
 {
-  return yangram_init(ctx, nargs, args, user_data, 2, 0, 1, 1, 0, VGRAM_BOTH);
+  return yangram_init(ctx, nargs, args, user_data, 2, 0, 1, 1, 0, 1, VGRAM_BOTH);
 }
 
 static grn_obj *
 yavgramq_init(grn_ctx * ctx, int nargs, grn_obj **args, grn_user_data *user_data)
 {
-  return yangram_init(ctx, nargs, args, user_data, 2, 0, 0, 0, 0, VGRAM_QUAD);
+  return yangram_init(ctx, nargs, args, user_data, 2, 0, 0, 0, 0, 1, VGRAM_QUAD);
 }
 
 static grn_obj *
 yavgramq_d_init(grn_ctx * ctx, int nargs, grn_obj **args, grn_user_data *user_data)
 {
-  return yangram_init(ctx, nargs, args, user_data, 2, 0, 0, 0, 1, VGRAM_QUAD);
+  return yangram_init(ctx, nargs, args, user_data, 2, 0, 0, 0, 1, 1, VGRAM_QUAD);
 }
 
 grn_rc
@@ -736,41 +676,43 @@ GRN_PLUGIN_INIT(grn_ctx *ctx)
 grn_rc
 GRN_PLUGIN_REGISTER(grn_ctx *ctx)
 {
-  grn_tokenizer_register(ctx, "TokenYaBigram", -1,
-                         yabigram_init, yangram_next, yangram_fin);
+  grn_rc rc;
 
-  grn_tokenizer_register(ctx, "TokenYaBigramIgnoreBlank", -1,
-                         yabigram_ib_init, yangram_next, yangram_fin);
+  rc = grn_tokenizer_register(ctx, "TokenYaBigram", -1,
+                              yabigram_init, yangram_next, yangram_fin);
 
-  grn_tokenizer_register(ctx, "TokenYaBigramSplitSymbolAlpha", -1,
-                         yabigram_sa_init, yangram_next, yangram_fin);
+  rc = grn_tokenizer_register(ctx, "TokenYaBigramIgnoreBlank", -1,
+                              yabigram_ib_init, yangram_next, yangram_fin);
 
-  grn_tokenizer_register(ctx, "TokenYaTrigram", -1,
-                         yatrigram_init, yangram_next, yangram_fin);
+  rc = grn_tokenizer_register(ctx, "TokenYaBigramSplitSymbolAlpha", -1,
+                              yabigram_sa_init, yangram_next, yangram_fin);
 
-  grn_tokenizer_register(ctx, "TokenYaTrigramIgnoreBlank", -1,
-                         yatrigram_ib_init, yangram_next, yangram_fin);
+  rc = grn_tokenizer_register(ctx, "TokenYaTrigram", -1,
+                              yatrigram_init, yangram_next, yangram_fin);
 
-  grn_tokenizer_register(ctx, "TokenYaTrigramSplitSymbolAlpha", -1,
-                         yatrigram_sa_init, yangram_next, yangram_fin);
+  rc = grn_tokenizer_register(ctx, "TokenYaTrigramIgnoreBlank", -1,
+                              yatrigram_ib_init, yangram_next, yangram_fin);
 
-  grn_tokenizer_register(ctx, "TokenYaVgram", -1,
-                         yavgram_init, yangram_next, yangram_fin);
+  rc = grn_tokenizer_register(ctx, "TokenYaTrigramSplitSymbolAlpha", -1,
+                              yatrigram_sa_init, yangram_next, yangram_fin);
 
-  grn_tokenizer_register(ctx, "TokenYaVgramSplitSymbolAlpha", -1,
-                         yavgram_sa_init, yangram_next, yangram_fin);
+  rc = grn_tokenizer_register(ctx, "TokenYaVgram", -1,
+                              yavgram_init, yangram_next, yangram_fin);
 
-  grn_tokenizer_register(ctx, "TokenYaVgramBoth", -1,
-                         yavgramb_init, yangram_next, yangram_fin);
+  rc = grn_tokenizer_register(ctx, "TokenYaVgramSplitSymbolAlpha", -1,
+                              yavgram_sa_init, yangram_next, yangram_fin);
 
-  grn_tokenizer_register(ctx, "TokenYaVgramBothSplitSymbolAlpha", -1,
-                         yavgramb_sa_init, yangram_next, yangram_fin);
+  rc = grn_tokenizer_register(ctx, "TokenYaVgramBoth", -1,
+                              yavgramb_init, yangram_next, yangram_fin);
 
-  grn_tokenizer_register(ctx, "TokenYaVgramQuad", -1,
-                         yavgramq_init, yangram_next, yangram_fin);
+  rc = grn_tokenizer_register(ctx, "TokenYaVgramBothSplitSymbolAlpha", -1,
+                              yavgramb_sa_init, yangram_next, yangram_fin);
 
-  grn_tokenizer_register(ctx, "TokenYaVgramQuadSplitDigit", -1,
-                         yavgramq_d_init, yangram_next, yangram_fin);
+  rc = grn_tokenizer_register(ctx, "TokenYaVgramQuad", -1,
+                              yavgramq_init, yangram_next, yangram_fin);
+
+  rc = grn_tokenizer_register(ctx, "TokenYaVgramQuadSplitDigit", -1,
+                              yavgramq_d_init, yangram_next, yangram_fin);
 
   return ctx->rc;
 }

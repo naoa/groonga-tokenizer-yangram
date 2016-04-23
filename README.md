@@ -23,12 +23,6 @@
 
 オーバーラップスキップを有効にし、且つ、``IgnoreBlank``が有効でない場合、通常のTokenBigram等と異なり空白が含まれた状態でトークナイズされます。これはオーバーラップをスキップすると空白の有無をうまく区別することができないためです。このため、通常のTokenBigram等よりも若干インデックスサイズが増えます。なお、空白のみのトークンは除去されます。
 
-config_setコマンドで``tokenizer.yangram.#{lexicon_name}.skip_overlap_ratio`` を少数で設定すると、出現頻度が低いレアトークンはスキップしなくなります。ある程度ドキュメントサイズが大きくなるとレアトークンはできるだけスキップしないほうが検索速度が向上できることが多いです。``GRN_II_CURSOR_SET_MIN_ENABLE``環境変数を設定するとより効果的です。
-
-```
-config_set tokenizer.yangram.Terms.skip_overlap_ratio 0.01
-```
-
 * Wikipedia(ja)で1000回検索した場合の検索速度差とヒット件数差
 
 |                       | TokenYaBigram            | TokenBigram |
