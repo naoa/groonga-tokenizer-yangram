@@ -280,7 +280,7 @@ yangram_init(grn_ctx *ctx, int nargs, grn_obj **args, grn_user_data *user_data,
   unsigned int normalized_length_in_bytes;
   grn_yangram_tokenizer *tokenizer;
 
-  if (!grn_ii_overlap_token_skip_enable || ignore_blank) {
+  if (!skip_overlap || !grn_ii_overlap_token_skip_enable || ignore_blank) {
     normalize_flags |= GRN_STRING_REMOVE_BLANK;
   }
 
