@@ -41,6 +41,8 @@
 #define VGRAM_BOTH 2
 #define VGRAM_QUAD 3
 
+grn_bool grn_ii_overlap_token_skip_enable = GRN_FALSE;
+
 typedef struct {
   grn_tokenizer_token token;
   grn_tokenizer_query *query;
@@ -278,7 +280,7 @@ yangram_init(grn_ctx *ctx, int nargs, grn_obj **args, grn_user_data *user_data,
   unsigned int normalized_length_in_bytes;
   grn_yangram_tokenizer *tokenizer;
 
-  if (!skip_overlap || ignore_blank) {
+  if (!grn_ii_overlap_token_skip_enable || ignore_blank) {
     normalize_flags |= GRN_STRING_REMOVE_BLANK;
   }
 
@@ -542,6 +544,7 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
       token_top < tokenizer->pushed_token_tail) {
     status |= GRN_TOKEN_OVERLAP;
     if (tokenizer->skip_overlap &&
+        !grn_ii_overlap_token_skip_enable &&
         !(status & GRN_TOKEN_REACH_END) &&
         !(status & GRN_TOKEN_SKIP_WITH_POSITION) &&
       tokenizer->query->tokenize_mode == GRN_TOKENIZE_GET) {
@@ -670,6 +673,18 @@ yavgramq_d_init(grn_ctx * ctx, int nargs, grn_obj **args, grn_user_data *user_da
 grn_rc
 GRN_PLUGIN_INIT(grn_ctx *ctx)
 {
+  {
+    char grn_ii_overlap_token_skip_enable_env[GRN_ENV_BUFFER_SIZE];
+    grn_getenv("GRN_II_OVERLAP_TOKEN_SKIP_ENABLE",
+               grn_ii_overlap_token_skip_enable_env,
+               GRN_ENV_BUFFER_SIZE);
+    if (grn_ii_overlap_token_skip_enable_env[0]) {
+      grn_ii_overlap_token_skip_enable = GRN_TRUE;
+    } else {
+      grn_ii_overlap_token_skip_enable = GRN_FALSE;
+    }
+  }
+
   return ctx->rc;
 }
 
@@ -678,6 +693,7 @@ GRN_PLUGIN_REGISTER(grn_ctx *ctx)
 {
   grn_rc rc;
 
+  /* deprecated */
   rc = grn_tokenizer_register(ctx, "TokenYaBigram", -1,
                               yabigram_init, yangram_next, yangram_fin);
 
@@ -687,6 +703,7 @@ GRN_PLUGIN_REGISTER(grn_ctx *ctx)
   rc = grn_tokenizer_register(ctx, "TokenYaBigramSplitSymbolAlpha", -1,
                               yabigram_sa_init, yangram_next, yangram_fin);
 
+  /* deprecated */
   rc = grn_tokenizer_register(ctx, "TokenYaTrigram", -1,
                               yatrigram_init, yangram_next, yangram_fin);
 

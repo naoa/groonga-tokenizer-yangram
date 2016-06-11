@@ -1,0 +1,37 @@
+plugin_register tokenizers/yangram
+[[0,0.0,0.0],true]
+tokenize TokenYaBigram "今日は雨だな" NormalizerAuto --mode GET
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  [
+    {
+      "value": "今日",
+      "position": 0,
+      "force_prefix": false
+    },
+    {
+      "value": "日は",
+      "position": 1,
+      "force_prefix": false
+    },
+    {
+      "value": "は雨",
+      "position": 2,
+      "force_prefix": false
+    },
+    {
+      "value": "雨だ",
+      "position": 3,
+      "force_prefix": false
+    },
+    {
+      "value": "だな",
+      "position": 4,
+      "force_prefix": false
+    }
+  ]
+]

@@ -1,0 +1,4 @@
+#$GRN_II_OVERLAP_TOKEN_SKIP_ENABLE=yes
+plugin_register tokenizers/yangram
+
+tokenize TokenYaBigram "今日は雨だな" NormalizerAuto --mode GET

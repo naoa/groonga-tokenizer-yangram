@@ -1,0 +1,31 @@
+#$GRN_II_OVERLAP_TOKEN_SKIP_ENABLE=yes
+plugin_register tokenizers/yangram
+
+table_create Entries TABLE_NO_KEY
+column_create Entries body COLUMN_SCALAR ShortText
+
+table_create Terms TABLE_PAT_KEY ShortText \
+  --default_tokenizer TokenYaBigram \
+  --normalizer NormalizerAuto
+
+load --table Entries
+[
+{"body": "データベース"},
+{"body": "タベ"},
+{"body": "タベ"},
+{"body": "タベ"},
+{"body": "タベ"},
+{"body": "タベ"},
+{"body": "タベ"},
+{"body": "タベ"}
+]
+
+column_create Terms index COLUMN_INDEX|WITH_POSITION Entries body
+
+table_tokenize Terms "データベース" --index_column index
+
+log_level --level debug
+#@add-important-log-levels debug
+select Entries --filter 'body @ "データベース"'
+#@remove-important-log-levels debug
+log_level --level notice

@@ -1,0 +1,99 @@
+plugin_register tokenizers/yangram
+[[0,0.0,0.0],true]
+table_create Entries TABLE_NO_KEY
+[[0,0.0,0.0],true]
+column_create Entries body COLUMN_SCALAR ShortText
+[[0,0.0,0.0],true]
+table_create Terms TABLE_PAT_KEY ShortText   --default_tokenizer TokenYaBigram   --normalizer NormalizerAuto
+[[0,0.0,0.0],true]
+load --table Entries
+[
+{"body": "データベース"},
+{"body": "タベ"},
+{"body": "タベ"},
+{"body": "タベ"},
+{"body": "タベ"},
+{"body": "タベ"},
+{"body": "タベ"},
+{"body": "タベ"}
+]
+[[0,0.0,0.0],8]
+column_create Terms index COLUMN_INDEX|WITH_POSITION Entries body
+[[0,0.0,0.0],true]
+table_tokenize Terms "データベース" --index_column index
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  [
+    {
+      "value": "デー",
+      "position": 0,
+      "force_prefix": false,
+      "estimated_size": 1
+    },
+    {
+      "value": "ータ",
+      "position": 1,
+      "force_prefix": false,
+      "estimated_size": 1
+    },
+    {
+      "value": "タベ",
+      "position": 2,
+      "force_prefix": false,
+      "estimated_size": 10
+    },
+    {
+      "value": "ベー",
+      "position": 3,
+      "force_prefix": false,
+      "estimated_size": 1
+    },
+    {
+      "value": "ース",
+      "position": 4,
+      "force_prefix": false,
+      "estimated_size": 1
+    }
+  ]
+]
+log_level --level debug
+[[0,0.0,0.0],true]
+select Entries --filter 'body @ "データベース"'
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  [
+    [
+      [
+        1
+      ],
+      [
+        [
+          "_id",
+          "UInt32"
+        ],
+        [
+          "body",
+          "ShortText"
+        ]
+      ],
+      [
+        1,
+        "データベース"
+      ]
+    ]
+  ]
+]
+#|d| [ii][overlap_token_skip] tid=3 pos=0 estimated_size=1
+#|d| [ii][overlap_token_skip] tid=7 pos=1 estimated_size=1
+#|d| [ii][overlap_token_skip] tid=5 pos=3 estimated_size=1
+#|d| [ii][overlap_token_skip] tid=6 pos=4 estimated_size=1
+log_level --level notice
+[[0,0.0,0.0],true]
