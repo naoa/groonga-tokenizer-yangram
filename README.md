@@ -10,6 +10,7 @@
 * ``TokenYaBigram``
 * ``TokenYaBigramIgnoreBlank``
 * ``TokenYaBigramSplitSymbolAlpha``
+* ``TokenYaBigramSplitDigit``
 * ``TokenYaTrigram``
 * ``TokenYaTrigramIgnoreBlank``
 * ``TokenYaTrigramSplitSymbolAlpha``

@@ -588,6 +588,7 @@ yangram_fin(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
   if (tokenizer->vgram_table) {
     grn_obj_unlink(ctx, tokenizer->vgram_table);
   }
+
   if (tokenizer->phrase_table) {
     grn_obj_unlink(ctx, tokenizer->phrase_table);
     GRN_PLUGIN_FREE(ctx, tokenizer->hits);
@@ -670,6 +671,12 @@ yavgramq_d_init(grn_ctx * ctx, int nargs, grn_obj **args, grn_user_data *user_da
   return yangram_init(ctx, nargs, args, user_data, 2, 0, 0, 0, 1, 1, VGRAM_QUAD);
 }
 
+static grn_obj *
+yabigram_d_init(grn_ctx * ctx, int nargs, grn_obj **args, grn_user_data *user_data)
+{
+  return yangram_init(ctx, nargs, args, user_data, 2, 0, 0, 0, 1, 1, NGRAM);
+}
+
 grn_rc
 GRN_PLUGIN_INIT(grn_ctx *ctx)
 {
@@ -693,7 +700,6 @@ GRN_PLUGIN_REGISTER(grn_ctx *ctx)
 {
   grn_rc rc;
 
-  /* deprecated */
   rc = grn_tokenizer_register(ctx, "TokenYaBigram", -1,
                               yabigram_init, yangram_next, yangram_fin);
 
@@ -703,7 +709,6 @@ GRN_PLUGIN_REGISTER(grn_ctx *ctx)
   rc = grn_tokenizer_register(ctx, "TokenYaBigramSplitSymbolAlpha", -1,
                               yabigram_sa_init, yangram_next, yangram_fin);
 
-  /* deprecated */
   rc = grn_tokenizer_register(ctx, "TokenYaTrigram", -1,
                               yatrigram_init, yangram_next, yangram_fin);
 
@@ -731,6 +736,8 @@ GRN_PLUGIN_REGISTER(grn_ctx *ctx)
   rc = grn_tokenizer_register(ctx, "TokenYaVgramQuadSplitDigit", -1,
                               yavgramq_d_init, yangram_next, yangram_fin);
 
+  rc = grn_tokenizer_register(ctx, "TokenYaBigramSplitDigit", -1,
+                              yabigram_d_init, yangram_next, yangram_fin);
   return ctx->rc;
 }
 
