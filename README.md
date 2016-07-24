@@ -14,6 +14,7 @@
 * ``TokenYaTrigram``
 * ``TokenYaTrigramIgnoreBlank``
 * ``TokenYaTrigramSplitSymbolAlpha``
+* ``TokenYaTrigramSplitSymbolAlphaDigit``
 
 検索時のみNgramのオーバーラップをスキップしてトークナイズします。  
 検索時のトークン数を減らすことができ、検索処理の速度向上が見込めます。  
