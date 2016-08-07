@@ -152,7 +152,7 @@ forward_grouped_token_tail(grn_ctx *ctx, grn_yangram_tokenizer *tokenizer,
       token_size++;
       *token_tail += char_length;
       rest_length -= char_length;
-      if (GRN_STR_ISBLANK(*ctypes)) {
+      if (!tokenizer->ignore_blank && GRN_STR_ISBLANK(*ctypes)) {
         break;
       }
       if (GRN_STR_CTYPE(*++ctypes) != GRN_CHAR_ALPHA) {
@@ -167,7 +167,7 @@ forward_grouped_token_tail(grn_ctx *ctx, grn_yangram_tokenizer *tokenizer,
       token_size++;
       *token_tail += char_length;
       rest_length -= char_length;
-      if (GRN_STR_ISBLANK(*ctypes)) {
+      if (!tokenizer->ignore_blank && GRN_STR_ISBLANK(*ctypes)) {
         break;
       }
       if (GRN_STR_CTYPE(*++ctypes) != GRN_CHAR_DIGIT) {
@@ -247,7 +247,11 @@ is_group_border(GNUC_UNUSED grn_ctx *ctx, grn_yangram_tokenizer *tokenizer,
                 const unsigned char *token_tail, const unsigned char *ctypes, int token_size)
 {
   if (ctypes) {
-    ctypes = ctypes + token_size;
+    ctypes = ctypes + token_size - 1;
+    if (!tokenizer->ignore_blank && GRN_STR_ISBLANK(*ctypes)) {
+      return GRN_TRUE;
+    }
+    ctypes++;
   }
   if (ctypes) {
     if (is_token_group(tokenizer, ctypes)) {
