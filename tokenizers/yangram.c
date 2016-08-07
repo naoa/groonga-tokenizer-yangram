@@ -476,8 +476,7 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
               token_tail += char_length;
             }
           } else {
-            if (token_tail == string_end &&
-              tokenizer->query->tokenize_mode == GRN_TOKENIZE_GET) {
+            if (tokenizer->query->tokenize_mode == GRN_TOKENIZE_GET) {
               status |= GRN_TOKEN_FORCE_PREFIX;
             }
           }
@@ -485,8 +484,7 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
 
 
       } else {
-        if (token_tail == string_end &&
-            tokenizer->query->tokenize_mode == GRN_TOKENIZE_GET) {
+        if (tokenizer->query->tokenize_mode == GRN_TOKENIZE_GET) {
           status |= GRN_TOKEN_FORCE_PREFIX;
         }
       }
