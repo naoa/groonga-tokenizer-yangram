@@ -17,35 +17,43 @@ tokenize TokenYaBigram "【請求項４】検索クエリAが" NormalizerAuto --
   [
     {
       "value": "【請求項4】",
-      "position": 0
+      "position": 0,
+      "force_prefix": false
     },
     {
       "value": "検索",
-      "position": 1
+      "position": 1,
+      "force_prefix": false
     },
     {
       "value": "索ク",
-      "position": 2
+      "position": 2,
+      "force_prefix": false
     },
     {
       "value": "クエ",
-      "position": 3
+      "position": 3,
+      "force_prefix": false
     },
     {
       "value": "エリ",
-      "position": 4
+      "position": 4,
+      "force_prefix": false
     },
     {
       "value": "リ",
-      "position": 5
+      "position": 5,
+      "force_prefix": false
     },
     {
       "value": "a",
-      "position": 6
+      "position": 6,
+      "force_prefix": false
     },
     {
       "value": "が",
-      "position": 7
+      "position": 7,
+      "force_prefix": true
     }
   ]
 ]
@@ -59,27 +67,33 @@ tokenize TokenYaBigram "【請求項４】検索クエリAが" NormalizerAuto --
   [
     {
       "value": "【請求項4】",
-      "position": 0
+      "position": 0,
+      "force_prefix": false
     },
     {
       "value": "検索",
-      "position": 1
+      "position": 1,
+      "force_prefix": false
     },
     {
       "value": "クエ",
-      "position": 3
+      "position": 3,
+      "force_prefix": false
     },
     {
       "value": "エリ",
-      "position": 4
+      "position": 4,
+      "force_prefix": false
     },
     {
       "value": "a",
-      "position": 6
+      "position": 6,
+      "force_prefix": false
     },
     {
       "value": "が",
-      "position": 7
+      "position": 7,
+      "force_prefix": true
     }
   ]
 ]

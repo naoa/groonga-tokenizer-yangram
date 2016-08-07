@@ -39,58 +39,48 @@ tokenize TokenYaTrigramSplitSymbolAlpha "Tommorow is rainy" NormalizerAuto --mod
       "force_prefix": false
     },
     {
-      "value": "ow ",
+      "value": "ow",
       "position": 6,
       "force_prefix": false
     },
     {
-      "value": "w i",
+      "value": "w",
       "position": 7,
       "force_prefix": false
     },
     {
-      "value": " is",
+      "value": "is",
       "position": 8,
       "force_prefix": false
     },
     {
-      "value": "is ",
+      "value": "s",
       "position": 9,
       "force_prefix": false
     },
     {
-      "value": "s r",
+      "value": "rai",
       "position": 10,
       "force_prefix": false
     },
     {
-      "value": " ra",
+      "value": "ain",
       "position": 11,
       "force_prefix": false
     },
     {
-      "value": "rai",
+      "value": "iny",
       "position": 12,
       "force_prefix": false
     },
     {
-      "value": "ain",
+      "value": "ny",
       "position": 13,
       "force_prefix": false
     },
     {
-      "value": "iny",
-      "position": 14,
-      "force_prefix": false
-    },
-    {
-      "value": "ny",
-      "position": 15,
-      "force_prefix": false
-    },
-    {
       "value": "y",
-      "position": 16,
+      "position": 14,
       "force_prefix": false
     }
   ]

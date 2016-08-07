@@ -17,27 +17,33 @@ tokenize TokenYaTrigramSplitSymbolAlpha "AABCDEFG" NormalizerAuto --mode ADD
   [
     {
       "value": "aab",
-      "position": 0
+      "position": 0,
+      "force_prefix": false
     },
     {
       "value": "abc",
-      "position": 1
+      "position": 1,
+      "force_prefix": false
     },
     {
       "value": "bc",
-      "position": 2
+      "position": 2,
+      "force_prefix": false
     },
     {
       "value": "c",
-      "position": 3
+      "position": 3,
+      "force_prefix": false
     },
     {
       "value": "def",
-      "position": 4
+      "position": 4,
+      "force_prefix": false
     },
     {
       "value": "g",
-      "position": 5
+      "position": 5,
+      "force_prefix": true
     }
   ]
 ]
@@ -51,19 +57,23 @@ tokenize TokenYaTrigramSplitSymbolAlpha "AABCDEFG" NormalizerAuto --mode GET
   [
     {
       "value": "aab",
-      "position": 0
+      "position": 0,
+      "force_prefix": false
     },
     {
       "value": "abc",
-      "position": 1
+      "position": 1,
+      "force_prefix": false
     },
     {
       "value": "def",
-      "position": 4
+      "position": 4,
+      "force_prefix": false
     },
     {
       "value": "g",
-      "position": 5
+      "position": 5,
+      "force_prefix": true
     }
   ]
 ]

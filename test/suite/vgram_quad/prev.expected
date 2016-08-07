@@ -18,25 +18,30 @@ tokenize TokenYaVgramQuad "装置は高速" NormalizerAuto --mode ADD
   [
     {
       "value": "装置は",
-      "position": 0
+      "position": 0,
+      "force_prefix": false
     },
     {
       "value": "置は高速",
-      "position": 1
+      "position": 1,
+      "force_prefix": false
     },
     {
       "value": "は高",
-      "position": 2
+      "position": 2,
+      "force_prefix": false
     },
     {
       "value": "高速",
-      "position": 3
+      "position": 3,
+      "force_prefix": false
     },
     {
       "value": "速",
-      "position": 4
+      "position": 4,
+      "force_prefix": false
     }
   ]
 ]
 tokenize TokenYaVgramQuad "置は高速" NormalizerAuto --mode GET
-[[0,0.0,0.0],[{"value":"置は高速","position":0}]]
+[[0,0.0,0.0],[{"value":"置は高速","position":0,"force_prefix":false}]]

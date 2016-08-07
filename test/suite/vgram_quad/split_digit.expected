@@ -18,27 +18,33 @@ tokenize TokenYaVgramQuadSplitDigit "今日は1雨だ" NormalizerAuto --mode ADD
   [
     {
       "value": "今日は1",
-      "position": 0
+      "position": 0,
+      "force_prefix": false
     },
     {
       "value": "日は1",
-      "position": 1
+      "position": 1,
+      "force_prefix": false
     },
     {
       "value": "は1",
-      "position": 2
+      "position": 2,
+      "force_prefix": false
     },
     {
       "value": "1雨",
-      "position": 3
+      "position": 3,
+      "force_prefix": false
     },
     {
       "value": "雨だ",
-      "position": 4
+      "position": 4,
+      "force_prefix": false
     },
     {
       "value": "だ",
-      "position": 5
+      "position": 5,
+      "force_prefix": false
     }
   ]
 ]
@@ -52,11 +58,13 @@ tokenize TokenYaVgramQuadSplitDigit "今日は1雨だ" NormalizerAuto --mode GET
   [
     {
       "value": "今日は1",
-      "position": 0
+      "position": 0,
+      "force_prefix": false
     },
     {
       "value": "雨だ",
-      "position": 4
+      "position": 4,
+      "force_prefix": true
     }
   ]
 ]

@@ -19,13 +19,8 @@ tokenize TokenYaBigramSplitSymbolAlpha "This is" NormalizerAuto --mode GET
       "force_prefix": false
     },
     {
-      "value": " i",
-      "position": 4,
-      "force_prefix": false
-    },
-    {
       "value": "is",
-      "position": 5,
+      "position": 4,
       "force_prefix": false
     }
   ]

@@ -18,33 +18,40 @@ tokenize TokenYaVgramQuad "データベA処理" NormalizerAuto --mode ADD
   [
     {
       "value": "データベ",
-      "position": 0
+      "position": 0,
+      "force_prefix": false
     },
     {
       "value": "ータ",
-      "position": 1
+      "position": 1,
+      "force_prefix": false
     },
     {
       "value": "タベ",
-      "position": 2
+      "position": 2,
+      "force_prefix": false
     },
     {
       "value": "ベ",
-      "position": 3
+      "position": 3,
+      "force_prefix": false
     },
     {
       "value": "a",
-      "position": 4
+      "position": 4,
+      "force_prefix": false
     },
     {
       "value": "処理",
-      "position": 5
+      "position": 5,
+      "force_prefix": false
     },
     {
       "value": "理",
-      "position": 6
+      "position": 6,
+      "force_prefix": false
     }
   ]
 ]
 tokenize TokenYaVgramQuad "データ" NormalizerAuto --mode GET
-[[0,0.0,0.0],[{"value":"データ","position":0}]]
+[[0,0.0,0.0],[{"value":"データ","position":0,"force_prefix":true}]]

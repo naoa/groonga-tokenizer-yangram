@@ -14,13 +14,13 @@ tokenize TokenYaBigram "広告評　論家" NormalizerAuto --mode GET
       "force_prefix": false
     },
     {
-      "value": "評 ",
-      "position": 2,
+      "value": "告評",
+      "position": 1,
       "force_prefix": false
     },
     {
       "value": "論家",
-      "position": 4,
+      "position": 3,
       "force_prefix": false
     }
   ]

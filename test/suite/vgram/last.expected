@@ -18,23 +18,28 @@ tokenize TokenYaVgram "今日は雨だ" NormalizerAuto --mode ADD
   [
     {
       "value": "今日",
-      "position": 0
+      "position": 0,
+      "force_prefix": false
     },
     {
       "value": "日は",
-      "position": 1
+      "position": 1,
+      "force_prefix": false
     },
     {
       "value": "は雨",
-      "position": 2
+      "position": 2,
+      "force_prefix": false
     },
     {
       "value": "雨だ",
-      "position": 3
+      "position": 3,
+      "force_prefix": false
     },
     {
       "value": "だ",
-      "position": 4
+      "position": 4,
+      "force_prefix": false
     }
   ]
 ]
@@ -48,15 +53,18 @@ tokenize TokenYaVgram "今日は雨だ" NormalizerAuto --mode GET
   [
     {
       "value": "今日",
-      "position": 0
+      "position": 0,
+      "force_prefix": false
     },
     {
       "value": "は雨",
-      "position": 2
+      "position": 2,
+      "force_prefix": false
     },
     {
       "value": "雨だ",
-      "position": 3
+      "position": 3,
+      "force_prefix": true
     }
   ]
 ]
@@ -70,21 +78,43 @@ tokenize TokenYaVgram "今日は雨" NormalizerAuto --mode ADD
   [
     {
       "value": "今日",
-      "position": 0
+      "position": 0,
+      "force_prefix": false
     },
     {
       "value": "日は",
-      "position": 1
+      "position": 1,
+      "force_prefix": false
     },
     {
       "value": "は雨",
-      "position": 2
+      "position": 2,
+      "force_prefix": false
     },
     {
       "value": "雨",
-      "position": 3
+      "position": 3,
+      "force_prefix": false
     }
   ]
 ]
 tokenize TokenYaVgram "今日は雨" NormalizerAuto --mode GET
-[[0,0.0,0.0],[{"value":"今日","position":0},{"value":"は雨","position":2}]]
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  [
+    {
+      "value": "今日",
+      "position": 0,
+      "force_prefix": false
+    },
+    {
+      "value": "は雨",
+      "position": 2,
+      "force_prefix": false
+    }
+  ]
+]

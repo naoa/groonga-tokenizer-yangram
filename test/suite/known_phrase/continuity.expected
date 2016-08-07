@@ -18,27 +18,33 @@ tokenize TokenYaBigram "【請求項１】【請求項２】検索装置" Normal
   [
     {
       "value": "【請求項1】",
-      "position": 0
+      "position": 0,
+      "force_prefix": false
     },
     {
       "value": "【請求項2】",
-      "position": 1
+      "position": 1,
+      "force_prefix": false
     },
     {
       "value": "検索",
-      "position": 2
+      "position": 2,
+      "force_prefix": false
     },
     {
       "value": "索装",
-      "position": 3
+      "position": 3,
+      "force_prefix": false
     },
     {
       "value": "装置",
-      "position": 4
+      "position": 4,
+      "force_prefix": false
     },
     {
       "value": "置",
-      "position": 5
+      "position": 5,
+      "force_prefix": false
     }
   ]
 ]
@@ -52,19 +58,23 @@ tokenize TokenYaBigram "【請求項１】【請求項２】検索装置" Normal
   [
     {
       "value": "【請求項1】",
-      "position": 0
+      "position": 0,
+      "force_prefix": false
     },
     {
       "value": "【請求項2】",
-      "position": 1
+      "position": 1,
+      "force_prefix": false
     },
     {
       "value": "検索",
-      "position": 2
+      "position": 2,
+      "force_prefix": false
     },
     {
       "value": "装置",
-      "position": 4
+      "position": 4,
+      "force_prefix": false
     }
   ]
 ]

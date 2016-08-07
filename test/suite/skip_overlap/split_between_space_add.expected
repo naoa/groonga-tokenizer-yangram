@@ -24,23 +24,18 @@ tokenize TokenYaBigramSplitSymbolAlpha "This is" NormalizerAuto --mode ADD
       "force_prefix": false
     },
     {
-      "value": "s ",
+      "value": "s",
       "position": 3,
       "force_prefix": false
     },
     {
-      "value": " i",
+      "value": "is",
       "position": 4,
       "force_prefix": false
     },
     {
-      "value": "is",
-      "position": 5,
-      "force_prefix": false
-    },
-    {
       "value": "s",
-      "position": 6,
+      "position": 5,
       "force_prefix": false
     }
   ]

@@ -14,13 +14,13 @@ tokenize TokenYaBigram "つつ きつつ" NormalizerAuto --mode GET
       "force_prefix": false
     },
     {
-      "value": " き",
+      "value": "きつ",
       "position": 2,
       "force_prefix": false
     },
     {
       "value": "つつ",
-      "position": 4,
+      "position": 3,
       "force_prefix": false
     }
   ]

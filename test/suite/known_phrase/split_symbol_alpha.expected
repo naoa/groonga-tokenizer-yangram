@@ -17,23 +17,28 @@ tokenize TokenYaBigramSplitSymbolAlpha "ABCDEFG" NormalizerAuto --mode ADD
   [
     {
       "value": "ab",
-      "position": 0
+      "position": 0,
+      "force_prefix": false
     },
     {
       "value": "b",
-      "position": 1
+      "position": 1,
+      "force_prefix": false
     },
     {
       "value": "cde",
-      "position": 2
+      "position": 2,
+      "force_prefix": false
     },
     {
       "value": "fg",
-      "position": 3
+      "position": 3,
+      "force_prefix": false
     },
     {
       "value": "g",
-      "position": 4
+      "position": 4,
+      "force_prefix": false
     }
   ]
 ]
@@ -47,15 +52,18 @@ tokenize TokenYaBigramSplitSymbolAlpha "ABCDEFG" NormalizerAuto --mode GET
   [
     {
       "value": "ab",
-      "position": 0
+      "position": 0,
+      "force_prefix": false
     },
     {
       "value": "cde",
-      "position": 2
+      "position": 2,
+      "force_prefix": false
     },
     {
       "value": "fg",
-      "position": 3
+      "position": 3,
+      "force_prefix": false
     }
   ]
 ]

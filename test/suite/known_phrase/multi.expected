@@ -19,55 +19,68 @@ tokenize TokenYaBigram "【請求項１】検索装置【請求項２】検索�
   [
     {
       "value": "【請求項1】",
-      "position": 0
+      "position": 0,
+      "force_prefix": false
     },
     {
       "value": "検索",
-      "position": 1
+      "position": 1,
+      "force_prefix": false
     },
     {
       "value": "索装",
-      "position": 2
+      "position": 2,
+      "force_prefix": false
     },
     {
       "value": "装置",
-      "position": 3
+      "position": 3,
+      "force_prefix": false
     },
     {
       "value": "置",
-      "position": 4
+      "position": 4,
+      "force_prefix": false
     },
     {
       "value": "【請求項2】",
-      "position": 5
+      "position": 5,
+      "force_prefix": false
     },
     {
       "value": "検索",
-      "position": 6
+      "position": 6,
+      "force_prefix": false
     },
     {
       "value": "索シ",
-      "position": 7
+      "position": 7,
+      "force_prefix": false
     },
     {
       "value": "シス",
-      "position": 8
+      "position": 8,
+      "force_prefix": false
     },
     {
       "value": "ステ",
-      "position": 9
+      "position": 9,
+      "force_prefix": false
     },
     {
       "value": "テム",
-      "position": 10
+      "position": 10,
+      "force_prefix": false
     },
     {
       "value": "ム",
-      "position": 11
+      "position": 11,
+      "force_prefix": false
     },
     {
       "value": "【請求項3】",
-      "position": 12
+      "position": 12,
+      "force_prefix": false
     }
   ]
 ]
@@ -81,35 +94,43 @@ tokenize TokenYaBigram "【請求項１】検索装置【請求項２】検索�
   [
     {
       "value": "【請求項1】",
-      "position": 0
+      "position": 0,
+      "force_prefix": false
     },
     {
       "value": "検索",
-      "position": 1
+      "position": 1,
+      "force_prefix": false
     },
     {
       "value": "装置",
-      "position": 3
+      "position": 3,
+      "force_prefix": false
     },
     {
       "value": "【請求項2】",
-      "position": 5
+      "position": 5,
+      "force_prefix": false
     },
     {
       "value": "検索",
-      "position": 6
+      "position": 6,
+      "force_prefix": false
     },
     {
       "value": "シス",
-      "position": 8
+      "position": 8,
+      "force_prefix": false
     },
     {
       "value": "テム",
-      "position": 10
+      "position": 10,
+      "force_prefix": false
     },
     {
       "value": "【請求項3】",
-      "position": 12
+      "position": 12,
+      "force_prefix": false
     }
   ]
 ]

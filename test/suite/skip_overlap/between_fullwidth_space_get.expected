@@ -14,13 +14,13 @@ tokenize TokenYaBigram "広告　評論家" NormalizerAuto --mode GET
       "force_prefix": false
     },
     {
-      "value": " 評",
+      "value": "評論",
       "position": 2,
       "force_prefix": false
     },
     {
       "value": "論家",
-      "position": 4,
+      "position": 3,
       "force_prefix": false
     }
   ]
