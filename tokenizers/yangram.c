@@ -69,35 +69,6 @@ typedef struct {
 } grn_yangram_tokenizer;
 
 static grn_bool
-is_token_all_blank(grn_ctx *ctx, grn_yangram_tokenizer *tokenizer,
-                   const unsigned char *token_top,
-                   int token_size)
-{
-  unsigned int char_length;
-  unsigned int rest_length = tokenizer->rest_length;
-  int i = 0;
-  if ((char_length = grn_plugin_isspace(ctx, (char *)token_top,
-                                        rest_length,
-                                        tokenizer->query->encoding))) {
-    i = 1;
-    token_top += char_length;
-    rest_length -= char_length;
-    while (i < token_size &&
-           (char_length = grn_plugin_isspace(ctx, (char *)token_top,
-                                             rest_length,
-                                             tokenizer->query->encoding))) {
-      token_top += char_length;
-      rest_length -= char_length;
-      i++;
-    }
-  }
-  if (i == token_size) {
-    return GRN_TRUE;
-  }
-  return GRN_FALSE;
-}
-
-static grn_bool
 is_token_group(grn_yangram_tokenizer *tokenizer, const unsigned char *ctypes)
 {
   if (ctypes &&
@@ -278,15 +249,12 @@ yangram_init(grn_ctx *ctx, int nargs, grn_obj **args, grn_user_data *user_data,
   grn_tokenizer_query *query;
   unsigned int normalize_flags =
     GRN_STRING_WITH_TYPES |
-    GRN_STRING_REMOVE_TOKENIZED_DELIMITER;
+    GRN_STRING_REMOVE_TOKENIZED_DELIMITER |
+    GRN_STRING_REMOVE_BLANK;
 
   const char *normalized;
   unsigned int normalized_length_in_bytes;
   grn_yangram_tokenizer *tokenizer;
-
-  if (!skip_overlap || !grn_ii_overlap_token_skip_enable || ignore_blank) {
-    normalize_flags |= GRN_STRING_REMOVE_BLANK;
-  }
 
   query = grn_tokenizer_query_open(ctx, nargs, args, normalize_flags);
   if (!query) {
@@ -535,13 +503,6 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
 
   if (!is_token_grouped && !is_token_hit && token_size < tokenizer->ngram_unit) {
     status |= GRN_TOKEN_UNMATURED;
-  }
-
-  if (token_size) {
-    if (tokenizer->skip_overlap &&
-        is_token_all_blank(ctx, tokenizer, token_top, token_size)) {
-      status |= GRN_TOKEN_SKIP_WITH_POSITION;
-    }
   }
 
   if (tokenizer->pushed_token_tail &&
