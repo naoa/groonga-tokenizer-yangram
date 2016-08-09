@@ -37,6 +37,53 @@ Groonga6.0.3で追加された環境変数``GRN_II_OVERLAP_TOKEN_SKIP_ENABLE``�
 
 テーブルは環境変数``GRN_VGRAM_WORD_TABLE_NAME``により変更することができます。
 
+検索クエリに非アスキーのあとに空白やアスキーがでてきた場合、検索できないことがあります。
+
+例えば、検索クエリが``"搬送 シート"``の空白を含むフレーズで、``搬送``がvgram対象の場合、前方一致で``搬送``から始まるトークンを探す必要がありますが、現状、末尾のトークン以外は正常に強制前方一致検索フラグが動きません。
+
+これを動くようにするには今のところGroonga本体に以下のパッチを適用する必要があります。
+
+```diff
+diff --git a/lib/ii.c b/lib/ii.c
+index c88c2e9..49c7640 100644
+--- a/lib/ii.c
++++ b/lib/ii.c
+@@ -6754,7 +6754,7 @@ token_candidate_build(grn_ctx *ctx, grn_obj *lexicon, grn_ii *ii,
+       case GRN_TOKEN_CURSOR_DOING :
+         key = _grn_table_key(ctx, lexicon, node->tid, &size);
+         ti = token_info_open(ctx, lexicon, ii, key, size, node->pos,
+-                             EX_NONE, NULL);
++                             node->ef, NULL);
+         break;
+       case GRN_TOKEN_CURSOR_DONE :
+         if (node->tid) {
+@@ -6862,8 +6862,13 @@ token_info_build(grn_ctx *ctx, grn_obj *lexicon, grn_ii *ii, const char *string,
+     switch (token_cursor->status) {
+     case GRN_TOKEN_CURSOR_DOING :
+       key = _grn_table_key(ctx, lexicon, tid, &size);
+-      ti = token_info_open(ctx, lexicon, ii, key, size, token_cursor->pos,
+-                           ef & EX_SUFFIX, NULL);
++      if (token_cursor->force_prefix) {
++        ti = token_info_open(ctx, lexicon, ii, key, size, token_cursor->pos,
++                             ef, NULL);
++      } else {
++        ti = token_info_open(ctx, lexicon, ii, key, size, token_cursor->pos,
++                             ef & EX_SUFFIX, NULL);
++      }
+       break;
+     case GRN_TOKEN_CURSOR_DONE :
+       ti = token_info_open(ctx, lexicon, ii, (const char *)token_cursor->curr,
+@@ -6902,7 +6907,7 @@ token_info_build(grn_ctx *ctx, grn_obj *lexicon, grn_ii *ii, const char *string,
+       case GRN_TOKEN_CURSOR_DOING :
+         key = _grn_table_key(ctx, lexicon, tid, &size);
+         ti = token_info_open(ctx, lexicon, ii, key, size, token_cursor->pos,
+-                             EX_NONE, NULL);
++                             ef, NULL);
+         break;
+       case GRN_TOKEN_CURSOR_DONE :
+
+```
+
 * ``TokenYaVgramBoth``
 * ``TokenYaVgramBothSplitSymbolAlpha``
 

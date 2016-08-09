@@ -1,0 +1,22 @@
+register tokenizers/yangram
+
+table_create vgram_words TABLE_HASH_KEY ShortText
+load --table vgram_words
+[
+{"_key": "搬送"},
+{"_key": "する"}
+]
+
+table_create vgram_terms TABLE_PAT_KEY ShortText --default_tokenizer TokenYaVgram --normalizer NormalizerAuto
+
+table_create docs TABLE_NO_KEY
+column_create docs body COLUMN_SCALAR ShortText
+
+load --table docs
+[
+{"body": "搬送するためのチャイルドシート"}
+]
+
+column_create vgram_terms index COLUMN_INDEX|WITH_POSITION docs body
+
+select docs --match_columns 'body' --query '*N"搬送 チャイルドシート"' --match_escalation_threshold -1

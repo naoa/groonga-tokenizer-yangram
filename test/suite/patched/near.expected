@@ -1,0 +1,52 @@
+register tokenizers/yangram
+[[0,0.0,0.0],true]
+table_create vgram_words TABLE_HASH_KEY ShortText
+[[0,0.0,0.0],true]
+load --table vgram_words
+[
+{"_key": "搬送"},
+{"_key": "する"}
+]
+[[0,0.0,0.0],2]
+table_create vgram_terms TABLE_PAT_KEY ShortText --default_tokenizer TokenYaVgram --normalizer NormalizerAuto
+[[0,0.0,0.0],true]
+table_create docs TABLE_NO_KEY
+[[0,0.0,0.0],true]
+column_create docs body COLUMN_SCALAR ShortText
+[[0,0.0,0.0],true]
+load --table docs
+[
+{"body": "搬送するためのチャイルドシート"}
+]
+[[0,0.0,0.0],1]
+column_create vgram_terms index COLUMN_INDEX|WITH_POSITION docs body
+[[0,0.0,0.0],true]
+select docs --match_columns 'body' --query '*N"搬送 チャイルドシート"' --match_escalation_threshold -1
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  [
+    [
+      [
+        1
+      ],
+      [
+        [
+          "_id",
+          "UInt32"
+        ],
+        [
+          "body",
+          "ShortText"
+        ]
+      ],
+      [
+        1,
+        "搬送するためのチャイルドシート"
+      ]
+    ]
+  ]
+]

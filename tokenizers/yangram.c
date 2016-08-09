@@ -362,6 +362,7 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
   int char_length = 0;
   grn_tokenizer_status status = 0;
   grn_bool is_token_hit = GRN_FALSE;
+  grn_obj *lexicon = args[0];
 
   if (tokenizer->phrase_table) {
     if (tokenizer->nhits > 0 &&
@@ -477,14 +478,28 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
             }
           } else {
             if (tokenizer->query->tokenize_mode == GRN_TOKENIZE_GET) {
+              grn_id tid;
+              tid = grn_table_get(ctx, lexicon,
+                                  (const char *)token_top, token_tail - token_top);
+              if (tid == GRN_ID_NIL) {
+                int added;
+                grn_table_add(ctx, lexicon,
+                              (const char *)token_top, token_tail - token_top, &added);
+              }
               status |= GRN_TOKEN_FORCE_PREFIX;
             }
           }
         }
-
-
       } else {
         if (tokenizer->query->tokenize_mode == GRN_TOKENIZE_GET) {
+          grn_id tid;
+          tid = grn_table_get(ctx, lexicon,
+                             (const char *)token_top, token_tail - token_top);
+          if (tid == GRN_ID_NIL) {
+            int added;
+            grn_table_add(ctx, lexicon,
+                          (const char *)token_top, token_tail - token_top, &added);
+          }
           status |= GRN_TOKEN_FORCE_PREFIX;
         }
       }
