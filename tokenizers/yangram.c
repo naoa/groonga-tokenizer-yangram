@@ -661,6 +661,12 @@ yatrigram_sad_init(grn_ctx * ctx, int nargs, grn_obj **args, grn_user_data *user
   return yangram_init(ctx, nargs, args, user_data, 3, 0, 1, 1, 1, 1, NGRAM);
 }
 
+static grn_obj *
+yahexgram_sad_init(grn_ctx * ctx, int nargs, grn_obj **args, grn_user_data *user_data)
+{
+  return yangram_init(ctx, nargs, args, user_data, 6, 0, 1, 1, 1, 1, NGRAM);
+}
+
 grn_rc
 GRN_PLUGIN_INIT(grn_ctx *ctx)
 {
@@ -725,6 +731,9 @@ GRN_PLUGIN_REGISTER(grn_ctx *ctx)
 
   rc = grn_tokenizer_register(ctx, "TokenYaTrigramSplitSymbolAlphaDigit", -1,
                               yatrigram_sad_init, yangram_next, yangram_fin);
+
+  rc = grn_tokenizer_register(ctx, "TokenYaHexgramSplitSymbolAlphaDigit", -1,
+                              yahexgram_sad_init, yangram_next, yangram_fin);
   return ctx->rc;
 }
 
