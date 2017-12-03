@@ -1,0 +1,34 @@
+plugin_register tokenizers/yangram
+[[0,0.0,0.0],true]
+table_create vgram_words TABLE_PAT_KEY ShortText
+[[0,0.0,0.0],true]
+load --table vgram_words
+[
+{"_key": "材は"}
+]
+[[0,0.0,0.0],1]
+tokenize TokenYaVgramQuadSplitDigit '過材 ウム 。' --normalizer NormalizerAuto --mode GET
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  [
+    {
+      "value": "過材",
+      "position": 0,
+      "force_prefix": true
+    },
+    {
+      "value": "ウム",
+      "position": 2,
+      "force_prefix": true
+    },
+    {
+      "value": "。",
+      "position": 4,
+      "force_prefix": false
+    }
+  ]
+]

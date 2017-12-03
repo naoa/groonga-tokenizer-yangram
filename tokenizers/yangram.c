@@ -451,6 +451,9 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
       } else if (token_tail == string_end &&
                  tokenizer->query->tokenize_mode == GRN_TOKENIZE_GET) {
         maybe_vgram = GRN_TRUE;
+      } else if (is_group_border(ctx, tokenizer, token_tail, token_ctypes, token_size) &&
+                 tokenizer->query->tokenize_mode == GRN_TOKENIZE_GET) {
+        maybe_vgram = GRN_TRUE;
       }
     }
 

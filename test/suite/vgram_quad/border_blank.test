@@ -1,0 +1,9 @@
+plugin_register tokenizers/yangram
+
+table_create vgram_words TABLE_PAT_KEY ShortText
+load --table vgram_words
+[
+{"_key": "材は"}
+]
+
+tokenize TokenYaVgramQuadSplitDigit '過材 ウム 。' --normalizer NormalizerAuto --mode GET
