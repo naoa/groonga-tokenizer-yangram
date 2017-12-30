@@ -1,0 +1,9 @@
+register tokenizers/yangram
+
+table_create vgram_words TABLE_HASH_KEY ShortText
+load --table vgram_words
+[
+{"_key": "装置"}
+]
+tokenize TokenYaVgramQuadSplitDigitUniSymbol "装置。【請求項" NormalizerAuto --mode ADD
+tokenize TokenYaVgramQuadSplitDigitUniSymbol "装置。【請求項" NormalizerAuto --mode GET

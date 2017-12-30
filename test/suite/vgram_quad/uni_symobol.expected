@@ -1,0 +1,89 @@
+register tokenizers/yangram
+[[0,0.0,0.0],true]
+table_create vgram_words TABLE_HASH_KEY ShortText
+[[0,0.0,0.0],true]
+load --table vgram_words
+[
+{"_key": "装置"}
+]
+[[0,0.0,0.0],1]
+tokenize TokenYaVgramQuadSplitDigitUniSymbol "装置。【請求項" NormalizerAuto --mode ADD
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  [
+    {
+      "value": "装置",
+      "position": 0,
+      "force_prefix": false
+    },
+    {
+      "value": "置",
+      "position": 1,
+      "force_prefix": false
+    },
+    {
+      "value": "。",
+      "position": 2,
+      "force_prefix": false
+    },
+    {
+      "value": "【",
+      "position": 3,
+      "force_prefix": false
+    },
+    {
+      "value": "請求",
+      "position": 4,
+      "force_prefix": false
+    },
+    {
+      "value": "求項",
+      "position": 5,
+      "force_prefix": false
+    },
+    {
+      "value": "項",
+      "position": 6,
+      "force_prefix": false
+    }
+  ]
+]
+tokenize TokenYaVgramQuadSplitDigitUniSymbol "装置。【請求項" NormalizerAuto --mode GET
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  [
+    {
+      "value": "装置",
+      "position": 0,
+      "force_prefix": true
+    },
+    {
+      "value": "。",
+      "position": 2,
+      "force_prefix": false
+    },
+    {
+      "value": "【",
+      "position": 3,
+      "force_prefix": false
+    },
+    {
+      "value": "請求",
+      "position": 4,
+      "force_prefix": false
+    },
+    {
+      "value": "求項",
+      "position": 5,
+      "force_prefix": true
+    }
+  ]
+]

@@ -41,6 +41,8 @@
 #define VGRAM_BOTH 2
 #define VGRAM_QUAD 3
 
+#define UNIGRAM_SYMBOL 1
+
 grn_bool grn_ii_overlap_token_skip_enable = GRN_FALSE;
 
 typedef struct {
@@ -66,6 +68,7 @@ typedef struct {
   const char *scan_rest;
   unsigned int nhits;
   unsigned int current_hit;
+  int flags;
 } grn_yangram_tokenizer;
 
 static grn_bool
@@ -159,6 +162,9 @@ forward_grouped_token_tail(grn_ctx *ctx, grn_yangram_tokenizer *tokenizer,
       if (GRN_STR_CTYPE(*++ctypes) != GRN_CHAR_SYMBOL) {
         break;
       }
+      if (tokenizer->flags & UNIGRAM_SYMBOL) {
+        break;
+      }
     }
   }
   return token_size;
@@ -244,7 +250,7 @@ static grn_obj *
 yangram_init(grn_ctx *ctx, int nargs, grn_obj **args, grn_user_data *user_data,
              unsigned short ngram_unit, grn_bool ignore_blank,
              grn_bool split_symbol, grn_bool split_alpha, grn_bool split_digit,
-             grn_bool skip_overlap, unsigned short use_vgram)
+             grn_bool skip_overlap, unsigned short use_vgram, int flags)
 {
   grn_tokenizer_query *query;
   unsigned int normalize_flags =
@@ -277,6 +283,7 @@ yangram_init(grn_ctx *ctx, int nargs, grn_obj **args, grn_user_data *user_data,
   tokenizer->split_alpha = split_alpha;
   tokenizer->split_digit = split_digit;
   tokenizer->use_vgram = use_vgram;
+  tokenizer->flags = flags;
   if (tokenizer->use_vgram > 0) {
     const char *vgram_word_table_name_env;
     vgram_word_table_name_env = getenv("GRN_VGRAM_WORD_TABLE_NAME");
@@ -583,91 +590,97 @@ yangram_fin(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
 static grn_obj *
 yabigram_init(grn_ctx * ctx, int nargs, grn_obj **args, grn_user_data *user_data)
 {
-  return yangram_init(ctx, nargs, args, user_data, 2, 0, 0, 0, 0, 1, NGRAM);
+  return yangram_init(ctx, nargs, args, user_data, 2, 0, 0, 0, 0, 1, NGRAM, 0);
 }
 
 static grn_obj *
 yabigram_ib_init(grn_ctx * ctx, int nargs, grn_obj **args, grn_user_data *user_data)
 {
-  return yangram_init(ctx, nargs, args, user_data, 2, 1, 0, 0, 0, 1, NGRAM);
+  return yangram_init(ctx, nargs, args, user_data, 2, 1, 0, 0, 0, 1, NGRAM, 0);
 }
 
 static grn_obj *
 yabigram_sa_init(grn_ctx * ctx, int nargs, grn_obj **args, grn_user_data *user_data)
 {
-  return yangram_init(ctx, nargs, args, user_data, 2, 0, 1, 1, 0, 1, NGRAM);
+  return yangram_init(ctx, nargs, args, user_data, 2, 0, 1, 1, 0, 1, NGRAM, 0);
 }
 
 static grn_obj *
 yatrigram_init(grn_ctx * ctx, int nargs, grn_obj **args, grn_user_data *user_data)
 {
-  return yangram_init(ctx, nargs, args, user_data, 3, 0, 0, 0, 0, 1, NGRAM);
+  return yangram_init(ctx, nargs, args, user_data, 3, 0, 0, 0, 0, 1, NGRAM, 0);
 }
 
 static grn_obj *
 yatrigram_ib_init(grn_ctx * ctx, int nargs, grn_obj **args, grn_user_data *user_data)
 {
-  return yangram_init(ctx, nargs, args, user_data, 3, 1, 0, 0, 0, 1, NGRAM);
+  return yangram_init(ctx, nargs, args, user_data, 3, 1, 0, 0, 0, 1, NGRAM, 0);
 }
 
 static grn_obj *
 yatrigram_sa_init(grn_ctx * ctx, int nargs, grn_obj **args, grn_user_data *user_data)
 {
-  return yangram_init(ctx, nargs, args, user_data, 3, 0, 1, 1, 0, 1, NGRAM);
+  return yangram_init(ctx, nargs, args, user_data, 3, 0, 1, 1, 0, 1, NGRAM, 0);
 }
 
 static grn_obj *
 yavgram_init(grn_ctx * ctx, int nargs, grn_obj **args, grn_user_data *user_data)
 {
-  return yangram_init(ctx, nargs, args, user_data, 2, 0, 0, 0, 0, 1, VGRAM);
+  return yangram_init(ctx, nargs, args, user_data, 2, 0, 0, 0, 0, 1, VGRAM, 0);
 }
 
 static grn_obj *
 yavgram_sa_init(grn_ctx * ctx, int nargs, grn_obj **args, grn_user_data *user_data)
 {
-  return yangram_init(ctx, nargs, args, user_data, 2, 0, 1, 1, 0, 1, VGRAM);
+  return yangram_init(ctx, nargs, args, user_data, 2, 0, 1, 1, 0, 1, VGRAM, 0);
 }
 
 static grn_obj *
 yavgramb_init(grn_ctx * ctx, int nargs, grn_obj **args, grn_user_data *user_data)
 {
-  return yangram_init(ctx, nargs, args, user_data, 2, 0, 0, 0, 0, 1, VGRAM_BOTH);
+  return yangram_init(ctx, nargs, args, user_data, 2, 0, 0, 0, 0, 1, VGRAM_BOTH, 0);
 }
 
 static grn_obj *
 yavgramb_sa_init(grn_ctx * ctx, int nargs, grn_obj **args, grn_user_data *user_data)
 {
-  return yangram_init(ctx, nargs, args, user_data, 2, 0, 1, 1, 0, 1, VGRAM_BOTH);
+  return yangram_init(ctx, nargs, args, user_data, 2, 0, 1, 1, 0, 1, VGRAM_BOTH, 0);
 }
 
 static grn_obj *
 yavgramq_init(grn_ctx * ctx, int nargs, grn_obj **args, grn_user_data *user_data)
 {
-  return yangram_init(ctx, nargs, args, user_data, 2, 0, 0, 0, 0, 1, VGRAM_QUAD);
+  return yangram_init(ctx, nargs, args, user_data, 2, 0, 0, 0, 0, 1, VGRAM_QUAD, 0);
 }
 
 static grn_obj *
 yavgramq_d_init(grn_ctx * ctx, int nargs, grn_obj **args, grn_user_data *user_data)
 {
-  return yangram_init(ctx, nargs, args, user_data, 2, 0, 0, 0, 1, 1, VGRAM_QUAD);
+  return yangram_init(ctx, nargs, args, user_data, 2, 0, 0, 0, 1, 1, VGRAM_QUAD, 0);
+}
+
+static grn_obj *
+yavgramq_dus_init(grn_ctx * ctx, int nargs, grn_obj **args, grn_user_data *user_data)
+{
+  return yangram_init(ctx, nargs, args, user_data, 2, 0, 0, 0, 1, 1, VGRAM_QUAD, UNIGRAM_SYMBOL);
 }
 
 static grn_obj *
 yabigram_d_init(grn_ctx * ctx, int nargs, grn_obj **args, grn_user_data *user_data)
 {
-  return yangram_init(ctx, nargs, args, user_data, 2, 0, 0, 0, 1, 1, NGRAM);
+  return yangram_init(ctx, nargs, args, user_data, 2, 0, 0, 0, 1, 1, NGRAM, 0);
 }
 
 static grn_obj *
 yatrigram_sad_init(grn_ctx * ctx, int nargs, grn_obj **args, grn_user_data *user_data)
 {
-  return yangram_init(ctx, nargs, args, user_data, 3, 0, 1, 1, 1, 1, NGRAM);
+  return yangram_init(ctx, nargs, args, user_data, 3, 0, 1, 1, 1, 1, NGRAM, 0);
 }
 
 static grn_obj *
 yahexgram_sad_init(grn_ctx * ctx, int nargs, grn_obj **args, grn_user_data *user_data)
 {
-  return yangram_init(ctx, nargs, args, user_data, 6, 0, 1, 1, 1, 1, NGRAM);
+  return yangram_init(ctx, nargs, args, user_data, 6, 0, 1, 1, 1, 1, NGRAM, 0);
 }
 
 grn_rc
@@ -737,6 +750,9 @@ GRN_PLUGIN_REGISTER(grn_ctx *ctx)
 
   rc = grn_tokenizer_register(ctx, "TokenYaHexgramSplitSymbolAlphaDigit", -1,
                               yahexgram_sad_init, yangram_next, yangram_fin);
+
+  rc = grn_tokenizer_register(ctx, "TokenYaVgramQuadSplitDigitUniSymbol", -1,
+                              yavgramq_dus_init, yangram_next, yangram_fin);
   return ctx->rc;
 }
 
