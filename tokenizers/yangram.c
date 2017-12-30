@@ -672,6 +672,12 @@ yabigram_d_init(grn_ctx * ctx, int nargs, grn_obj **args, grn_user_data *user_da
 }
 
 static grn_obj *
+yabigram_dus_init(grn_ctx * ctx, int nargs, grn_obj **args, grn_user_data *user_data)
+{
+  return yangram_init(ctx, nargs, args, user_data, 2, 0, 0, 0, 1, 1, NGRAM, UNIGRAM_SYMBOL);
+}
+
+static grn_obj *
 yatrigram_sad_init(grn_ctx * ctx, int nargs, grn_obj **args, grn_user_data *user_data)
 {
   return yangram_init(ctx, nargs, args, user_data, 3, 0, 1, 1, 1, 1, NGRAM, 0);
@@ -753,6 +759,9 @@ GRN_PLUGIN_REGISTER(grn_ctx *ctx)
 
   rc = grn_tokenizer_register(ctx, "TokenYaVgramQuadSplitDigitUniSymbol", -1,
                               yavgramq_dus_init, yangram_next, yangram_fin);
+
+  rc = grn_tokenizer_register(ctx, "TokenYaBigramSplitDigitUniSymbol", -1,
+                              yabigram_dus_init, yangram_next, yangram_fin);
   return ctx->rc;
 }
 
