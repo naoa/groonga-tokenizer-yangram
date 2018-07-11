@@ -1,0 +1,9 @@
+register tokenizers/yangram
+
+table_create vgram_words TABLE_HASH_KEY ShortText
+load --table vgram_words
+[
+{"_key": "装置"}
+]
+tokenize TokenYaVgramQuadSplitDigitUniSymbolConcatAlphaDigit "。【請求項１２】H2SO4は" NormalizerAuto --mode ADD
+tokenize TokenYaVgramQuadSplitDigitUniSymbolConcatAlphaDigit "。【請求項１２】H2SO4は" NormalizerAuto --mode GET

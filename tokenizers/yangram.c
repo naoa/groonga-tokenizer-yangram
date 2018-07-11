@@ -41,7 +41,8 @@
 #define VGRAM_BOTH 2
 #define VGRAM_QUAD 3
 
-#define UNIGRAM_SYMBOL 1
+#define UNIGRAM_SYMBOL     (0x01)
+#define CONCAT_ALPHA_DIGIT (0x01<<1)
 
 grn_bool grn_ii_overlap_token_skip_enable = GRN_FALSE;
 
@@ -129,7 +130,12 @@ forward_grouped_token_tail(grn_ctx *ctx, grn_yangram_tokenizer *tokenizer,
       if (!tokenizer->ignore_blank && GRN_STR_ISBLANK(*ctypes)) {
         break;
       }
-      if (GRN_STR_CTYPE(*++ctypes) != GRN_CHAR_ALPHA) {
+      ctypes++;
+      if ((tokenizer->flags & CONCAT_ALPHA_DIGIT) &&
+          (GRN_STR_CTYPE(*ctypes) == GRN_CHAR_DIGIT)) {
+        continue;
+      }
+      if (GRN_STR_CTYPE(*ctypes) != GRN_CHAR_ALPHA) {
         break;
       }
     }
@@ -144,7 +150,12 @@ forward_grouped_token_tail(grn_ctx *ctx, grn_yangram_tokenizer *tokenizer,
       if (!tokenizer->ignore_blank && GRN_STR_ISBLANK(*ctypes)) {
         break;
       }
-      if (GRN_STR_CTYPE(*++ctypes) != GRN_CHAR_DIGIT) {
+      ctypes++;
+      if ((tokenizer->flags & CONCAT_ALPHA_DIGIT) &&
+          (GRN_STR_CTYPE(*ctypes) == GRN_CHAR_ALPHA)) {
+        continue;
+      }
+      if (GRN_STR_CTYPE(*ctypes) != GRN_CHAR_DIGIT) {
         break;
       }
     }
@@ -666,6 +677,17 @@ yavgramq_dus_init(grn_ctx * ctx, int nargs, grn_obj **args, grn_user_data *user_
 }
 
 static grn_obj *
+yavgramq_duscad_init(grn_ctx * ctx, int nargs, grn_obj **args, grn_user_data *user_data)
+{
+  return yangram_init(ctx, nargs, args, user_data, 2, 0, 0, 0, 1, 1, VGRAM_QUAD, UNIGRAM_SYMBOL|CONCAT_ALPHA_DIGIT);
+}
+static grn_obj *
+yabigramq_duscad_init(grn_ctx * ctx, int nargs, grn_obj **args, grn_user_data *user_data)
+{
+  return yangram_init(ctx, nargs, args, user_data, 2, 0, 0, 0, 1, 1, NGRAM, UNIGRAM_SYMBOL|CONCAT_ALPHA_DIGIT);
+}
+
+static grn_obj *
 yabigram_d_init(grn_ctx * ctx, int nargs, grn_obj **args, grn_user_data *user_data)
 {
   return yangram_init(ctx, nargs, args, user_data, 2, 0, 0, 0, 1, 1, NGRAM, 0);
@@ -762,6 +784,12 @@ GRN_PLUGIN_REGISTER(grn_ctx *ctx)
 
   rc = grn_tokenizer_register(ctx, "TokenYaBigramSplitDigitUniSymbol", -1,
                               yabigram_dus_init, yangram_next, yangram_fin);
+
+  rc = grn_tokenizer_register(ctx, "TokenYaVgramQuadSplitDigitUniSymbolConcatAlphaDigit", -1,
+                              yavgramq_duscad_init, yangram_next, yangram_fin);
+
+  rc = grn_tokenizer_register(ctx, "TokenYaBigramQuadSplitDigitUniSymbolConcatAlphaDigit", -1,
+                              yabigramq_duscad_init, yangram_next, yangram_fin);
   return ctx->rc;
 }
 
