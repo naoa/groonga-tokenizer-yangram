@@ -788,7 +788,7 @@ GRN_PLUGIN_REGISTER(grn_ctx *ctx)
   rc = grn_tokenizer_register(ctx, "TokenYaVgramQuadSplitDigitUniSymbolConcatAlphaDigit", -1,
                               yavgramq_duscad_init, yangram_next, yangram_fin);
 
-  rc = grn_tokenizer_register(ctx, "TokenYaBigramQuadSplitDigitUniSymbolConcatAlphaDigit", -1,
+  rc = grn_tokenizer_register(ctx, "TokenYaBigramSplitDigitUniSymbolConcatAlphaDigit", -1,
                               yabigramq_duscad_init, yangram_next, yangram_fin);
   return ctx->rc;
 }

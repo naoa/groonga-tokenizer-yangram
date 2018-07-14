@@ -1,4 +1,4 @@
 register tokenizers/yangram
 
-tokenize TokenYaBigramQuadSplitDigitUniSymbolConcatAlphaDigit "。【請求項１２】H2SO4は" NormalizerAuto --mode ADD
-tokenize TokenYaBigramQuadSplitDigitUniSymbolConcatAlphaDigit "。【請求項１２】H2SO4は" NormalizerAuto --mode GET
+tokenize TokenYaBigramSplitDigitUniSymbolConcatAlphaDigit "。【請求項１２】H2SO4は" NormalizerAuto --mode ADD
+tokenize TokenYaBigramSplitDigitUniSymbolConcatAlphaDigit "。【請求項１２】H2SO4は" NormalizerAuto --mode GET
