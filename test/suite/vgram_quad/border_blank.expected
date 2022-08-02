@@ -18,17 +18,20 @@ tokenize TokenYaVgramQuadSplitDigit '過材 ウム 。' --normalizer NormalizerA
     {
       "value": "過材",
       "position": 0,
-      "force_prefix": true
+      "force_prefix": true,
+      "force_prefix_search": true
     },
     {
       "value": "ウム",
       "position": 2,
-      "force_prefix": true
+      "force_prefix": true,
+      "force_prefix_search": true
     },
     {
       "value": "。",
       "position": 4,
-      "force_prefix": false
+      "force_prefix": false,
+      "force_prefix_search": false
     }
   ]
 ]

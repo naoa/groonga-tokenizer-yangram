@@ -18,52 +18,62 @@ tokenize TokenYaBigram "【請求項１】検索装置" NormalizerAuto --mode AD
     {
       "value": "【",
       "position": 0,
-      "force_prefix": false
+      "force_prefix": false,
+      "force_prefix_search": false
     },
     {
       "value": "請求",
       "position": 1,
-      "force_prefix": false
+      "force_prefix": false,
+      "force_prefix_search": false
     },
     {
       "value": "求項",
       "position": 2,
-      "force_prefix": false
+      "force_prefix": false,
+      "force_prefix_search": false
     },
     {
       "value": "項",
       "position": 3,
-      "force_prefix": false
+      "force_prefix": false,
+      "force_prefix_search": false
     },
     {
       "value": "1",
       "position": 4,
-      "force_prefix": false
+      "force_prefix": false,
+      "force_prefix_search": false
     },
     {
       "value": "】",
       "position": 5,
-      "force_prefix": false
+      "force_prefix": false,
+      "force_prefix_search": false
     },
     {
       "value": "検索",
       "position": 6,
-      "force_prefix": false
+      "force_prefix": false,
+      "force_prefix_search": false
     },
     {
       "value": "索装",
       "position": 7,
-      "force_prefix": false
+      "force_prefix": false,
+      "force_prefix_search": false
     },
     {
       "value": "装置",
       "position": 8,
-      "force_prefix": false
+      "force_prefix": false,
+      "force_prefix_search": false
     },
     {
       "value": "置",
       "position": 9,
-      "force_prefix": false
+      "force_prefix": false,
+      "force_prefix_search": false
     }
   ]
 ]
@@ -78,37 +88,44 @@ tokenize TokenYaBigram "【請求項１】検索装置" NormalizerAuto --mode GE
     {
       "value": "【",
       "position": 0,
-      "force_prefix": false
+      "force_prefix": false,
+      "force_prefix_search": false
     },
     {
       "value": "請求",
       "position": 1,
-      "force_prefix": false
+      "force_prefix": false,
+      "force_prefix_search": false
     },
     {
       "value": "求項",
       "position": 2,
-      "force_prefix": false
+      "force_prefix": false,
+      "force_prefix_search": false
     },
     {
       "value": "1",
       "position": 4,
-      "force_prefix": false
+      "force_prefix": false,
+      "force_prefix_search": false
     },
     {
       "value": "】",
       "position": 5,
-      "force_prefix": false
+      "force_prefix": false,
+      "force_prefix_search": false
     },
     {
       "value": "検索",
       "position": 6,
-      "force_prefix": false
+      "force_prefix": false,
+      "force_prefix_search": false
     },
     {
       "value": "装置",
       "position": 8,
-      "force_prefix": false
+      "force_prefix": false,
+      "force_prefix_search": false
     }
   ]
 ]

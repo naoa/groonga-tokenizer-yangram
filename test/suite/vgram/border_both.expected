@@ -18,39 +18,60 @@ tokenize TokenYaVgram "のA情報A処理" NormalizerAuto --mode ADD
     {
       "value": "の",
       "position": 0,
-      "force_prefix": false
+      "force_prefix": false,
+      "force_prefix_search": false
     },
     {
       "value": "a",
       "position": 1,
-      "force_prefix": false
+      "force_prefix": false,
+      "force_prefix_search": false
     },
     {
       "value": "情報",
       "position": 2,
-      "force_prefix": false
+      "force_prefix": false,
+      "force_prefix_search": false
     },
     {
       "value": "報",
       "position": 3,
-      "force_prefix": false
+      "force_prefix": false,
+      "force_prefix_search": false
     },
     {
       "value": "a",
       "position": 4,
-      "force_prefix": false
+      "force_prefix": false,
+      "force_prefix_search": false
     },
     {
       "value": "処理",
       "position": 5,
-      "force_prefix": false
+      "force_prefix": false,
+      "force_prefix_search": false
     },
     {
       "value": "理",
       "position": 6,
-      "force_prefix": false
+      "force_prefix": false,
+      "force_prefix_search": false
     }
   ]
 ]
 tokenize TokenYaVgram "情報" NormalizerAuto --mode GET
-[[0,0.0,0.0],[{"value":"情報","position":0,"force_prefix":true}]]
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  [
+    {
+      "value": "情報",
+      "position": 0,
+      "force_prefix": true,
+      "force_prefix_search": true
+    }
+  ]
+]

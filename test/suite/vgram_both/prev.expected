@@ -18,27 +18,32 @@ tokenize TokenYaVgramBoth "装置は高速" NormalizerAuto --mode ADD
     {
       "value": "装置は",
       "position": 0,
-      "force_prefix": false
+      "force_prefix": false,
+      "force_prefix_search": false
     },
     {
       "value": "置は高",
       "position": 1,
-      "force_prefix": false
+      "force_prefix": false,
+      "force_prefix_search": false
     },
     {
       "value": "は高",
       "position": 2,
-      "force_prefix": false
+      "force_prefix": false,
+      "force_prefix_search": false
     },
     {
       "value": "高速",
       "position": 3,
-      "force_prefix": false
+      "force_prefix": false,
+      "force_prefix_search": false
     },
     {
       "value": "速",
       "position": 4,
-      "force_prefix": false
+      "force_prefix": false,
+      "force_prefix_search": false
     }
   ]
 ]
@@ -53,12 +58,14 @@ tokenize TokenYaVgramBoth "は高速" NormalizerAuto --mode GET
     {
       "value": "は高",
       "position": 0,
-      "force_prefix": false
+      "force_prefix": false,
+      "force_prefix_search": false
     },
     {
       "value": "高速",
       "position": 1,
-      "force_prefix": true
+      "force_prefix": true,
+      "force_prefix_search": true
     }
   ]
 ]

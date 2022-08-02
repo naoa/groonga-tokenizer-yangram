@@ -19,4 +19,4 @@ load --table docs
 
 column_create vgram_terms index COLUMN_INDEX|WITH_POSITION docs body
 
-select docs --match_columns 'body' --query '*N"搬送 チャイルドシート"' --match_escalation_threshold -1
+select docs --match_columns 'body' --query '*NP"搬送 チャイルドシート"' --match_escalation_threshold -1

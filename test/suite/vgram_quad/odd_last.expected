@@ -19,27 +19,32 @@ tokenize TokenYaVgramQuad "た政府機関" NormalizerAuto --mode ADD
     {
       "value": "た政",
       "position": 0,
-      "force_prefix": false
+      "force_prefix": false,
+      "force_prefix_search": false
     },
     {
       "value": "政府",
       "position": 1,
-      "force_prefix": false
+      "force_prefix": false,
+      "force_prefix_search": false
     },
     {
       "value": "府機関",
       "position": 2,
-      "force_prefix": false
+      "force_prefix": false,
+      "force_prefix_search": false
     },
     {
       "value": "機関",
       "position": 3,
-      "force_prefix": false
+      "force_prefix": false,
+      "force_prefix_search": false
     },
     {
       "value": "関",
       "position": 4,
-      "force_prefix": false
+      "force_prefix": false,
+      "force_prefix_search": false
     }
   ]
 ]
@@ -54,12 +59,14 @@ tokenize TokenYaVgramQuad "た政府機関" NormalizerAuto --mode GET
     {
       "value": "た政",
       "position": 0,
-      "force_prefix": false
+      "force_prefix": false,
+      "force_prefix_search": false
     },
     {
       "value": "府機関",
       "position": 2,
-      "force_prefix": true
+      "force_prefix": true,
+      "force_prefix_search": true
     }
   ]
 ]

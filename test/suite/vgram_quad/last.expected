@@ -19,32 +19,38 @@ tokenize TokenYaVgramQuad "今日は雨だな" NormalizerAuto --mode ADD
     {
       "value": "今日",
       "position": 0,
-      "force_prefix": false
+      "force_prefix": false,
+      "force_prefix_search": false
     },
     {
       "value": "日は雨",
       "position": 1,
-      "force_prefix": false
+      "force_prefix": false,
+      "force_prefix_search": false
     },
     {
       "value": "は雨だな",
       "position": 2,
-      "force_prefix": false
+      "force_prefix": false,
+      "force_prefix_search": false
     },
     {
       "value": "雨だ",
       "position": 3,
-      "force_prefix": false
+      "force_prefix": false,
+      "force_prefix_search": false
     },
     {
       "value": "だな",
       "position": 4,
-      "force_prefix": false
+      "force_prefix": false,
+      "force_prefix_search": false
     },
     {
       "value": "な",
       "position": 5,
-      "force_prefix": false
+      "force_prefix": false,
+      "force_prefix_search": false
     }
   ]
 ]
@@ -59,12 +65,14 @@ tokenize TokenYaVgramQuad "今日は雨だな" NormalizerAuto --mode GET
     {
       "value": "今日",
       "position": 0,
-      "force_prefix": false
+      "force_prefix": false,
+      "force_prefix_search": false
     },
     {
       "value": "は雨だな",
       "position": 2,
-      "force_prefix": false
+      "force_prefix": false,
+      "force_prefix_search": false
     }
   ]
 ]
@@ -79,27 +87,32 @@ tokenize TokenYaVgramQuad "今日は雨だ" NormalizerAuto --mode ADD
     {
       "value": "今日",
       "position": 0,
-      "force_prefix": false
+      "force_prefix": false,
+      "force_prefix_search": false
     },
     {
       "value": "日は雨",
       "position": 1,
-      "force_prefix": false
+      "force_prefix": false,
+      "force_prefix_search": false
     },
     {
       "value": "は雨だ",
       "position": 2,
-      "force_prefix": false
+      "force_prefix": false,
+      "force_prefix_search": false
     },
     {
       "value": "雨だ",
       "position": 3,
-      "force_prefix": false
+      "force_prefix": false,
+      "force_prefix_search": false
     },
     {
       "value": "だ",
       "position": 4,
-      "force_prefix": false
+      "force_prefix": false,
+      "force_prefix_search": false
     }
   ]
 ]
@@ -114,12 +127,14 @@ tokenize TokenYaVgramQuad "今日は雨だ" NormalizerAuto --mode GET
     {
       "value": "今日",
       "position": 0,
-      "force_prefix": false
+      "force_prefix": false,
+      "force_prefix_search": false
     },
     {
       "value": "は雨だ",
       "position": 2,
-      "force_prefix": true
+      "force_prefix": true,
+      "force_prefix_search": true
     }
   ]
 ]
@@ -134,22 +149,26 @@ tokenize TokenYaVgramQuad "今日は雨" NormalizerAuto --mode ADD
     {
       "value": "今日",
       "position": 0,
-      "force_prefix": false
+      "force_prefix": false,
+      "force_prefix_search": false
     },
     {
       "value": "日は雨",
       "position": 1,
-      "force_prefix": false
+      "force_prefix": false,
+      "force_prefix_search": false
     },
     {
       "value": "は雨",
       "position": 2,
-      "force_prefix": false
+      "force_prefix": false,
+      "force_prefix_search": false
     },
     {
       "value": "雨",
       "position": 3,
-      "force_prefix": false
+      "force_prefix": false,
+      "force_prefix_search": false
     }
   ]
 ]
@@ -164,12 +183,14 @@ tokenize TokenYaVgramQuad "今日は雨" NormalizerAuto --mode GET
     {
       "value": "今日",
       "position": 0,
-      "force_prefix": false
+      "force_prefix": false,
+      "force_prefix_search": false
     },
     {
       "value": "日は雨",
       "position": 1,
-      "force_prefix": true
+      "force_prefix": true,
+      "force_prefix_search": true
     }
   ]
 ]

@@ -18,52 +18,62 @@ tokenize TokenYaVgramQuadSplitDigitUniSymbolConcatAlphaDigit "。【請求項１
     {
       "value": "。",
       "position": 0,
-      "force_prefix": false
+      "force_prefix": false,
+      "force_prefix_search": false
     },
     {
       "value": "【",
       "position": 1,
-      "force_prefix": false
+      "force_prefix": false,
+      "force_prefix_search": false
     },
     {
       "value": "請求",
       "position": 2,
-      "force_prefix": false
+      "force_prefix": false,
+      "force_prefix_search": false
     },
     {
       "value": "求項",
       "position": 3,
-      "force_prefix": false
+      "force_prefix": false,
+      "force_prefix_search": false
     },
     {
       "value": "項1",
       "position": 4,
-      "force_prefix": false
+      "force_prefix": false,
+      "force_prefix_search": false
     },
     {
       "value": "12",
       "position": 5,
-      "force_prefix": false
+      "force_prefix": false,
+      "force_prefix_search": false
     },
     {
       "value": "2",
       "position": 6,
-      "force_prefix": false
+      "force_prefix": false,
+      "force_prefix_search": false
     },
     {
       "value": "】",
       "position": 7,
-      "force_prefix": false
+      "force_prefix": false,
+      "force_prefix_search": false
     },
     {
       "value": "h2so4",
       "position": 8,
-      "force_prefix": false
+      "force_prefix": false,
+      "force_prefix_search": false
     },
     {
       "value": "は",
       "position": 9,
-      "force_prefix": true
+      "force_prefix": true,
+      "force_prefix_search": true
     }
   ]
 ]
@@ -78,42 +88,50 @@ tokenize TokenYaVgramQuadSplitDigitUniSymbolConcatAlphaDigit "。【請求項１
     {
       "value": "。",
       "position": 0,
-      "force_prefix": false
+      "force_prefix": false,
+      "force_prefix_search": false
     },
     {
       "value": "【",
       "position": 1,
-      "force_prefix": false
+      "force_prefix": false,
+      "force_prefix_search": false
     },
     {
       "value": "請求",
       "position": 2,
-      "force_prefix": false
+      "force_prefix": false,
+      "force_prefix_search": false
     },
     {
       "value": "項1",
       "position": 4,
-      "force_prefix": false
+      "force_prefix": false,
+      "force_prefix_search": false
     },
     {
       "value": "12",
       "position": 5,
-      "force_prefix": true
+      "force_prefix": true,
+      "force_prefix_search": true
     },
     {
       "value": "】",
       "position": 7,
-      "force_prefix": false
+      "force_prefix": false,
+      "force_prefix_search": false
     },
     {
       "value": "h2so4",
       "position": 8,
-      "force_prefix": false
+      "force_prefix": false,
+      "force_prefix_search": false
     },
     {
       "value": "は",
       "position": 9,
-      "force_prefix": true
+      "force_prefix": true,
+      "force_prefix_search": true
     }
   ]
 ]
