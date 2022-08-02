@@ -1,0 +1,228 @@
+register tokenizers/yangram
+[[0,0.0,0.0],true]
+table_create vgram_words TABLE_HASH_KEY ShortText
+[[0,0.0,0.0],true]
+load --table vgram_words
+[
+{"_key": "今日は"},
+{"_key": "日は"}
+]
+[[0,0.0,0.0],2]
+tokenize TokenYaVgramQuadSplitSymbolDigitUniEosConcatAlphaDigit "今日は-雨だ。明日は晴れだ.明後日はー曇りだ" NormalizerAuto --mode ADD
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  [
+    {
+      "value": "今日は-",
+      "position": 0,
+      "force_prefix": false,
+      "force_prefix_search": false
+    },
+    {
+      "value": "日は-",
+      "position": 1,
+      "force_prefix": false,
+      "force_prefix_search": false
+    },
+    {
+      "value": "は-",
+      "position": 2,
+      "force_prefix": false,
+      "force_prefix_search": false
+    },
+    {
+      "value": "-雨",
+      "position": 3,
+      "force_prefix": false,
+      "force_prefix_search": false
+    },
+    {
+      "value": "雨だ",
+      "position": 4,
+      "force_prefix": false,
+      "force_prefix_search": false
+    },
+    {
+      "value": "だ",
+      "position": 5,
+      "force_prefix": false,
+      "force_prefix_search": false
+    },
+    {
+      "value": "。",
+      "position": 6,
+      "force_prefix": false,
+      "force_prefix_search": false
+    },
+    {
+      "value": "明日は",
+      "position": 7,
+      "force_prefix": false,
+      "force_prefix_search": false
+    },
+    {
+      "value": "日は晴",
+      "position": 8,
+      "force_prefix": false,
+      "force_prefix_search": false
+    },
+    {
+      "value": "は晴",
+      "position": 9,
+      "force_prefix": false,
+      "force_prefix_search": false
+    },
+    {
+      "value": "晴れ",
+      "position": 10,
+      "force_prefix": false,
+      "force_prefix_search": false
+    },
+    {
+      "value": "れだ",
+      "position": 11,
+      "force_prefix": false,
+      "force_prefix_search": false
+    },
+    {
+      "value": "だ",
+      "position": 12,
+      "force_prefix": false,
+      "force_prefix_search": false
+    },
+    {
+      "value": ".",
+      "position": 13,
+      "force_prefix": false,
+      "force_prefix_search": false
+    },
+    {
+      "value": "明後",
+      "position": 14,
+      "force_prefix": false,
+      "force_prefix_search": false
+    },
+    {
+      "value": "後日は",
+      "position": 15,
+      "force_prefix": false,
+      "force_prefix_search": false
+    },
+    {
+      "value": "日はー",
+      "position": 16,
+      "force_prefix": false,
+      "force_prefix_search": false
+    },
+    {
+      "value": "はー",
+      "position": 17,
+      "force_prefix": false,
+      "force_prefix_search": false
+    },
+    {
+      "value": "ー曇",
+      "position": 18,
+      "force_prefix": false,
+      "force_prefix_search": false
+    },
+    {
+      "value": "曇り",
+      "position": 19,
+      "force_prefix": false,
+      "force_prefix_search": false
+    },
+    {
+      "value": "りだ",
+      "position": 20,
+      "force_prefix": false,
+      "force_prefix_search": false
+    },
+    {
+      "value": "だ",
+      "position": 21,
+      "force_prefix": false,
+      "force_prefix_search": false
+    }
+  ]
+]
+tokenize TokenYaVgramQuadSplitSymbolDigitUniEosConcatAlphaDigit "今日は-雨だ。明日は晴れだ.明後日はー曇りだ" NormalizerAuto --mode GET
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  [
+    {
+      "value": "今日は-",
+      "position": 0,
+      "force_prefix": false,
+      "force_prefix_search": false
+    },
+    {
+      "value": "雨だ",
+      "position": 4,
+      "force_prefix": false,
+      "force_prefix_search": false
+    },
+    {
+      "value": "。",
+      "position": 6,
+      "force_prefix": false,
+      "force_prefix_search": false
+    },
+    {
+      "value": "明日は",
+      "position": 7,
+      "force_prefix": false,
+      "force_prefix_search": false
+    },
+    {
+      "value": "晴れ",
+      "position": 10,
+      "force_prefix": false,
+      "force_prefix_search": false
+    },
+    {
+      "value": "だ",
+      "position": 12,
+      "force_prefix": false,
+      "force_prefix_search": false
+    },
+    {
+      "value": ".",
+      "position": 13,
+      "force_prefix": false,
+      "force_prefix_search": false
+    },
+    {
+      "value": "明後",
+      "position": 14,
+      "force_prefix": false,
+      "force_prefix_search": false
+    },
+    {
+      "value": "日はー",
+      "position": 16,
+      "force_prefix": false,
+      "force_prefix_search": false
+    },
+    {
+      "value": "曇り",
+      "position": 19,
+      "force_prefix": false,
+      "force_prefix_search": false
+    },
+    {
+      "value": "りだ",
+      "position": 20,
+      "force_prefix": true,
+      "force_prefix_search": true
+    }
+  ]
+]

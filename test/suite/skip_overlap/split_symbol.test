@@ -1,0 +1,4 @@
+register tokenizers/yangram
+
+tokenize TokenYaBigramQuadSplitSymbolDigitUniEosConcatAlphaDigit "今日は-雨だ。明日は晴れだ.明後日はー曇りだ" NormalizerAuto --mode ADD
+tokenize TokenYaBigramQuadSplitSymbolDigitUniEosConcatAlphaDigit "今日は-雨だ。明日は晴れだ.明後日はー曇りだ" NormalizerAuto --mode GET
