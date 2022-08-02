@@ -377,6 +377,23 @@ yangram_init(grn_ctx *ctx, int nargs, grn_obj **args, grn_user_data *user_data,
   return NULL;
 }
 
+
+inline static bool
+is_next_eos(grn_ctx *ctx, grn_yangram_tokenizer *tokenizer, const char *token_tail)
+{
+  int char_length = grn_plugin_charlen(ctx, (char *)token_tail,
+                                       tokenizer->rest_length,
+                                       tokenizer->query->encoding);
+  if (tokenizer->rest_length > char_length) {
+    if ((tokenizer->flags & UNIGRAM_EOS) &&
+        ((char_length == 1 && !memcmp(token_tail, ".", 1)) ||
+        (char_length == 3 && !memcmp(token_tail, "。", 3)))) {
+        return true;
+    }
+  }
+  return false;
+}
+
 static grn_obj *
 yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
              grn_user_data *user_data)
@@ -489,18 +506,20 @@ yangram_next(grn_ctx *ctx, GNUC_UNUSED int nargs, GNUC_UNUSED grn_obj **args,
     }
 
     if (maybe_vgram) {
+
       if (token_tail < string_end &&
-          !is_group_border(ctx, tokenizer, token_tail, token_ctypes, token_size)) {
+          !is_group_border(ctx, tokenizer, token_tail, token_ctypes, token_size) &&
+          !is_next_eos(ctx, tokenizer, token_tail)) {
         char_length = grn_plugin_charlen(ctx, (char *)token_tail,
                                          tokenizer->rest_length,
                                          tokenizer->query->encoding);
         token_size++;
         token_tail += char_length;
 
-
         if (tokenizer->use_vgram == VGRAM_QUAD) {
           if (token_tail < string_end &&
-              !is_group_border(ctx, tokenizer, token_tail, token_ctypes, token_size)) {
+              !is_group_border(ctx, tokenizer, token_tail, token_ctypes, token_size) &&
+              !is_next_eos(ctx, tokenizer, token_tail)) {
             id = grn_table_get(ctx, tokenizer->vgram_table,
                                (const char *)token_top, token_tail - token_top);
             if (id) {
