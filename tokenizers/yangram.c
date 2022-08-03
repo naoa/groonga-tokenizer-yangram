@@ -44,6 +44,7 @@
 #define UNIGRAM_SYMBOL     (0x01)
 #define CONCAT_ALPHA_DIGIT (0x01<<1)
 #define UNIGRAM_EOS (0x01<<2)
+#define CONCAT_NGRAM_ALPHA (0x01<<3)
 
 grn_bool grn_ii_overlap_token_skip_enable = GRN_FALSE;
 
@@ -225,7 +226,8 @@ forward_ngram_token_tail(grn_ctx *ctx, grn_yangram_tokenizer *tokenizer,
           break;
         }
         ctypes++;
-        if ((tokenizer->split_alpha == GRN_FALSE &&
+        if ((
+            (tokenizer->split_alpha == GRN_FALSE && !(tokenizer->flags & CONCAT_NGRAM_ALPHA)) &&
             GRN_STR_CTYPE(*ctypes) == GRN_CHAR_ALPHA) ||
             (tokenizer->split_digit == GRN_FALSE &&
             GRN_STR_CTYPE(*ctypes) == GRN_CHAR_DIGIT) ||
@@ -729,6 +731,16 @@ yabigramq_dsuscad_init(grn_ctx * ctx, int nargs, grn_obj **args, grn_user_data *
 {
   return yangram_init(ctx, nargs, args, user_data, 2, 0, 1, 0, 1, 1, NGRAM, UNIGRAM_EOS|CONCAT_ALPHA_DIGIT);
 }
+static grn_obj *
+yavgramq_dsuscadna_init(grn_ctx * ctx, int nargs, grn_obj **args, grn_user_data *user_data)
+{
+  return yangram_init(ctx, nargs, args, user_data, 2, 0, 1, 0, 1, 1, VGRAM_QUAD, UNIGRAM_EOS|CONCAT_ALPHA_DIGIT|CONCAT_NGRAM_ALPHA);
+}
+static grn_obj *
+yabigramq_dsuscadna_init(grn_ctx * ctx, int nargs, grn_obj **args, grn_user_data *user_data)
+{
+  return yangram_init(ctx, nargs, args, user_data, 2, 0, 1, 0, 1, 1, NGRAM, UNIGRAM_EOS|CONCAT_ALPHA_DIGIT|CONCAT_NGRAM_ALPHA);
+}
 
 static grn_obj *
 yabigram_d_init(grn_ctx * ctx, int nargs, grn_obj **args, grn_user_data *user_data)
@@ -839,6 +851,12 @@ GRN_PLUGIN_REGISTER(grn_ctx *ctx)
 
   rc = grn_tokenizer_register(ctx, "TokenYaBigramQuadSplitSymbolDigitUniEosConcatAlphaDigit", -1,
                               yabigramq_dsuscad_init, yangram_next, yangram_fin);
+
+  rc = grn_tokenizer_register(ctx, "TokenYaVgramQuadSplitSymbolDigitUniEosConcatAlphaDigitNgramAlpha", -1,
+                              yavgramq_dsuscadna_init, yangram_next, yangram_fin);
+
+  rc = grn_tokenizer_register(ctx, "TokenYaBigramQuadSplitSymbolDigitUniEosConcatAlphaDigitNgramAlpha", -1,
+                              yabigramq_dsuscadna_init, yangram_next, yangram_fin);
 
   return ctx->rc;
 }

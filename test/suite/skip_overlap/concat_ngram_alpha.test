@@ -1,0 +1,10 @@
+register tokenizers/yangram
+
+table_create vgram_words TABLE_HASH_KEY ShortText
+load --table vgram_words
+[
+{"_key": "ミン"},
+{"_key": "タミン"}
+]
+tokenize TokenYaBigramQuadSplitSymbolDigitUniEosConcatAlphaDigitNgramAlpha "ビタミンAがある。ビタミンB2はない。" NormalizerAuto --mode ADD
+tokenize TokenYaBigramQuadSplitSymbolDigitUniEosConcatAlphaDigitNgramAlpha "ビタミンAがある。ビタミンB2はない。" NormalizerAuto --mode GET

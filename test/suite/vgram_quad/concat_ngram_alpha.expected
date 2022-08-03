@@ -1,0 +1,210 @@
+register tokenizers/yangram
+[[0,0.0,0.0],true]
+table_create vgram_words TABLE_HASH_KEY ShortText
+[[0,0.0,0.0],true]
+load --table vgram_words
+[
+{"_key": "ミン"},
+{"_key": "タミン"}
+]
+[[0,0.0,0.0],2]
+tokenize TokenYaVgramQuadSplitSymbolDigitUniEosConcatAlphaDigitNgramAlpha "ビタミンAがある。ビタミンB2はない。" NormalizerAuto --mode ADD
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  [
+    {
+      "value": "ビタ",
+      "position": 0,
+      "force_prefix": false,
+      "force_prefix_search": false
+    },
+    {
+      "value": "タミン",
+      "position": 1,
+      "force_prefix": false,
+      "force_prefix_search": false
+    },
+    {
+      "value": "ミン",
+      "position": 2,
+      "force_prefix": false,
+      "force_prefix_search": false
+    },
+    {
+      "value": "ンa",
+      "position": 3,
+      "force_prefix": false,
+      "force_prefix_search": false
+    },
+    {
+      "value": "a",
+      "position": 4,
+      "force_prefix": false,
+      "force_prefix_search": false
+    },
+    {
+      "value": "があ",
+      "position": 5,
+      "force_prefix": false,
+      "force_prefix_search": false
+    },
+    {
+      "value": "ある",
+      "position": 6,
+      "force_prefix": false,
+      "force_prefix_search": false
+    },
+    {
+      "value": "る",
+      "position": 7,
+      "force_prefix": false,
+      "force_prefix_search": false
+    },
+    {
+      "value": "。",
+      "position": 8,
+      "force_prefix": false,
+      "force_prefix_search": false
+    },
+    {
+      "value": "ビタ",
+      "position": 9,
+      "force_prefix": false,
+      "force_prefix_search": false
+    },
+    {
+      "value": "タミン",
+      "position": 10,
+      "force_prefix": false,
+      "force_prefix_search": false
+    },
+    {
+      "value": "ミン",
+      "position": 11,
+      "force_prefix": false,
+      "force_prefix_search": false
+    },
+    {
+      "value": "ンb",
+      "position": 12,
+      "force_prefix": false,
+      "force_prefix_search": false
+    },
+    {
+      "value": "b2",
+      "position": 13,
+      "force_prefix": false,
+      "force_prefix_search": false
+    },
+    {
+      "value": "はな",
+      "position": 14,
+      "force_prefix": false,
+      "force_prefix_search": false
+    },
+    {
+      "value": "ない",
+      "position": 15,
+      "force_prefix": false,
+      "force_prefix_search": false
+    },
+    {
+      "value": "い",
+      "position": 16,
+      "force_prefix": false,
+      "force_prefix_search": false
+    },
+    {
+      "value": "。",
+      "position": 17,
+      "force_prefix": true,
+      "force_prefix_search": true
+    }
+  ]
+]
+tokenize TokenYaVgramQuadSplitSymbolDigitUniEosConcatAlphaDigitNgramAlpha "ビタミンAがある。ビタミンB2はない。" NormalizerAuto --mode GET
+[
+  [
+    0,
+    0.0,
+    0.0
+  ],
+  [
+    {
+      "value": "ビタ",
+      "position": 0,
+      "force_prefix": false,
+      "force_prefix_search": false
+    },
+    {
+      "value": "タミン",
+      "position": 1,
+      "force_prefix": true,
+      "force_prefix_search": true
+    },
+    {
+      "value": "a",
+      "position": 4,
+      "force_prefix": false,
+      "force_prefix_search": false
+    },
+    {
+      "value": "があ",
+      "position": 5,
+      "force_prefix": false,
+      "force_prefix_search": false
+    },
+    {
+      "value": "る",
+      "position": 7,
+      "force_prefix": false,
+      "force_prefix_search": false
+    },
+    {
+      "value": "。",
+      "position": 8,
+      "force_prefix": false,
+      "force_prefix_search": false
+    },
+    {
+      "value": "ビタ",
+      "position": 9,
+      "force_prefix": false,
+      "force_prefix_search": false
+    },
+    {
+      "value": "タミン",
+      "position": 10,
+      "force_prefix": true,
+      "force_prefix_search": true
+    },
+    {
+      "value": "b2",
+      "position": 13,
+      "force_prefix": false,
+      "force_prefix_search": false
+    },
+    {
+      "value": "はな",
+      "position": 14,
+      "force_prefix": false,
+      "force_prefix_search": false
+    },
+    {
+      "value": "い",
+      "position": 16,
+      "force_prefix": false,
+      "force_prefix_search": false
+    },
+    {
+      "value": "。",
+      "position": 17,
+      "force_prefix": true,
+      "force_prefix_search": true
+    }
+  ]
+]
